@@ -5752,10 +5752,10 @@ class Da_Net extends ZeroFrame {
                     "message_design_type": {
                         "label": "Change design of messages",
                         "desc": "Changes the design of the messages",
-                        "value": 1,
+                        "value": 2,
                         "values": [
                             [1, "Square"],
-                            [2, "Arrow at top"],
+                            [2, "Arrow at top (default)"],
                             [3, "Arrow at middle of avatar"]
                         ],
                         "type": "select",
@@ -5977,7 +5977,7 @@ class Da_Net extends ZeroFrame {
                 var olddata2 = data2
 
                 var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg)"
-                console.log(data2, curoptional)
+                console.log("VERIFYING content.json", data2, curoptional)
                 if (!data2.hasOwnProperty("optional") || data2.optional !== curoptional)
                     data2.optional = curoptional
 
@@ -6012,6 +6012,7 @@ class Da_Net extends ZeroFrame {
                     })
             })
         }
+        verifyData()
     }
 
     verifyUser() {
