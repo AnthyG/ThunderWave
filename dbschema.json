@@ -1,0 +1,56 @@
+{
+    "db_name": "Da_Net",
+    "db_file": "data/da_net.db",
+    "version": 2,
+    "maps": {
+        "users/.+/data.json": {
+            "to_table": [{
+                    "node": "messages",
+                    "table": "messages"
+                },
+                {
+                    "node": "images",
+                    "table": "images"
+                }
+            ]
+        },
+        "users/.+/content.json": {
+            "to_json_table": [
+                "cert_user_id"
+            ],
+            "file_name": "data.json"
+        }
+    },
+    "tables": {
+        "json": {
+            "cols": [
+                ["json_id", "INTEGER PRIMARY KEY AUTOINCREMENT"],
+                ["directory", "TEXT"],
+                ["file_name", "TEXT"],
+                ["cert_user_id", "TEXT"]
+            ],
+            "indexes": ["CREATE UNIQUE INDEX path ON json(directory, file_name)"],
+            "schema_changed": 6
+        },
+        "messages": {
+            "cols": [
+                ["message_id", "INTEGER PRIMARY KEY"],
+                ["body", "TEXT"],
+                ["date_added", "INTEGER"],
+                ["json_id", "INTEGER REFERENCES json (json_id)"]
+            ],
+            "indexes": ["CREATE UNIQUE INDEX message_key ON messages(json_id, date_added)"],
+            "schema_changed": 16
+        },
+        "images": {
+            "cols": [
+                ["image_id", "INTEGER PRIMARY KEY"],
+                ["file_name", "TEXT"],
+                ["date_added", "INTEGER"],
+                ["json_id", "INTEGER REFERENCES json (json_id)"]
+            ],
+            "indexes": ["CREATE UNIQUE INDEX image_key ON images(json_id, date_added)"],
+            "schema_changed": 6
+        }
+    }
+}

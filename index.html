@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>ThunderWave</title>
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <link rel="stylesheet" href="css/all.css" />
+    <!--<link rel="stylesheet" href="css/highlight-styles/default.css" />-->
+    <base href="" target="_top" id="base">
+    <script>
+        base.href = document.location.href.replace("/media", "").replace("index.html", "").replace(/[&?]wrapper=False/, "").replace(/[&?]wrapper_nonce=[A-Za-z0-9]+/, "")
+    </script>
+</head>
+
+<body>
+    <div class="container grid-960">
+        <header class="navbar fixed shadow-drop-bottom">
+            <div class="navbar container grid-960">
+                <section class="navbar-section">
+                    <ul class="tab workin-tabber" tabs-target="#main-tabs" style="border-bottom-color: transparent;">
+                        <li class="tab-item active">
+                            <a target-tab="Home" href="javascript:void(0)">Home</a>
+                        </li>
+
+                        <li class="tab-item">
+                            <a target-tab="MediaUploader" href="javascript:void(0)">Media Uploader</a>
+                        </li>
+
+                        <li class="tab-item">
+                            <a target-tab="Settings" href="javascript:void(0)">Settings</a>
+                        </li>
+                        <li class="tab-item">
+                            <a target-tab="About" href="javascript:void(0)">About</a>
+                        </li>
+                    </ul>
+                </section>
+                <section class="navbar-center">
+                    <a href="javascript:void(0)" class="mr-10 navbar-brand tracking-in-expand">ThunderWave</a>
+                </section>
+                <section class="navbar-section">
+                    <a href="#Select+user" id="select_user" onclick='return page.selectUser()'>Select user</a>
+                </section>
+                <!--<section class="navbar-primary">
+                    <a href="javascript:void(0)" class="navbar-brand mr-10">ThunderWave</a>
+                </section>
+                <section class="navbar-section">
+                    <ul class="tab tab-block workin-tabber" tabs-target="#main-tabs" style="width: 100%;">
+                        <li class="tab-item active">
+                            <a target-tab="Home" href="javascript:void(0)">Home</a>
+                        </li>
+                        <li class="tab-item">
+                            <a target-tab="Settings" href="javascript:void(0)">Settings</a>
+                        </li>
+                        <li class="tab-item">
+                            <a target-tab="About" href="javascript:void(0)">About</a>
+                        </li>
+                    </ul>-->
+                </section>
+            </div>
+        </header>
+        <div id="main-tabs" curtab="Home">
+            <div tab="Home" style="/*padding-bottom: 30px;*/ border: none;" class="panel">
+                <div id="messagesAt" class="label fixed"></div>
+
+                <div class="panel-body" style="overflow-x: hidden;">
+                    <button id="scrolltobottombtn" class="btn btn-action btn-lg btn-primary shadow-drop-2-bottom circle hide"><i class="icon icon-arrow-down"></i></button>
+
+                    <ul id="messages" class="unstyled"></ul>
+
+                    <!--<div class="container grid-960 fixed" style="bottom: 0px; z-index: 998;">
+                        <button id="scrolltobottombtn" class="btn btn-action btn-lg btn-primary shadow-drop-2-bottom circle hide"><i class="icon icon-arrow-down"></i></button>
+                    </div>-->
+                </div>
+
+                <div id="inputsC2" class="panel-footer #fixed shadow-drop-top">
+                    <div class="hide" id="media_preview">
+                        <figure class="figure">
+                            <img src="" class="img-responsive img-fit-contain" alt="" />
+                            <figcaption class="figure-caption text-center"></figcaption>
+                        </figure>
+                    </div>
+
+                    <div class="container grid-960 pt-5 pb-5" style="/*background-color: #202a2f;*/">
+                        <!-- normal input group with button -->
+                        <div class="input-group" style="/*padding-right: 4rem;*/">
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="media_selector_btn"><i class="icon icon-plus"></i></button>
+                            <button class="btn btn-lg btn-action input-group-btn hide" id="media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
+                            <!--<span class="input-group-addon addon-lg"><a href="#Select+user" id="select_user" onclick='return page.selectUser()'>Select user</a></span>-->
+                            <!--<input type="text" class="form-input input-lg" placeholder="Message.." id="message" onkeypress="if (event.keyCode == 13) page.sendMessage()" />-->
+                            <textarea class="form-input input-lg" placeholder="Message.." id="message" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendMessage(); return false; }" rows="1"></textarea>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="send" onclick="return page.sendMessage()"><i class="icon icon-forward"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div tab="MediaUploader">
+                <input class="form-input" type="file" id="media_uploader" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif" />
+                <output id="media_list"></output>
+                <button class="btn btn-primary btn-action" id="media_upload_btn"><i class="icon icon-upload"></i></button>
+            </div>
+
+            <div tab="Settings">
+                <div id="sttngs_container"></div>
+            </div>
+            <div tab="About">
+                <ul class="tab workin-tabber" tabs-target="#about-tabs">
+                    <li class="tab-item active">
+                        <a target-tab="page-1" href="javascript:void(0)">About the Project</a>
+                    </li>
+                    <li class="tab-item">
+                        <a target-tab="page-2" href="javascript:void(0)">Ideas/Changelog</a>
+                    </li>
+                </ul>
+                <div id="about-tabs" curtab="page-1">
+                    <div tab="page-1">
+                        <p><b>ThunderWave</b> (formerly Da_Net) is being developed with <span class="icons icons-heart active"></span> by <a href="/Me.ZeroNetwork.bit/?Profile/1oranGeS2xsKZ4jVsu9SVttzgkYXu4k9v/14K7EydgyeP84L1NKaAHBZTPQCev8BbqCy/glightstar@zeroid.bit"
+                                title="Profile on ZeroMe">glightstar@zeroid.bit</a> and is based on <a href="https://decentralize.today/decentralized-p2p-chat-in-100-lines-of-code-d6e496034cd4" target="_blank">this</a> ZeroChat-Guide.<br> For style, it uses
+                            a work-in-progress-modified fork of <a href="https://picturepan2.github.io/spectre/" target="_blank">Spectre.css</a> and some icons from <a href="/Me.ZeroNetwork.bit/">ZeroMe</a>.<br><a href="https://emojione.com/" target="_blank">EmojiOne</a>                            is used for Emoji's and for the Autocomplete-in-Message-input,
+                            <a href="https://github.com/yuku-t/jquery-textcomplete" target="_blank">jQuery-Textcomplete</a>.<br> Furthermore it makes use of <a href="https://github.com/chjj/marked" target="_blank">Marked</a> (with <a href="https://github.com/isagalaev/highlight.js"
+                                target="_blank">highlight.js</a> for Code-Syntax),<br> for the Avatars <a href="http://github.com/stewartlord/identicon.js" target="_blank">Identicon.js</a> (which requires <a href="http://www.xarg.org/download/pnglib.js">PNGLib</a>),
+                            <a href="https://github.com/jonathantneal/svg4everybody" target="_blank">SVG4Everybody</a>,<br> <a href="http://momentjs.com/" target="_blank">Moment.js</a> for date_time-parsing, <a href="https://github.com/jackmoore/autosize"
+                                target="_blank">Autosize</a>, and at last, <a href="https://jquery.com/" target="_blank">jQuery</a>.</p>
+
+                        <br>
+                        <p id="out">
+                            <span class="icon icons loading"></span>
+                        </p>
+                    </div>
+                    <div tab="page-2">
+                        <p>Structure of a list-item:<br><code><i>{state}</i> Idea.. <i>(example) [requirements]</i></code></p>
+                        <ul>
+                            <li>{state}
+                                <ul>
+                                    <li><span class="icon icon-time"></span> {Workin on it right now!}</li>
+                                    <li><span class="icon icon-time"></span> {Workin on it..}</li>
+                                    <li><span class="icon icon-check"></span> {"Date when finished"}</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <hr>
+                        <ul>
+                            <li>Citation of messages (kinda like an answer/reply)</li>
+                            <li><span class="icon icon-time"></span> {Workin on it right now!} Media implementation (e.g. images, audio, video (the last 2 maybe just in private chats?)) (?also with comments?) [Will have to look further into 'optional files',
+                                so it will be <b>very</b> hard]</li>
+                            <li>Private messages (kinda like ZeroMail) [End2End-Encrypted, both Users have complete non-seeding encrypted Chat-history, only readable with their own private key.<br>So this will probably be <b>very</b> hard for me to create,
+                                like really! :/]</li>
+                            <li>Search/Filter-function in chat(s)</li>
+                            <li><span class="icon icon-check"></span> {April 8th, 2017} Markdown-Support [Will most certain replace the current message-input with a textarea.., YES, I will x)]</li>
+                            <li><span class="icon icon-check"></span> {April 6th, 2017} Emoji's</li>
+                            <li><span class="icon icon-check"></span> {April 7th, 2017} Timestamp-Links (actually message-links)</li>
+                            <li><span class="icon icon-check"></span> {April 8th, 2017} Added Options-Version</li>
+                            <li><span class="icon icon-time"></span> {Workin on it} Automatic Option-Updating, with 'Option'-Merging, to preserve the Users Option-States
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--<PRESETS style="display: none !important;">
+        <div id="PRESET_message-container">
+            <li id='t_{{date_added}}' class='columns col-gapless message-container'>
+                <div class='col-1 text-center'>
+                    <a class='inline-block' href='?u/{{username}}'>
+                        <figure class='avatar' data-initial='{{username.substr(0, 2)}}'>{{message_pic}}</figure>
+                    </a>
+                </div>
+                <div class='col-11 columns col-gapless'>
+                    <h6 class='col-12' style='margin-bottom: .4rem;'><a href='?u/{{username}}'>{{username}}</a> <span class='message-user-mention-badge {{(page.LS.opts.user_mention_badge.value ? ((message_parsed.match(page.site_info.cert_user_id) || message_parsed.match(page.site_info.cert_user_id.split("@")[0])) ? "badge" : "") : "")}}'></span><small>{{message_timestamp}}</small></h6>
+                    <p class='col-12'>{{message_parsed}}</p>
+                </div>
+            </li>
+        </div>
+    </PRESETS>-->
+
+    <script>
+        function config$bH(goingback) {
+            console.log("configuring bodyHeight..")
+
+            function configIt(noalert) {
+                var noalert = noalert || false
+
+                // $('body').height($('body>.container')[0].scrollHeight + 28) // Disabling this, is visually preferred, but the complete thing doesn't work without it >:|
+                // $('body').css('overflow-x', 'hidden')
+
+                var $mp = $('#messages').parent()
+                if ($('#main-tabs').attr('curtab') === "Home" && !goingback) {
+                    $mp.scrollTop($mp[0].scrollHeight)
+                        //     $(document).scrollTop($('body>.container')[0].scrollHeight + 28)
+                }
+
+                if (noalert)
+                    console.log("bodyHeight configured!")
+            }
+            $(document).ready(function() {
+                configIt(true)
+                setTimeout(function() {
+                    configIt(false)
+                }, 1000)
+            })
+        }
+
+        function add2MSGInput(text) {
+            $('#message').val($('#message').val() + text)
+        }
+    </script>
+    <script type="text/javascript" src="js/all.js"></script>
+    <script>
+        (function() {
+            $("body").addClass("loaded")
+
+            $(".workin-tabber").each(function(elX, elY) {
+                var $dis = $(elY)
+                var $dis2 = $($dis.attr('tabs-target'))
+
+                var curtab = $dis2.attr('curtab')
+                var $curtab = $dis2.find('[tab="' + curtab + '"]')
+
+                $dis2.children().not($curtab).hide()
+                    // console.log($dis, $dis2, curtab, $curtab)
+
+                $dis.find('[target-tab]').on('click', function() {
+                    var $dis3 = $(this)
+
+                    var curtab = $dis2.attr('curtab')
+                    var $curtab = $dis2.find('[tab="' + curtab + '"]')
+
+                    var ncurtab = $dis3.attr('target-tab')
+                    var $ncurtab = $dis2.find('[tab="' + ncurtab + '"]')
+
+                    // console.log($dis3, ncurtab, $ncurtab)
+
+                    $dis.find('[target-tab="' + curtab + '"]').parent().removeClass("active")
+                    $dis3.parent().addClass("active")
+
+                    $curtab.hide()
+                    $ncurtab.show()
+
+                    $dis2.attr('curtab', ncurtab)
+                    config$bH()
+                })
+            })
+
+            $('#message').textcomplete([{
+                match: /\B:([\-+\w]*)$/,
+                search: function(term, callback) {
+                    var results = []
+                    var results2 = []
+                    var results3 = []
+                    $.each(emojiStrategy, function(shortname, data) {
+                        if (shortname.indexOf(term) > -1) {
+                            results.push(shortname)
+                        } else {
+                            if ((data.aliases !== null) && (data.aliases.indexOf(term) > -1)) {
+                                results2.push(shortname)
+                            } else if ((data.keywords !== null) && (data.keywords.indexOf(term) > -1)) {
+                                results3.push(shortname)
+                            }
+                        }
+                    })
+
+                    if (term.length >= 3) {
+                        results.sort(function(a, b) {
+                            return (a.length > b.length)
+                        })
+                        results2.sort(function(a, b) {
+                            return (a.length > b.length)
+                        })
+                        results3.sort()
+                    }
+                    var newResults = results.concat(results2).concat(results3)
+
+                    callback(newResults)
+                },
+                template: function(shortname) {
+                    return '<img class="emojione" src="css/png/' + emojiStrategy[shortname].unicode + '.png"> :' + shortname + ':'
+                },
+                replace: function(shortname) {
+                    return ':' + shortname + ': '
+                },
+                index: 1,
+                maxCount: 5
+            }], {
+                appendTo: '#inputsC2',
+                dropdownClassName: 'menu dropdown-menu-messageinput',
+                footer: '<a href="https://emoji.codes" target="_blank">Browse All<span class="arrow">»</span></a>',
+                maxCount: 5
+            })
+
+            autosize($('#message'))
+            var oldresizeH = 0
+            $('#message').on('autosize:resized', function() {
+                var h = $('#inputsC2').height() - 20
+
+                // $('#main-tabs > [tab="Home"]').css({
+                //     "paddingBottom": h
+                // })
+                config$bH(true)
+                if (oldresizeH > h)
+                    h = -h
+
+                // var $mp = $('#messages').parent()
+                // $mp.scrollTop($mp.scrollTop() + h)
+
+                oldresizeH = h
+            })
+            $('#message').on('change', function() {
+                autosize.update($('#message'))
+            })
+
+
+
+            function readMedia(e) {
+                // Check for the various File API support.
+                if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
+                    alert('The File APIs are not fully supported in this browser.')
+                    return false
+                }
+
+                var files = e.target.files
+
+                $('#media_list').html("")
+                var first = true
+                for (var fX in files) {
+                    var fY = files[fX]
+                    console.log(fX, fY)
+
+                    if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\.(png|jpg|jpeg|gif)*')) // !first ||      |audio|video
+                        continue
+
+                    var reader = new FileReader()
+                    reader.onload = (function(f2) {
+                        console.log("reading", f2)
+                        return function(event) {
+                            console.log("with event", event)
+
+                            // if (!page.hasOwnProperty("MediaFiles"))
+                            //     page.MediaFiles = []
+
+                            // page.MediaFiles.push(f2)
+
+                            // Render thumbnail
+                            var media = event.target.result ? (f2.type.match('image\..*') ? '<img class="img-responsive rounded {{CLASSES}}" src="' + event.target.result + '" title="' + escape(f2.name) + '" />' : false) : false // (f2.type.match('audio\..*') ? '<audio controls src="' + event.target.result + '" />' : (f2.type.match('video\..*') ? '<video controls src="' + event.target.result + '" />' : false))) : 
+
+                            if (first) {
+                                first = false
+                                $('#media_preview').children("figure.figure").html(media
+                                    .replace(/\{\{CLASSES\}\}/gm, 'centered" alt="' + f2.name + '"') +
+                                    '<figcaption class="figure-caption text-center">' + f2.name + '</figcaption>'
+                                )
+                                $('#media_preview').removeClass("hide")
+                                $('#media_selector_cancel_btn').removeClass('hide')
+                            }
+
+                            var el = $('<li><b>' + escape(f2.name) + '</b> (' + (f2.type || 'n/a') + ') - ' + f2.size + ' bytes, last modified: ' + (f2.lastModifiedDate ? f2.lastModifiedDate.toLocaleDateString() : 'n/a') + '<br>' + (media ? media : '<i>NO PREVIEW</i>') + '</li>')
+                            el.appendTo('#media_list')
+                            console.log("and element", el, $('#media_list')[0])
+                        }
+                    })(fY)
+                    reader.readAsDataURL(fY)
+                }
+            }
+            $('#media_uploader').on('change', function(e) {
+                console.log($('#media_uploader')[0].files)
+                if ($('#media_uploader')[0].files[0]) {
+                    $('#media_selector_btn').html('<i class="icon icon-upload"></i>')
+                    $('#media_selector_cancel_btn').removeClass('hide')
+                    readMedia(e)
+                } else {
+                    $('#media_preview').addClass("hide")
+                    $('#media_selector_cancel_btn').addClass('hide')
+                }
+            })
+
+            $('#media_upload_btn').on('click', function() {
+                if ($('#media_uploader')[0].files[0]) {
+                    page.uploadMedia()
+                    $('#media_preview').addClass('hide')
+                    $('#media_selector_cancel_btn').addClass('hide')
+                } else {
+                    $('#media_preview').removeClass("hide")
+                    $('#media_selector_cancel_btn').removeClass('hide')
+                }
+            })
+
+            $('#media_selector_btn').on('click', function() {
+                if ($('#media_uploader')[0].files[0]) {
+                    page.uploadMedia()
+                    $('#media_preview').addClass('hide')
+                    $('#media_selector_cancel_btn').addClass('hide')
+                    $('#media_selector_btn').html('<i class="icon icon-plus"></i>')
+                } else {
+                    $('#media_uploader').click();
+                }
+            })
+            $('#media_selector_cancel_btn').on('click', function() {
+                var ctrl = $('#media_uploader')[0]
+                try {
+                    ctrl.value = null;
+                } catch (ex) {}
+                if (ctrl.value) {
+                    ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+                }
+
+                $('#media_preview').addClass('hide')
+                $('#media_selector_cancel_btn').addClass('hide')
+                $('#media_selector_btn').html('<i class="icon icon-plus"></i>')
+            })
+
+
+
+            $('#scrolltobottombtn').on('click', function() {
+                var $mp = $('#messages').parent()
+                $mp.scrollTop($mp[0].scrollHeight)
+
+                // var totop = $('body>.container')[0].scrollHeight + 28
+                // $(document).scrollTop(totop)
+
+                // $(document).animate({
+                //     scrollTop: totop
+                // }, 400, 'swing')
+            })
+
+            $(window).on('hashchange', function() {
+                if (window.location.hash) {
+                    var h = window.location.hash.substr(1)
+                    if (h.substr(0, 3) === "tc_" || h.substr(0, 2) === "d_") {
+                        var $el = $('#' + h),
+                            el = $el[0]
+
+                        // console.log("Scrollin to " + h, $(document).scrollTop(), $el.offset().top, el.scrollHeight, $el.offset().top - el.scrollHeight + 2)
+
+                        var $mp = $('#messages').parent()
+                        $mp.scrollTop($el.offset().top)
+
+                        // $(document).scrollTop($el.offset().top - 53)
+                    }
+                }
+            })
+
+
+
+            page.cmd("wrapperNotification", [
+                "", "<b>As a warning</b>, <i>this Zite is still in Beta</i>, so to receive the<br> newest updates you may want to <i>'Disable cache'</i><br> in your <i>'Developers console'</i>!", 7500
+            ])
+
+
+
+            var messagesAtTO = false
+            $(window).on('resize', function() {
+                config$bH(true)
+            })
+
+            setTimeout(function() {
+                config$bH()
+            }, 100)
+
+            var blockscroll = false
+            $('#messages').parent().on('scroll', function() {
+                if (!blockscroll) {
+                    blockscroll = true
+
+                    var lowerD = 0
+                    var isAt = false,
+                        isAtL = ""
+                    $('#messages').find('[timestamp-date]').each(function() {
+                        var $dis = $(this)
+                        var distance = $dis.offset().top - 53 - $(document).scrollTop()
+
+                        var first = $(document).scrollTop() >= distance,
+                            second = distance >= lowerD,
+                            third = distance <= 0;
+                        // console.log($dis.children('.divider.text-center').attr('data-content'), $(document).scrollTop(), distance, lowerD, first, second, third)
+                        if (first && (second || lowerD === 0) && third) {
+                            var $dis2 = $dis.children('.divider.text-center')
+                            isAt = $dis2.attr('data-content')
+                            isAtL = $dis.attr('timestamp-date')
+                            lowerD = distance
+                        }
+                    })
+
+                    var $mp = $('#messages').parent()
+                    var bcsH = $mp[0].scrollHeight - 2000
+
+                    console.log($mp[0].scrollHeight, bcsH, $mp.scrollTop())
+
+                    // var bcsH = $('body>.container')[0].scrollHeight - ($('body>.container')[0].scrollHeight / 10)
+                    if ($('#main-tabs').attr("curtab") === "Home" && $mp.scrollTop() < bcsH) {
+                        $('#scrolltobottombtn').removeClass("hide")
+                    } else {
+                        $('#scrolltobottombtn').addClass("hide")
+                    }
+
+                    // console.log($mp.scrollTop(), bcsH, $mp.scrollTop() < bcsH)
+
+                    // console.log(isAt)
+                    if (isAt) {
+                        $('#messagesAt').html(isAt).fadeIn()
+                        $('#messagesAt').attr('onclick', 'javascript:window.location.hash="#d_' + isAtL + '";')
+                        clearTimeout(messagesAtTO)
+                        messagesAtTO = setTimeout(function() {
+                            $('#messagesAt').stop().fadeOut()
+                        }, 5000)
+                    } else {
+                        $('#messagesAt').stop().hide()
+                        clearTimeout(messagesAtTO)
+                        $('#messagesAt').html("")
+                            // page.loadMessages(false, false, false, false, "DESC", true)
+                    }
+
+                    setTimeout(function() {
+                        blockscroll = false
+                    }, 100)
+                }
+            })
+        })()
+    </script>
+</body>
+
+</html>
