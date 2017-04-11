@@ -5356,7 +5356,7 @@ class Da_Net extends ZeroFrame {
                                                     if (f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                         $m.val($m.val() + ' ![ALTTEXT](' + output_url + ')')
                                                     else
-                                                        $m.val($m.val() + ' [TEXT](' + output_url + ')')
+                                                        $m.val($m.val() + ' [TITLE](' + output_url + ')')
 
                                                     // Publish the file to other users
                                                     page.cmd("siteSign", {
