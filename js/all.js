@@ -5074,7 +5074,7 @@ class Da_Net extends ZeroFrame {
                 }
             )
             .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
-                var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + '\'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
+                var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
@@ -5084,7 +5084,7 @@ class Da_Net extends ZeroFrame {
 
         var msg_part_2_1 = '<div id="tc_' + msgkey + '" tc="' + date_added + '" class="card mb-5">' +
             ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
-                '<div class="card-header"><small class="tile-title">' + username + '</small></div>') + '<div class="card-body text-break">' +
+                '<div class="card-header"><small class="tile-title"><a onclick="add2MSGInput(\'' + username + ' \'); return false;" href="?u/' + encodeURI(username) + '">' + username + '</a></small></div>') + '<div class="card-body text-break">' +
             message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
 
         if (((users_own_message && thismessageis.same_user) || thismessageis.same_user) && thismessageis.same_date && thismessageis.in_time_range) {
@@ -5351,12 +5351,11 @@ class Da_Net extends ZeroFrame {
                                             ], (res) => {
                                                 if (res == "ok") {
                                                     var output_url = '/' + page.site_info.address + '/' + f_path
-                                                    var $m = $('#message')
                                                     console.log(output_url, f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                     if (f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
-                                                        $m.val($m.val() + ' ![ALTTEXT](' + output_url + ')')
+                                                        add2MSGInput(' ![ALTTEXT](' + output_url + ') ')
                                                     else
-                                                        $m.val($m.val() + ' [TITLE](' + output_url + ')')
+                                                        add2MSGInput(' [TITLE](' + output_url + ') ')
 
                                                     // Publish the file to other users
                                                     page.cmd("siteSign", {
