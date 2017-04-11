@@ -4936,14 +4936,23 @@ markedR.link = function(href, title, text) {
     return '<a href="' + href + '" target="_blank" ' + (title ? ('title="' + title + '"') : '') + '>' + text + '</a>'
 }
 
-function imageViewGen(href, title, text) {
-    return '<a href="' + href + '" target="_blank">' +
+function imageViewGen(res, href, title, text) {
+    return '<div class="popover #popover-bottom"><a href="' + href + '" target="_blank">' +
         '<img src="' + href +
         '" alt="' + text +
         '" class="img-responsive rounded" ' +
         (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
         (markedR.options.xhtml ? '/>' : '>') +
-        '</a>'
+        '</a><div class="popover-container">' +
+        '<div class="card"><div class="card-header">' +
+        (title ? ('<div class="card-title">' + title + '</div>') :
+            (text ? ('<div class="card-title">' + text + '</div>') : '')) +
+        (title && text ? ('<div class="card-subtitle">' + text + '</div>') : '') +
+        '</div><div class="card-body">Peers: ' +
+        res.peer + '<br>Size: ' + res.size +
+        '</div><div class="card-footer"><button class="btn" onclick="page.imageDeleter(this, \'' +
+        href + '\', \'' + escape(title) + '\', \'' + escape(text) +
+        '\')">Delete file</button></div></div></div>'
 }
 markedR.image = function(href, title, text) {
     var href = href || '',
@@ -5388,6 +5397,7 @@ class Da_Net extends ZeroFrame {
         if (hrefArr[0] === "")
             hrefArr.shift()
         var isvalidimage = false
+
         console.log("Checkin image", href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
@@ -5408,7 +5418,7 @@ class Da_Net extends ZeroFrame {
         this.cmd("dbQuery", [
             "SELECT * FROM images LEFT JOIN json USING (json_id) WHERE directory = \"users/" + hrefArr[0] + "\" AND images.file_name = \"" + hrefArr[1] + "\""
         ], (images) => {
-            console.log("IMAGES", images)
+            // console.log("IMAGES", images)
             if (!images || !images[0])
                 return false
 
@@ -5419,14 +5429,65 @@ class Da_Net extends ZeroFrame {
 
                 var $mfr = $('#MEDIAFILEREPLACE_' + uh)
                 if (res.is_downloaded === 1)
-                    $mfr.replaceWith($(imageViewGen(href, title, text)))
+                    $mfr.replaceWith($(imageViewGen(res, href, title, text)))
                 else
-                    $mfr.replaceWith($('<button class="btn" onclick="page.imageDownloader(this, \'' + href + '\', \'' + escape(title) + '\', \'' + escape(text) + '\')">Download ' + (title ? title : (text ? text : '')) + '</button>'))
+                    $mfr.replaceWith($('<div class="popover">' +
+                        '<button class="btn" onclick="page.imageDownloader(this, \'' +
+                        href + '\', \'' + escape(title) + '\', \'' + escape(text) +
+                        '\')">Download ' + (title ? title : (text ? text : '')) +
+                        '</button><div class="popover-container">' +
+                        '<div class="card"><div class="card-header">' +
+                        (title ? ('<div class="card-title">' + title + '</div>') :
+                            (text ? ('<div class="card-title">' + text + '</div>') : '')) +
+                        (title && text ? ('<div class="card-subtitle">' + text + '</div>') : '') +
+                        '</div><div class="card-body">Peers: ' +
+                        res.peer + '<br>Size: ' + res.size + '</div></div></div>'))
             })
         })
     }
     imageDownloader(el, href, title, text) {
         var hrefArr = href.split("/")
+        if (hrefArr[0] === "")
+            hrefArr.shift()
+        var isvalidimage = false
+
+        console.log("Checkin image", href, hrefArr)
+        if (hrefArr[0] === this.site_info.address)
+            hrefArr.shift()
+        if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
+            hrefArr.shift()
+            hrefArr.shift()
+            isvalidimage = true
+        }
+        /*
+        hrefArr[0] = auth_address
+        hrefArr[1] = file_name
+        */
+
+        if (!isvalidimage)
+            return false
+
+        console.log("Image is valid", hrefArr)
+        page.cmd("dbQuery", [
+            "SELECT * FROM images LEFT JOIN json USING (json_id) WHERE directory = \"users/" + hrefArr[0] + "\" AND images.file_name = \"" + hrefArr[1] + "\""
+        ], (images) => {
+            console.log("IMAGES", images)
+            if (!images || !images[0])
+                return false
+
+            var image = images[0]
+            console.log("Loading image..", image)
+            page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
+                console.log("Image result: ", res)
+                $(el).parent().replaceWith($(imageViewGen(res, href, unescape(title), unescape(text))))
+            })
+        })
+    }
+    imageDeleter(el, href, title, text) {
+        var hrefArr = href.split("/")
+        if (hrefArr[0] === "")
+            hrefArr.shift()
+        console.log(href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
         if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
@@ -5437,7 +5498,14 @@ class Da_Net extends ZeroFrame {
         hrefArr[0] = auth_address
         hrefArr[1] = file_name
         */
-        $(el).replaceWith($(imageViewGen(href, unescape(title), unescape(text))))
+        page.cmd("optionalFileDelete",
+            "data/users/" + hrefArr[0] + "/" + hrefArr[1], (res) => {
+                console.log("Deleted media-file: data/users/" + hrefArr[0] + '/' + hrefArr[1], res);
+
+                var uh = Math.random().toString(36).substring(7);
+                page.imageDisplayer(uh, href, unescape(title), unescape(text))
+                $(el).parent().parent().parent().parent().replaceWith($('<div id="MEDIAFILEREPLACE_' + uh + '"></div>'))
+            })
     }
 
     loadMessages(override, to_now, from_time, to_time, ADESC, goingback) {
