@@ -4,7 +4,7 @@
  "background-color": "#202a2f",
  "clone_root": "template-new",
  "cloned_from": "1HeLLo4uzjaLetFx6NH3PMwFP3qbRbTf3D",
- "description": "A chat made by glightstar@zeroid.bit",
+ "description": "A chat for ZeroNet",
  "files": {
   "css/all.css": {
    "sha512": "35cde54ed653b2dc5514f2a09bfeb6327f8ef60310cff7a54b4fa449911e6fc9",
@@ -35,15 +35,15 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1491904696,
+ "modified": 1491905269,
  "postmessage_nonce_security": true,
  "sign": [
-  85952016809341423165228370169209930960031347800513737162234268117194301400379,
-  86939191249745627296660273438508079157120263605588175184316221978973951200056
+  114071622845506432101602695664764745148153689421398131532267739684712631801678,
+  15521806598626159947599695273724009080878105643559854127000218480707349965363
  ],
  "signers_sign": "G9GfWM6HdGV88sk+BfmHKZFouIpc0kRQSb7KY1YnP0IiRoNsQBb8Cke8eBEOgF7QiRYXb1ganqIa1TXqDHSaOUk=",
  "signs": {
-  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "HDHw4mIm5xhwXgXT0xr2zT314vKGUz1AUcuMeSmJxfHjJz80u8e/mEfTDY2UwxpVEg76Mjvc2KOEQfVoStouuEM="
+  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "HHy7NXGNr3EN811irmVs00qWn0Vjaa7VkDamW4P8a0Mq4GFP+4RYCQPs65lssRC9fJvL9ose8iAib9iYybxBv9Y="
  },
  "signs_required": 1,
  "title": "ThunderWave (formerly Da_Net)",
