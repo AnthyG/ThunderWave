@@ -8,8 +8,8 @@
  "favicon": "favicon.ico",
  "files": {
   "css/all.css": {
-   "sha512": "35cde54ed653b2dc5514f2a09bfeb6327f8ef60310cff7a54b4fa449911e6fc9",
-   "size": 150004
+   "sha512": "fb3207b321c292f446e7e5d27acf13fc30cbdb1f09f372caee87e8294e2a3e7a",
+   "size": 150761
   },
   "data-default/users/content-default.json": {
    "sha512": "3c3679bc24b7cd1009999bc3339e8e70c307459fead70137f358977779003931",
@@ -19,13 +19,17 @@
    "sha512": "6ec60115d2a5020940e55bc5930d5cbb246714386a8a8ef6422ccc240d305600",
    "size": 1778
   },
+  "favicon.ico": {
+   "sha512": "0cc1bde727d6d9baa538333d24cb765d64b180b3ccac7b622c4287ea2508a0ff",
+   "size": 1150
+  },
   "index.html": {
-   "sha512": "3caed6ec9979ff5557bec45cd414447bffabd43290653efd02f7f12314873fb4",
-   "size": 26669
+   "sha512": "cfd859aff5808581b6900174ba131f7de1258c79f3d7a115c12f2bfe85b8d197",
+   "size": 27423
   },
   "js/all.js": {
-   "sha512": "8904a8bfa810814f32854dc6f5024f0fd3d48bc123203fdb1323f4f3400cc4a9",
-   "size": 941483
+   "sha512": "4c2965ab2dd7d479598188069298fef0a27c0c0382712f024a6aff88443d1195",
+   "size": 942690
   }
  },
  "ignore": "(data/.*db|data/users/.*/.*|disabled/.*|merged-.*|(js|css)/(?!all.(js|css)))|^.git",
@@ -36,15 +40,15 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1491905269,
+ "modified": 1491910982,
  "postmessage_nonce_security": true,
  "sign": [
-  114071622845506432101602695664764745148153689421398131532267739684712631801678,
-  15521806598626159947599695273724009080878105643559854127000218480707349965363
+  34447469028468298447150518139335867807218577641771469326057184748502728610223,
+  42568868793782699255754446395616138772979101888879201738562920796831585663446
  ],
  "signers_sign": "G9GfWM6HdGV88sk+BfmHKZFouIpc0kRQSb7KY1YnP0IiRoNsQBb8Cke8eBEOgF7QiRYXb1ganqIa1TXqDHSaOUk=",
  "signs": {
-  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "HHy7NXGNr3EN811irmVs00qWn0Vjaa7VkDamW4P8a0Mq4GFP+4RYCQPs65lssRC9fJvL9ose8iAib9iYybxBv9Y="
+  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "G5esd+P44yAhKvUY+lH8pSZg/p0rrbZakEP50nT1J3UC0hjzDktyopME3WM3sMcAeNF/XJHKvub2hG/FpA6ZnxY="
  },
  "signs_required": 1,
  "title": "ThunderWave (formerly Da_Net)",
