@@ -98,6 +98,37 @@ ul.unstyled {
     position: absolute;
 }
 
+#messages>li>ul.times-messages>li>.tile>.tile-content {
+    position: relative;
+}
+
+#messages[design-type]>li>ul.times-messages>li>.tile>.tile-content:before {
+    content: " ";
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    border-style: solid;
+    border-width: 15px 10px 0;
+    border-color: #eeeeee transparent;
+    display: block;
+    width: 0px;
+    z-index: 1;
+}
+
+#messages[design-type]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
+    right: 0px;
+    left: initial;
+}
+
+#messages[design-type="3"]>li>ul.times-messages>li>.tile>.tile-content:before {
+    top: 22px;
+    left: 2px;
+}
+
+#messages[design-type="3"]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
+    right: 2px
+}
+
 #messages>li>ul.times-messages>li>.tile>.tile-content>.card {
     max-width: 50rem;
     padding-left: 1rem;
