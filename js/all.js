@@ -4935,11 +4935,24 @@ markedR.link = function(href, title, text) {
 
     return '<a href="' + href + '" target="_blank" ' + (title ? ('title="' + title + '"') : '') + '>' + text + '</a>'
 }
+
+function imageViewGen(href, title, text) {
+    return '<a href="' + href + '" target="_blank">' +
+        '<img src="' + href +
+        '" alt="' + text +
+        '" class="img-responsive rounded" ' +
+        (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
+        (markedR.options.xhtml ? '/>' : '>') +
+        '</a>'
+}
 markedR.image = function(href, title, text) {
     var href = href || '',
         title = title || '',
         text = text || ''
-    return '<a href="' + href + '" target="_blank"><img src="' + href + '" alt="' + text + '" class="img-responsive rounded" ' + (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) + (this.options.xhtml ? '/>' : '>' + '</a>')
+
+    var uh = Math.random().toString(36).substring(7);
+    page.imageDisplayer(uh, href, title, text)
+    return '<div id="MEDIAFILEREPLACE_' + uh + '"></div>'
 }
 
 
@@ -5361,6 +5374,70 @@ class Da_Net extends ZeroFrame {
             })(fY)
             reader.readAsBinaryString(fY)
         }
+    }
+
+    imageDisplayer(uh, href, title, text) {
+        // page.cmd("optionalFileList", [], (data) => {
+        //     console.log(data);
+        //     page.cmd("optionalFileInfo", data[0].inner_path, (res) => {
+        //         console.log(res);
+        //     })
+        // })
+
+        var hrefArr = href.split("/")
+        if (hrefArr[0] === "")
+            hrefArr.shift()
+        var isvalidimage = false
+        console.log("Checkin image", href, hrefArr)
+        if (hrefArr[0] === this.site_info.address)
+            hrefArr.shift()
+        if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
+            hrefArr.shift()
+            hrefArr.shift()
+            isvalidimage = true
+        }
+        /*
+        hrefArr[0] = auth_address
+        hrefArr[1] = file_name
+        */
+
+        if (!isvalidimage)
+            return false
+
+        console.log("Image is valid", hrefArr)
+        this.cmd("dbQuery", [
+            "SELECT * FROM images LEFT JOIN json USING (json_id) WHERE directory = \"users/" + hrefArr[0] + "\" AND images.file_name = \"" + hrefArr[1] + "\""
+        ], (images) => {
+            console.log("IMAGES", images)
+            if (!images || !images[0])
+                return false
+
+            var image = images[0]
+            console.log("Loading image..", image)
+            page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
+                console.log("Image result: ", res)
+
+                var $mfr = $('#MEDIAFILEREPLACE_' + uh)
+                if (res.is_downloaded === 1)
+                    $mfr.replaceWith($(imageViewGen(href, title, text)))
+                else
+                    $mfr.replaceWith($('<button class="btn" onclick="page.imageDownloader(this, \'' + href + '\', \'' + escape(title) + '\', \'' + escape(text) + '\')">Download ' + (title ? title : (text ? text : '')) + '</button>'))
+            })
+        })
+    }
+    imageDownloader(el, href, title, text) {
+        var hrefArr = href.split("/")
+        if (hrefArr[0] === this.site_info.address)
+            hrefArr.shift()
+        if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
+            hrefArr.shift()
+            hrefArr.shift()
+        }
+        /*
+        hrefArr[0] = auth_address
+        hrefArr[1] = file_name
+        */
+        $(el).replaceWith($(imageViewGen(href, unescape(title), unescape(text))))
     }
 
     loadMessages(override, to_now, from_time, to_time, ADESC, goingback) {
