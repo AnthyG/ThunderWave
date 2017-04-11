@@ -547,6 +547,13 @@ class Da_Net extends ZeroFrame {
 
             var $m = $('#messages')
 
+            var message_design_type = parseInt(page.LS.opts.message_design_type.value)
+            if (message_design_type === 1) {
+                $('#messages').removeAttr("design-type")
+            } else {
+                $('#messages').attr("design-type", message_design_type)
+            }
+
             if (override) {
                 page.lastmessagewas = ""
                 $m.html('<div class="icon icons loading"></div>')
