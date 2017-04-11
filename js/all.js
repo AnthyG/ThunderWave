@@ -5405,7 +5405,7 @@ class Da_Net extends ZeroFrame {
             hrefArr.shift()
         var isvalidimage = false
 
-        console.log("Checkin image", href, hrefArr)
+        // console.log("Checkin image", href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
         if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
@@ -5421,7 +5421,7 @@ class Da_Net extends ZeroFrame {
         if (!isvalidimage)
             return false
 
-        console.log("Image is valid", hrefArr)
+        // console.log("Image is valid", hrefArr)
         this.cmd("dbQuery", [
             "SELECT * FROM images LEFT JOIN json USING (json_id) WHERE directory = \"users/" + hrefArr[0] + "\" AND images.file_name = \"" + hrefArr[1] + "\""
         ], (images) => {
@@ -5430,9 +5430,10 @@ class Da_Net extends ZeroFrame {
                 return false
 
             var image = images[0]
-            console.log("Loading image..", image)
+
+            // console.log("Loading image..", image)
             page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
-                console.log("Image result: ", res)
+                // console.log("Image result: ", res)
 
                 var $mfr = $('#MEDIAFILEREPLACE_' + uh)
                 if (res.is_downloaded === 1)
@@ -5460,7 +5461,7 @@ class Da_Net extends ZeroFrame {
             hrefArr.shift()
         var isvalidimage = false
 
-        console.log("Checkin image", href, hrefArr)
+        // console.log("Checkin image", href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
         if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
@@ -5476,16 +5477,17 @@ class Da_Net extends ZeroFrame {
         if (!isvalidimage)
             return false
 
-        console.log("Image is valid", hrefArr)
+        // console.log("Image is valid", hrefArr)
         page.cmd("dbQuery", [
             "SELECT * FROM images LEFT JOIN json USING (json_id) WHERE directory = \"users/" + hrefArr[0] + "\" AND images.file_name = \"" + hrefArr[1] + "\""
         ], (images) => {
-            console.log("IMAGES", images)
+            // console.log("IMAGES", images)
             if (!images || !images[0])
                 return false
 
             var image = images[0]
-            console.log("Loading image..", image)
+
+            // console.log("Loading image..", image)
             page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
                 console.log("Image result: ", res)
                 $(el).parent().replaceWith($(imageViewGen(res, href, unescape(title), unescape(text))))
@@ -5497,7 +5499,7 @@ class Da_Net extends ZeroFrame {
         if (hrefArr[0] === "")
             hrefArr.shift()
 
-        console.log(href, hrefArr)
+        // console.log(href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
         if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
@@ -5923,83 +5925,93 @@ class Da_Net extends ZeroFrame {
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
         var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
 
-        // Verify data.json
-        page.cmd("fileGet", {
-            "inner_path": data_inner_path,
-            "required": false
-        }, (data) => {
-            if (data)
-                var data = JSON.parse(data)
-            else
-                var data = {}
+        function verifyData() {
+            page.cmd("fileGet", {
+                "inner_path": data_inner_path,
+                "required": false
+            }, (data) => {
+                if (data)
+                    var data = JSON.parse(data)
+                else
+                    var data = {}
+                var olddata = data
 
-            if (!data.hasOwnProperty("messages"))
-                data.messages = [{
-                    "body": emojione.toShort("## Joined Da_Net :wave::blush:"),
-                    "date_added": parseInt(moment().utc().format("x"))
-                }]
-            if (!data.hasOwnProperty("images"))
-                data.images = []
+                if (!data.hasOwnProperty("messages"))
+                    data.messages = [{
+                        "body": emojione.toShort("## Joined Da_Net :wave::blush:"),
+                        "date_added": parseInt(moment().utc().format("x"))
+                    }]
+                if (!data.hasOwnProperty("images"))
+                    data.images = []
 
-            var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
-            var json_rawA = btoa(json_raw)
+                var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                var json_rawA = btoa(json_raw)
 
-            page.cmd("fileWrite", [
-                data_inner_path,
-                json_rawA
-            ], (res) => {
-                if (res == "ok") {
-
-                    // Verify content.json
-                    page.cmd("fileGet", {
-                        "inner_path": content_inner_path,
-                        "required": false
-                    }, (data2) => {
-                        if (data2)
-                            var data2 = JSON.parse(data2)
-                        else
-                            var data2 = {}
-
-                        var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg)"
-                        if (!data2.hasOwnProperty("optional") || data2.optional !== curoptional)
-                            data2.optional = curoptional
-
-                        var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
-                        var json_rawA2 = btoa(json_raw2)
-
-                        page.cmd("fileWrite", [
-                            content_inner_path,
-                            json_rawA2
-                        ], (res) => {
-                            if (res == "ok") {
-                                page.cmd("siteSign", {
-                                    "inner_path": content_inner_path
-                                }, (res) => {
-                                    page.cmd("sitePublish", {
-                                        "inner_path": content_inner_path,
-                                        "sign": false
-                                    }, function() {
-                                        console.log(data.messages, data.messages.length)
-                                        if (data.messages.length === 1)
-                                            page.cmd("wrapperNotification", [
-                                                "done", "Your first message was sent successfully! :)"
-                                            ])
-                                    })
-                                })
-                            } else {
-                                page.cmd("wrapperNotification", [
-                                    "error", "File write error: " + JSON.stringify(res)
-                                ])
-                            }
-                        })
+                if (data !== olddata)
+                    page.cmd("fileWrite", [
+                        data_inner_path,
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            verifyContent(data)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
                     })
-                } else {
-                    page.cmd("wrapperNotification", [
-                        "error", "File write error: " + JSON.stringify(res)
-                    ])
-                }
+                else
+                    verifyContent(data)
             })
-        })
+        }
+
+        function verifyContent(data) {
+            page.cmd("fileGet", {
+                "inner_path": content_inner_path,
+                "required": false
+            }, (data2) => {
+                if (data2)
+                    var data2 = JSON.parse(data2)
+                else
+                    var data2 = {}
+                var olddata2 = data2
+
+                var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg)"
+                console.log(data2, curoptional)
+                if (!data2.hasOwnProperty("optional") || data2.optional !== curoptional)
+                    data2.optional = curoptional
+
+                var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
+                var json_rawA2 = btoa(json_raw2)
+
+                if (data2 !== olddata2)
+                    page.cmd("fileWrite", [
+                        content_inner_path,
+                        json_rawA2
+                    ], (res) => {
+                        if (res == "ok") {
+                            page.cmd("siteSign", {
+                                "inner_path": content_inner_path
+                            }, (res) => {
+                                page.cmd("sitePublish", {
+                                    "inner_path": content_inner_path,
+                                    "sign": false
+                                }, function() {
+                                    console.log(data.messages, data.messages.length)
+                                    if (data.messages.length === 1)
+                                        page.cmd("wrapperNotification", [
+                                            "done", "Your first message was sent successfully! :)"
+                                        ])
+                                })
+                            })
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                    })
+            })
+        }
     }
 
     verifyUser() {
