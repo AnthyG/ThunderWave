@@ -5444,7 +5444,8 @@ class Da_Net extends ZeroFrame {
 
             if (message.params.cert_user_id) {
                 $("#select_user").html(message.params.cert_user_id)
-                this.loadMessages()
+
+                // this.loadMessages()
             } else
                 $("#select_user").html("Select user")
 
@@ -5472,7 +5473,7 @@ class Da_Net extends ZeroFrame {
             var LS = (typeof LS === "object" ? (LS || {}) : {})
 
             // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
-            var curOptsV = 5
+            var curOptsV = 6
             if (!LS.hasOwnProperty("opts") || LS.optsV !== curOptsV) {
                 LS.optsV = curOptsV
 
@@ -5584,6 +5585,30 @@ class Da_Net extends ZeroFrame {
                             ).toString() + ')'
                         }
                     },
+                    "message_design_type": {
+                        "label": "Change design of messages",
+                        "desc": "Changes the design of the messages",
+                        "value": 1,
+                        "values": [
+                            [1, "Square"],
+                            [2, "Arrow at top"],
+                            [3, "Arrow at middle of avatar"]
+                        ],
+                        "type": "select",
+                        "r_ms": false,
+                        "cb": {
+                            "change": '(' + (
+                                function() {
+                                    var parsedVal = parseInt(page.LS.opts.message_design_type.value)
+                                    if (parsedVal === 1) {
+                                        $('#messages').removeAttr("design-type")
+                                    } else {
+                                        $('#messages').attr("design-type", parsedVal)
+                                    }
+                                }
+                            ).toString() + ')'
+                        }
+                    },
                     "reset_options_to_default": {
                         "label": "Reset to default",
                         "desc": "Resets all options to their default values",
@@ -5603,17 +5628,17 @@ class Da_Net extends ZeroFrame {
                 }
             }
 
-            if (oldOpts) {
-                for (var x in LS.opts) {
-                    var y1 = LS.opts[x]
-                    var y2 = oldOpts[x]
+            // if (oldOpts) {
+            //     for (var x in LS.opts) {
+            //         var y1 = LS.opts[x]
+            //         var y2 = oldOpts[x]
 
-                    y1.type = y1.type || ""
-                    y2.type = y2.type || ""
-                    if ((y1.type === y2.type && y1.type !== "") || typeof y1.value === typeof y2.value)
-                        y2.value = y2.value
-                }
-            }
+            //         y1.type = y1.type || ""
+            //         y2.type = y2.type || ""
+            //         if ((y1.type === y2.type && y1.type !== "") || typeof y1.value === typeof y2.value)
+            //             y2.value = y2.value
+            //     }
+            // }
 
             dis.LS = LS
             var opts = LS.opts
@@ -5842,6 +5867,8 @@ class Da_Net extends ZeroFrame {
     }
 
     onOpenWebsocket() {
+        this.setSettingsOptions()
+
         this.cmd("siteInfo", {}, (site_info) => {
             this.site_info = site_info
             this.setSiteInfo(site_info)
@@ -5852,8 +5879,6 @@ class Da_Net extends ZeroFrame {
                 this.loadMessages()
             }
         })
-
-        this.setSettingsOptions()
 
         console.log("Ready to call ZeroFrame API!")
     }
