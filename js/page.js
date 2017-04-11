@@ -95,6 +95,7 @@ function imageViewGen(res, href, title, text) {
         (title && text ? ('<div class="card-subtitle">' + text + '</div>') : '') +
         '</div><div class="card-body">Peers: ' +
         res.peer + '<br>Size: ' + res.size +
+        '<br>Type: ' + res.inner_path.match('.+\\.(.*)')[1] +
         '</div><div class="card-footer"><button class="btn" onclick="page.imageDeleter(this, \'' +
         href + '\', \'' + escape(title) + '\', \'' + escape(text) +
         '\')">Delete file</button></div></div></div>'
@@ -586,7 +587,9 @@ class Da_Net extends ZeroFrame {
                             (text ? ('<div class="card-title">' + text + '</div>') : '')) +
                         (title && text ? ('<div class="card-subtitle">' + text + '</div>') : '') +
                         '</div><div class="card-body">Peers: ' +
-                        res.peer + '<br>Size: ' + res.size + '</div></div></div>'))
+                        res.peer + '<br>Size: ' + res.size +
+                        '<br>Type: ' + res.inner_path.match('.+\\.(.*)')[1] +
+                        '</div></div></div>'))
             })
         })
     }
@@ -632,6 +635,7 @@ class Da_Net extends ZeroFrame {
         var hrefArr = href.split("/")
         if (hrefArr[0] === "")
             hrefArr.shift()
+
         console.log(href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
@@ -645,7 +649,7 @@ class Da_Net extends ZeroFrame {
         */
         page.cmd("optionalFileDelete",
             "data/users/" + hrefArr[0] + "/" + hrefArr[1], (res) => {
-                console.log("Deleted media-file: data/users/" + hrefArr[0] + '/' + hrefArr[1], res);
+                console.log("Deleted optional media-file: data/users/" + hrefArr[0] + '/' + hrefArr[1], res);
 
                 var uh = Math.random().toString(36).substring(7);
                 page.imageDisplayer(uh, href, unescape(title), unescape(text))
