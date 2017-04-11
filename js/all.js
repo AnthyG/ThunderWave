@@ -5282,7 +5282,7 @@ class Da_Net extends ZeroFrame {
             var fY = files[fX]
             console.log(fX, fY)
 
-            if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\.(png|jpg|jpeg|gif)')) // |audio|video      || !fY.name.match(/\.IMAGETYPE$/gm)
+            if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\/(png|jpg|jpeg|gif)|(audio)\/(mp3|ogg)|(video)\/(ogg)')) // |audio|video      || !fY.name.match(/\.IMAGETYPE$/gm)
                 continue
 
             var reader = new FileReader()
@@ -5350,7 +5350,13 @@ class Da_Net extends ZeroFrame {
                                                 json_rawA
                                             ], (res) => {
                                                 if (res == "ok") {
-                                                    $('#message').val($('#message').val() + ' ![ALTTEXT](/' + page.site_info.address + '/' + f_path + ')')
+                                                    var output_url = '/' + page.site_info.address + '/' + f_path
+                                                    var $m = $('#message')
+                                                    console.log(output_url, f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
+                                                    if (f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
+                                                        $m.val($m.val() + ' ![ALTTEXT](' + output_url + ')')
+                                                    else
+                                                        $m.val($m.val() + ' [TEXT](' + output_url + ')')
 
                                                     // Publish the file to other users
                                                     page.cmd("siteSign", {
@@ -5954,7 +5960,7 @@ class Da_Net extends ZeroFrame {
                         else
                             var data2 = {}
 
-                        var curoptional = ".+\\.(png|jpg|jpeg|gif)"
+                        var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg)"
                         if (!data2.hasOwnProperty("optional") || data2.optional !== curoptional)
                             data2.optional = curoptional
 
