@@ -106,7 +106,7 @@ markedR.image = function(href, title, text) {
 
     var uh = Math.random().toString(36).substring(7);
     page.imageDisplayer(uh, href, title, text)
-    return '<div id="MEDIAFILEREPLACE_' + uh + '"></div>'
+    return '<div id="MEDIAFILEREPLACE_' + uh + '" class="icon icons loading"></div>'
 }
 
 
@@ -649,7 +649,7 @@ class Da_Net extends ZeroFrame {
 
                 var uh = Math.random().toString(36).substring(7);
                 page.imageDisplayer(uh, href, unescape(title), unescape(text))
-                $(el).parent().parent().parent().parent().replaceWith($('<div id="MEDIAFILEREPLACE_' + uh + '"></div>'))
+                $(el).parent().parent().parent().parent().replaceWith($('<div id="MEDIAFILEREPLACE_' + uh + '" class="icon icons loading"></div>'))
             })
     }
 
@@ -712,7 +712,7 @@ class Da_Net extends ZeroFrame {
             for (var i = 0; i < messages.length; i++) {
                 this.addMessage(messages[i].message_id, messages[i].cert_user_id, messages[i].body, messages[i].date_added, override ? false : true)
             }
-            $m.find('.loading').remove()
+            $m.children('.loading').remove()
 
             config$bH(goingback)
 
@@ -1050,7 +1050,7 @@ class Da_Net extends ZeroFrame {
                 })(x, y, cntrls)
             }
             sHTML.appendTo('#sttngs_container')
-            $('#sttngs_container').find('.loading').remove()
+            $('#sttngs_container').children('.loading').remove()
         })
     }
 
