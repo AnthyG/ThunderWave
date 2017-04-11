@@ -1657,23 +1657,23 @@ ul.unstyled {
     margin-left: auto;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-body {
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body {
     /*white-space: pre-line;*/
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-body *:first-child {
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:first-child {
     margin-top: 0;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-body *:last-child {
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:last-child {
     margin-bottom: 0px;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-body>p:only-child>img.emojione:only-child {
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:only-child>img.emojione:only-child {
     font-size: xx-large;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-footer:last-child {
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-footer:last-child {
     padding-bottom: 0;
 }
 
