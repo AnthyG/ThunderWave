@@ -1157,6 +1157,7 @@ class Da_Net extends ZeroFrame {
                     })
             })
         }
+        verifyData()
     }
 
     verifyUser() {
