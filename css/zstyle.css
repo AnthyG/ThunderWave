@@ -1,0 +1,298 @@
+html,
+body2 {
+    position: relative;
+    min-height: 100%;
+    height: 100%;
+}
+
+html {
+    position: relative;
+    overflow-x: hidden;
+    /*     margin: 16px; */
+    padding: 0;
+    min-height: 100%;
+    /* For rem units support */
+    font-size: 62.5%;
+}
+
+body {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    /*overflow-y: auto;
+    overflow-x: hidden;*/
+    overflow: hidden;
+}
+
+body.loaded {
+    /*height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;*/
+}
+
+ul.unstyled {
+    list-style: none;
+}
+
+#inputsC {
+    display: block;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    background-color: inherit;
+    background-color: #263238;
+    z-index: 999;
+}
+
+#message {
+    max-height: 120px;
+}
+
+#send {
+    /*position: absolute;
+    right: 1rem;
+    bottom: .5rem;*/
+}
+
+#media_preview {
+    /*position: absolute; 
+     top: 43px; 
+    left: 0px;
+    right: 0px;
+    bottom: 50px;
+    width: 100%;
+     height: calc(100% - 92px); 
+    z-index: 1000;*/
+    /*background-color: #263238;*/
+}
+
+#main-tabs {
+    /*padding-top: 4.4rem;*/
+}
+
+#main-tabs>[tab] {
+    padding-top: 4.4rem;
+}
+
+#main-tabs>div[tab="Home"] {
+    /*margin-top: 4.4rem;*/
+    height: 100vh;
+}
+
+#messages {
+    margin-left: 0px;
+    /*height: 75vh;
+    overflow-y: overlay;
+    overflow-x: hidden;*/
+    /*overflow: visible;*/
+}
+
+#scrolltobottombtn {
+    /*right: 20px;
+    bottom: 70px;*/
+    right: 35px;
+    bottom: 80px;
+    z-index: 998;
+    position: absolute;
+}
+
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card {
+    max-width: 50rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    /*width: 100%;*/
+    display: table;
+}
+
+#messages>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card {
+    margin-right: auto;
+}
+
+#messages>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content>.card {
+    margin-left: auto;
+}
+
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-body {
+    /*white-space: pre-line;*/
+}
+
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-body *:first-child {
+    margin-top: 0;
+}
+
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-body *:last-child {
+    margin-bottom: 0px;
+}
+
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-body>p:only-child>img.emojione:only-child {
+    font-size: xx-large;
+}
+
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card .card-footer:last-child {
+    padding-bottom: 0;
+}
+
+#messages>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle>a.message-timestamp {
+    color: #1c2429;
+}
+
+.times-messages {
+    margin-left: 0px;
+}
+
+#messagesAt {
+    top: 50px;
+    left: 50%;
+    z-index: 998;
+    transform: translateX(-50%);
+}
+
+.navbar.fixed {
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    z-index: 1000;
+    background-color: #263238;
+}
+
+.navbar.fixed>.navbar {
+    background-color: #263238;
+}
+
+html {
+    overflow: auto;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    -webkit-border-radius: 0;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: .1rem;
+    border-radius: .1rem;
+    background: #1de9b6;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+::-webkit-scrollbar-thumb:window-inactive {
+    background: #13c095;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: orange !important;
+}
+
+body>*::-webkit-scrollbar-thumb {
+    background: red !important;
+}
+
+body>*>*::-webkit-scrollbar-thumb {
+    background: green !important;
+}
+
+body>*>*>*::-webkit-scrollbar-thumb {
+    background: blue !important;
+}
+
+body>*>*>*>*::-webkit-scrollbar-thumb {
+    background-color: pink !important;
+}
+
+#messages::-webkit-scrollbar-thumb {
+    background: purple !important;
+}
+
+
+/* AutoComplete styles for Emoji One */
+
+.dropdown-menu-messageinput {
+    top: initial !important;
+    bottom: 50px !important;
+}
+
+.dropdown-menu-messageinput .textcomplete-item {
+    margin-top: 0;
+    padding: 0 .8rem;
+    text-decoration: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.dropdown-menu-messageinput .textcomplete-footer .arrow {
+    margin-left: .8em;
+    font-size: 1.3em;
+}
+
+.dropdown-menu-messageinput li .emojione {
+    vertical-align: middle;
+    font-size: 1.23em;
+    width: 1em;
+    height: 1em;
+    top: -1px;
+    margin: 0 .3em 0 0;
+}
+
+.dropdown-menu-messageinput {
+    background: #eee;
+    border-radius: .2rem;
+    box-shadow: 0 .1rem .4rem rgba(38, 50, 56, .3);
+    color: #1c2429;
+    list-style: none;
+    margin: 0;
+    min-width: 18rem;
+    padding: 1rem;
+    -ms-transform: translateY(.5rem);
+    transform: translateY(.5rem);
+    z-index: 100;
+}
+
+.dropdown-menu-messageinput .textcomplete-item,
+.dropdown-menu-messageinput .textcomplete-footer {
+    margin-top: 0;
+    padding: 0 .8rem;
+    text-decoration: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.dropdown-menu-messageinput .textcomplete-item>a,
+.dropdown-menu-messageinput .textcomplete-footer>a {
+    border-radius: .2rem;
+    color: inherit;
+    display: block;
+    margin: 0 -.8rem;
+    padding: .6rem .8rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.dropdown-menu-messageinput .textcomplete-item.active>a,
+.dropdown-menu-messageinput .textcomplete-item>a:focus,
+.dropdown-menu-messageinput .textcomplete-item>a:hover,
+.dropdown-menu-messageinput .textcomplete-footer.active>a,
+.dropdown-menu-messageinput .textcomplete-footer>a:focus,
+.dropdown-menu-messageinput .textcomplete-footer>a:hover {
+    color: #1de9b6;
+}
+
+.dropdown-menu-messageinput .textcomplete-item>a:active,
+.dropdown-menu-messageinput .textcomplete-item>a.active,
+.dropdown-menu-messageinput .textcomplete-footer>a:active,
+.dropdown-menu-messageinput .textcomplete-footer>a.active {
+    background: #e5fcf7;
+    color: #1de9b6;
+}
