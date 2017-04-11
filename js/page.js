@@ -148,7 +148,7 @@ class Da_Net extends ZeroFrame {
         var CDalreadyexists = $("#messages").find('[timestamp-date="' + curdate2 + '"]')[0] || false
 
         var users_own_message = (username === page.site_info.cert_user_id)
-        var user_is_mentioned = (message_escaped.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gm"))) ? true : false
+        var user_is_mentioned = (message_escaped.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
         var user_mention_badge = (page.LS.opts.user_mention_badge.value && user_is_mentioned) ? "badge" : ""
 
         var thismessageis = {
@@ -211,16 +211,16 @@ class Da_Net extends ZeroFrame {
         var message_parsed = emojione.toImage(
             marked(
                 message_escaped
-                // .replace(/(http(s)?:\/\/([\S]+))/gm, function(match, p1) {
+                // .replace(/(http(s)?:\/\/([\S]+))/gmi, function(match, p1) {
                 //     return (page.LS.opts.parse_links.value ? '<a class="message-link" href="' + encodeURI(p1) + '" target="_blank">' + p1 + '</a>' : '<span class="message-link">' + p1 + '</span>')
                 // })
                 , {
                     renderer: markedR
                 }
             )
-            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie)\.bit)|@(?:[\w]+))/gm, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
                 var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + '\'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
-                var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gm"))) ? true : false
+                var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
         )
