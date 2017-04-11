@@ -11,6 +11,32 @@
    "sha512": "898eb9011121f5ca2c914d53bb41a32f885a9def931dfb67b51a737dca7354df",
    "size": 150761
   },
+  "data-default/users/content-default.json": {
+   "sha512": "3c3679bc24b7cd1009999bc3339e8e70c307459fead70137f358977779003931",
+   "size": 1107
+  },
+  "dbschema.json": {
+   "sha512": "6ec60115d2a5020940e55bc5930d5cbb246714386a8a8ef6422ccc240d305600",
+   "size": 1778
+  },
+  "favicon.ico": {
+   "sha512": "0cc1bde727d6d9baa538333d24cb765d64b180b3ccac7b622c4287ea2508a0ff",
+   "size": 1150
+  },
+  "index.html": {
+   "sha512": "d0c472caa86ff43486b3f0fc0ecdbbcabffa9b07746bb6419dad74b7d9bbe852",
+   "size": 28322
+  },
+  "js/all.js": {
+   "sha512": "15cfd3b4f7fb97bb4407c8a50baae474fbd4cfbb82d472e9762526845c2f2f8f",
+   "size": 950067
+  },
+  "js/pnglib.js": {
+   "sha512": "4eef3d0bdb40a717097d7985982ce37c024e622e41ec78f2160c9f2923fcd079",
+   "size": 8120
+  }
+ },
+ "files_optional": {
   "css/png/0023-20e3.png": {
    "sha512": "4dcfe169aa4c192e51b8c3615e0195c4a6e1d935aa526c9a7a89e232bf8d493b",
    "size": 604
@@ -7338,33 +7364,9 @@
   "css/png/3299.png": {
    "sha512": "b231ccd3dce2b010800b9d08c124aab35778493134a809534d658c6186cf610b",
    "size": 857
-  },
-  "data-default/users/content-default.json": {
-   "sha512": "3c3679bc24b7cd1009999bc3339e8e70c307459fead70137f358977779003931",
-   "size": 1107
-  },
-  "dbschema.json": {
-   "sha512": "6ec60115d2a5020940e55bc5930d5cbb246714386a8a8ef6422ccc240d305600",
-   "size": 1778
-  },
-  "favicon.ico": {
-   "sha512": "0cc1bde727d6d9baa538333d24cb765d64b180b3ccac7b622c4287ea2508a0ff",
-   "size": 1150
-  },
-  "index.html": {
-   "sha512": "d0c472caa86ff43486b3f0fc0ecdbbcabffa9b07746bb6419dad74b7d9bbe852",
-   "size": 28322
-  },
-  "js/all.js": {
-   "sha512": "15cfd3b4f7fb97bb4407c8a50baae474fbd4cfbb82d472e9762526845c2f2f8f",
-   "size": 950067
-  },
-  "js/pnglib.js": {
-   "sha512": "4eef3d0bdb40a717097d7985982ce37c024e622e41ec78f2160c9f2923fcd079",
-   "size": 8120
   }
  },
- "ignore": "(data/.*db|data/users/.*/.*|disabled/.*|merged-.*|(js|css)/(?!(all.(js|css)|png))|^.git)",
+ "ignore": "(data/.*db|data/users/.*/.*|disabled/.*|merged-.*|(js|css)/(?!(all.(js|css))|png)|^.git)",
  "includes": {
   "data/users/content.json": {
    "signers": [],
@@ -7372,15 +7374,16 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1491945941,
+ "modified": 1491946737,
+ "optional": "(css/png/.*)",
  "postmessage_nonce_security": true,
  "sign": [
-  76265234047743878527192625371184903692885668159811614922419214428220175941995,
-  104358487832799585104541885331709022200258617285173648567893535901911848720219
+  3797465292207547099340767601279306978007216035846004701987668788289047781021,
+  91405313251276100510152181504183505585707351794674190944671374432158224799414
  ],
  "signers_sign": "G9GfWM6HdGV88sk+BfmHKZFouIpc0kRQSb7KY1YnP0IiRoNsQBb8Cke8eBEOgF7QiRYXb1ganqIa1TXqDHSaOUk=",
  "signs": {
-  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "HFSPr48vYBE2Q49cx6S/1zAi90LQKJU1lFKItm7z5f39FSh0pe9BkU/XCSZvYTENWjJ7eLfOvugsQ3HZTxeFnYU="
+  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "GwFIynYdzs/HPOH97HjMPxGYzODDMttwSc407kxU7/1J3B6PicTASHB7oW35IkTSlV8R29m3HBQpFr9NK+qtL9M="
  },
  "signs_required": 1,
  "title": "ThunderWave",
