@@ -46,7 +46,33 @@
                     <!--<figure class="avatar" data-initial="TW" style="background-color: #1DE9B6;"><img src="/1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky/favicon.ico" /></figure>-->
                 </section>
                 <section class="navbar-section">
-                    <a href="#Select+user" id="select_user" onclick='return page.selectUser()'>Select user</a>
+                    <div class="dropdown dropdown-right">
+                        <!--<a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
+                            Menu <i class="icon icon-caret"></i>
+                        </a>-->
+                        <button class="btn btn-primary btn-action btn-lg btn-link dropdown-toggle" tabindex="0">
+                            <i class="icon icon-menu"></i>
+                        </button>
+                        <ul class="menu">
+                            <li class="menu-item">
+                                <div class="tile tile-centered">
+                                    <div class="tile-icon" id="current_user_avatar">
+                                        <figure class="avatar" data-initial="TW"></figure>
+                                    </div>
+                                    <div class="tile-content" id="current_user_name">
+                                        Please login first
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="divider"></li>
+                            <li class="menu-item">
+                                <a href="#Select+user" id="select_user" onclick='return page.selectUser()'>
+                                    Select user
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--<a href="#Select+user" id="select_user" onclick='return page.selectUser()'>Select user</a>-->
                 </section>
                 <!--<section class="navbar-primary">
                     <a href="javascript:void(0)" class="navbar-brand mr-10">ThunderWave</a>
