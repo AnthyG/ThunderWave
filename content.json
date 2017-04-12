@@ -4,7 +4,7 @@
  "background-color": "#202a2f",
  "clone_root": "template-new",
  "cloned_from": "1HeLLo4uzjaLetFx6NH3PMwFP3qbRbTf3D",
- "description": "A chat for ZeroNet",
+ "description": "A beautiful chat for ZeroNet.",
  "favicon": "favicon.ico",
  "files": {
   "css/all.css": {
@@ -24,12 +24,12 @@
    "size": 1150
   },
   "index.html": {
-   "sha512": "d0c472caa86ff43486b3f0fc0ecdbbcabffa9b07746bb6419dad74b7d9bbe852",
-   "size": 28322
+   "sha512": "05030fd80309061ef00923acf17566f5978bc907f5836c6a43c6c74b724de507",
+   "size": 31075
   },
   "js/all.js": {
-   "sha512": "15cfd3b4f7fb97bb4407c8a50baae474fbd4cfbb82d472e9762526845c2f2f8f",
-   "size": 950067
+   "sha512": "eaea25d6c4858fee7a89008498f9192a1fa9f0edf6adceced2a1d3cf5ec9f037",
+   "size": 954814
   },
   "js/pnglib.js": {
    "sha512": "4eef3d0bdb40a717097d7985982ce37c024e622e41ec78f2160c9f2923fcd079",
@@ -7374,16 +7374,16 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1491946737,
+ "modified": 1492010927,
  "optional": "(css/png/.*)",
  "postmessage_nonce_security": true,
  "sign": [
-  3797465292207547099340767601279306978007216035846004701987668788289047781021,
-  91405313251276100510152181504183505585707351794674190944671374432158224799414
+  29450531216511439306170652417507335325785435717683104256328485438901612192001,
+  61985749360975435294421424154833576163671336911505106167488061216454385575349
  ],
  "signers_sign": "G9GfWM6HdGV88sk+BfmHKZFouIpc0kRQSb7KY1YnP0IiRoNsQBb8Cke8eBEOgF7QiRYXb1ganqIa1TXqDHSaOUk=",
  "signs": {
-  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "GwFIynYdzs/HPOH97HjMPxGYzODDMttwSc407kxU7/1J3B6PicTASHB7oW35IkTSlV8R29m3HBQpFr9NK+qtL9M="
+  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "G2AJNxIq9Y6ri5PVsbZKNQxKTDXp/fTGBIrlwyNQNmtEhd7Ns4ebioOR9G+UzGWmsrXdxKdZY/x5OZHRSBu/SNA="
  },
  "signs_required": 1,
  "title": "ThunderWave",
