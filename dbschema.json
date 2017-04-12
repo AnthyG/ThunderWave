@@ -12,6 +12,9 @@
                     "node": "images",
                     "table": "images"
                 }
+            ],
+            "to_keyvalue": [
+                "last_seen"
             ]
         },
         "users/.+/content.json": {
