@@ -5651,6 +5651,7 @@ class Da_Net extends ZeroFrame {
                 var user_pic_1 = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
                 var user_pic_2 = '<figure class="avatar" data-initial="' + message.params.cert_user_id.substr(0, 2) + '">' + user_pic_1 + '</figure>'
 
+                $('.hideifnotloggedin').removeClass("hide")
                 $("#select_user").html("Change user")
                 $('#current_user_name').html(message.params.cert_user_id)
                 $("#current_user_avatar").html(user_pic_2)
@@ -5658,6 +5659,7 @@ class Da_Net extends ZeroFrame {
                 if (message.params.event[0] === "cert_changed" && message.params.event[1])
                     this.loadMessages()
             } else {
+                $('.hideifnotloggedin').addClass("hide")
                 $("#select_user").html("Select user")
                 $('#current_user_name').html("Please login first")
                 $("#current_user_avatar").html('<figure class="avatar" data-initial="TW"></figure>')
