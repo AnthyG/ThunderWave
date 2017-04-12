@@ -5,8 +5,8 @@
  "clone_root": "template-new",
  "cloned_from": "1HeLLo4uzjaLetFx6NH3PMwFP3qbRbTf3D",
  "description": "A beautiful chat for ZeroNet.",
- "favicon": "favicon.ico",
  "domain": "thunderwave.bit",
+ "favicon": "favicon.ico",
  "files": {
   "css/all.css": {
    "sha512": "898eb9011121f5ca2c914d53bb41a32f885a9def931dfb67b51a737dca7354df",
@@ -7383,16 +7383,16 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1492023865,
+ "modified": 1492025632,
  "optional": "(css/png/.*)",
  "postmessage_nonce_security": true,
  "sign": [
-  57202875652597236921598114179433336292525555905104262629600130530995122024921,
-  67468754065469217122405128187993413145969830965460120484696337647897852376293
+  115764375396860679044949996900056045870492246030472407195488378574417296670223,
+  5189303582830188808161735584453088533645368466771902997880852826514133673775
  ],
  "signers_sign": "G9GfWM6HdGV88sk+BfmHKZFouIpc0kRQSb7KY1YnP0IiRoNsQBb8Cke8eBEOgF7QiRYXb1ganqIa1TXqDHSaOUk=",
  "signs": {
-  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "HCy5WHKvkCbigstAyz19bEeiKH5M2SeRwFYGkDXeD5E5Et/0IFx0/ZG/pfMcsLTgpc9cMjPt1F8jv84Bsg1EQos="
+  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "HFDFw4fWDRkwuf4V9OIfj+6EbrfrlB9gQXZEr3zd6OUQwI/KAUf1guiZ1eRZWh6iqObASVxbRQIIYsci3CJhAB4="
  },
  "signs_required": 1,
  "title": "ThunderWave",
