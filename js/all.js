@@ -5823,6 +5823,7 @@ class Da_Net extends ZeroFrame {
                             ).toString() + ')'
                         }
                     },
+                    "divider_1": "",
                     "disable_emojis": {
                         "label": "Disable loading of Emoji's",
                         "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
@@ -5836,6 +5837,31 @@ class Da_Net extends ZeroFrame {
                             ).toString() + ')'
                         }
                     },
+                    "seed_all_emojis": {
+                        "label": "Seed all Emoji's",
+                        "desc": "Downloads and seeds all Emoji's automatically!",
+                        "value": false,
+                        "cb": {
+                            "change": '(' + (
+                                function() {
+                                    if (page.LS.opts.seed_all_emojis.value) {
+                                        page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
+                                            (res) => {
+                                                console.log(res)
+                                            })
+                                    } else {
+                                        page.cmd("OptionalHelpRemove", ["css/png"],
+                                            (res) => {
+                                                console.log(res)
+                                                page.cmd("wrapperNotification", [
+                                                    "done", "You are no longer Auto-Seeding Emoji's!", 5000
+                                                ])
+                                            })
+                                    }
+                                }
+                            ).toString() + ')'
+                        }
+                    },
                     "delete_all_emojis": {
                         "label": "Delete all Emoji's",
                         "desc": "All Emoji's in your \"cache\" will be deleted",
@@ -5845,20 +5871,45 @@ class Da_Net extends ZeroFrame {
                         "cb": {
                             "click": '(' + (
                                 function() {
-                                    if (page.site_info.cert_user_id !== "glightstar@zeroid.bit")
+                                    if (page.site_info.cert_user_id !== "glightstar@zeroid.bit") {
+                                        var count = 0
                                         page.cmd("optionalFileList", [], (data) => {
                                             for (var x in data) {
                                                 var y = data[x]
                                                 if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
                                                     page.cmd("optionalFileDelete", y.inner_path, (res) => {
                                                         console.log("deleted emoji at path " + y.inner_path)
+                                                        count++
                                                     })
                                             }
+                                            page.cmd("wrapperNotification", [
+                                                "done", "Removed " + count + " Emoji's!", 5000
+                                            ])
                                         })
+                                    } else {
+                                        page.cmd("wrapperNotification", [
+                                            "error", "You can't delete Emoji's!", 5000
+                                        ])
+                                        var count = 0
+                                        page.cmd("optionalFileList", [], (data) => {
+                                            console.log(data)
+                                            for (var x in data) {
+                                                var y = data[x]
+                                                if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/") {
+                                                    console.log("would have removed emoji at path " + y.inner_path)
+                                                    count++
+                                                }
+                                            }
+                                            page.cmd("wrapperNotification", [
+                                                "done", "Would have removed " + count + " Emoji's!", 5000
+                                            ])
+                                        })
+                                    }
                                 }
                             ).toString() + ')'
                         }
                     },
+                    "divider_2": "",
                     "reset_options_to_default": {
                         "label": "Reset to default",
                         "desc": "Resets all options to their default values",
@@ -5907,6 +5958,12 @@ class Da_Net extends ZeroFrame {
 
             for (var x in opts) {
                 var y = opts[x]
+
+                if (y === "") {
+                    $('<hr>').appendTo(sHTML)
+                    continue
+                }
+
                 y.type = y.type || "";
 
                 (function(x, y, cntrls) {
