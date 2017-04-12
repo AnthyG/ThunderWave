@@ -208,8 +208,7 @@ class Da_Net extends ZeroFrame {
 
         var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#tc_' + msgkey + '">' + curtime + '</a>')
             // var message_timestamp = ('<span class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '">' + curtime + '</span>')
-        var message_parsed = emojione.toImage(
-            marked(
+        var message_parsed = marked(
                 message_escaped
                 // .replace(/(http(s)?:\/\/([\S]+))/gmi, function(match, p1) {
                 //     return (page.LS.opts.parse_links.value ? '<a class="message-link" href="' + encodeURI(p1) + '" target="_blank">' + p1 + '</a>' : '<span class="message-link">' + p1 + '</span>')
@@ -223,7 +222,8 @@ class Da_Net extends ZeroFrame {
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
-        )
+        if (!page.LS.opts.disable_emojis.value)
+            message_parsed = emojione.toImage(message_parsed)
 
         // console.log(CDalreadyexists, CDalreadyexistsC)
 
@@ -781,7 +781,7 @@ class Da_Net extends ZeroFrame {
             var LS = (typeof LS === "object" ? (LS || {}) : {})
 
             // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
-            var curOptsV = 6
+            var curOptsV = 7
             if (!LS.hasOwnProperty("opts") || LS.optsV !== curOptsV) {
                 LS.optsV = curOptsV
 
@@ -917,6 +917,42 @@ class Da_Net extends ZeroFrame {
                             ).toString() + ')'
                         }
                     },
+                    "disable_emojis": {
+                        "label": "Disable loading of Emoji's",
+                        "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
+                        "value": false,
+                        "r_ms": true,
+                        "cb": {
+                            "change": '(' + (
+                                function() {
+
+                                }
+                            ).toString() + ')'
+                        }
+                    },
+                    "delete_all_emojis": {
+                        "label": "Delete all Emoji's",
+                        "desc": "All Emoji's in your \"cache\" will be deleted",
+                        "value": "Delete",
+                        "type": "button",
+                        "r_ms": true,
+                        "cb": {
+                            "click": '(' + (
+                                function() {
+                                    if (page.site_info.cert_user_id !== "glightstar@zeroid.bit")
+                                        page.cmd("optionalFileList", [], (data) => {
+                                            for (var x in data) {
+                                                var y = data[x]
+                                                if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
+                                                    page.cmd("optionalFileDelete", y.inner_path, (res) => {
+                                                        console.log("deleted emoji at path " + y.inner_path)
+                                                    })
+                                            }
+                                        })
+                                }
+                            ).toString() + ')'
+                        }
+                    },
                     "reset_options_to_default": {
                         "label": "Reset to default",
                         "desc": "Resets all options to their default values",
@@ -990,7 +1026,7 @@ class Da_Net extends ZeroFrame {
                             if (r_ms)
                                 page.loadMessages()
                         })
-                    } else if (y.type === "checkbox" || (typeof y.value === "boolean" && y.type === "")) {
+                    } else if (y.type === "checkbox" || y.type === "switch" || (typeof y.value === "boolean" && y.type === "")) {
                         var el = $('<div class="form-group">' + (cntrls.checkbox
                             .replace(/X/gm, x)
                             .replace(/Y_LABEL/gm, y.label)
