@@ -7,6 +7,10 @@
  "description": "A beautiful chat for ZeroNet.",
  "favicon": "favicon.ico",
  "files": {
+  "ThunderWave_Logo.png": {
+   "sha512": "b542f57db20dfe6b5df3d306dfa49177060ccd0c1b07c6e84d7f60b8d328a067",
+   "size": 109138
+  },
   "css/all.css": {
    "sha512": "898eb9011121f5ca2c914d53bb41a32f885a9def931dfb67b51a737dca7354df",
    "size": 150761
@@ -24,8 +28,8 @@
    "size": 1150
   },
   "index.html": {
-   "sha512": "05030fd80309061ef00923acf17566f5978bc907f5836c6a43c6c74b724de507",
-   "size": 31075
+   "sha512": "4acb37e054cb39e9efad4d421db1c9218f47eab6940949ef13deaf7c65c8a614",
+   "size": 31284
   },
   "js/all.js": {
    "sha512": "eaea25d6c4858fee7a89008498f9192a1fa9f0edf6adceced2a1d3cf5ec9f037",
@@ -7374,16 +7378,16 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1492010927,
+ "modified": 1492012759,
  "optional": "(css/png/.*)",
  "postmessage_nonce_security": true,
  "sign": [
-  29450531216511439306170652417507335325785435717683104256328485438901612192001,
-  61985749360975435294421424154833576163671336911505106167488061216454385575349
+  1987964858206808595426948534737251434009250410593493215261890998989120959264,
+  2585468208840444547564190102045026840883814627441617864993556008259175296246
  ],
  "signers_sign": "G9GfWM6HdGV88sk+BfmHKZFouIpc0kRQSb7KY1YnP0IiRoNsQBb8Cke8eBEOgF7QiRYXb1ganqIa1TXqDHSaOUk=",
  "signs": {
-  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "G2AJNxIq9Y6ri5PVsbZKNQxKTDXp/fTGBIrlwyNQNmtEhd7Ns4ebioOR9G+UzGWmsrXdxKdZY/x5OZHRSBu/SNA="
+  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "Gwnosk6Qdjwj8knlBOpjPgYrwltfkXeYO6iljkpKAdb1bDZiBjpkIiUaJeXse3N2eTSzdD1Ahkfzb0vXDNdBXJM="
  },
  "signs_required": 1,
  "title": "ThunderWave",
