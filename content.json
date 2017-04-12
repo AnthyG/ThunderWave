@@ -7,10 +7,6 @@
  "description": "A beautiful chat for ZeroNet.",
  "favicon": "favicon.ico",
  "files": {
-  "ThunderWave_Logo.png": {
-   "sha512": "b542f57db20dfe6b5df3d306dfa49177060ccd0c1b07c6e84d7f60b8d328a067",
-   "size": 109138
-  },
   "css/all.css": {
    "sha512": "898eb9011121f5ca2c914d53bb41a32f885a9def931dfb67b51a737dca7354df",
    "size": 150761
@@ -28,16 +24,24 @@
    "size": 1150
   },
   "index.html": {
-   "sha512": "6431ea4457730153c0af20fdc261f47f2ad9d75a3871c76221671db2d01885a4",
-   "size": 31714
+   "sha512": "65948a73f83e879a3ba71c835a2f19e200db2b03436c2b733728995b9acbf59e",
+   "size": 31870
   },
   "js/all.js": {
-   "sha512": "69c23b58eb0ebe59c11346469025b73ca2ab096bb77c6690fe6874da2663cc45",
-   "size": 955517
+   "sha512": "cc2504353a304c3e83886855af92cfdf4c537a01fcb986078fcd6e47a50e3f74",
+   "size": 958882
   },
   "js/pnglib.js": {
    "sha512": "4eef3d0bdb40a717097d7985982ce37c024e622e41ec78f2160c9f2923fcd079",
    "size": 8120
+  },
+  "thunderwave_Logo1.png": {
+   "sha512": "7158d4a07a61d8ee80dd3d7b5111b97c2f86bd126f6e4f682afc5661c18dd770",
+   "size": 59608
+  },
+  "thunderwave_Logo2.png": {
+   "sha512": "315a113bfaabdf2dd5d56e1ed0a1382ef84534602d93a6b2b75abf01b008800f",
+   "size": 50582
   }
  },
  "files_optional": {
@@ -7378,16 +7382,16 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1492015409,
+ "modified": 1492023865,
  "optional": "(css/png/.*)",
  "postmessage_nonce_security": true,
  "sign": [
-  46512882969771281578992719346555186963205278992850052728624841401742497537813,
-  45320608442061901073039285111745717772118106953055477463880706975533269995053
+  57202875652597236921598114179433336292525555905104262629600130530995122024921,
+  67468754065469217122405128187993413145969830965460120484696337647897852376293
  ],
  "signers_sign": "G9GfWM6HdGV88sk+BfmHKZFouIpc0kRQSb7KY1YnP0IiRoNsQBb8Cke8eBEOgF7QiRYXb1ganqIa1TXqDHSaOUk=",
  "signs": {
-  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "HMdOibd4Z6xIApQlUgZoOIdKy6dmGg6R/k2afM1SqdG4g70p8LU4vOuUGAgP/3grEPXWspjmptA1ts8EhuJUkTc="
+  "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "HCy5WHKvkCbigstAyz19bEeiKH5M2SeRwFYGkDXeD5E5Et/0IFx0/ZG/pfMcsLTgpc9cMjPt1F8jv84Bsg1EQos="
  },
  "signs_required": 1,
  "title": "ThunderWave",
