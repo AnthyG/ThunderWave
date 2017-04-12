@@ -6,6 +6,7 @@
  "cloned_from": "1HeLLo4uzjaLetFx6NH3PMwFP3qbRbTf3D",
  "description": "A chat for ZeroNet",
  "favicon": "favicon.ico",
+ "domain": "thunderbolt.bit",
  "files": {
   "css/all.css": {
    "sha512": "35cde54ed653b2dc5514f2a09bfeb6327f8ef60310cff7a54b4fa449911e6fc9",
