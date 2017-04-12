@@ -5537,7 +5537,7 @@ class Da_Net extends ZeroFrame {
             var lsl_HTML = ''
             for (var x in lsl) {
                 var y = lsl[x]
-                lsl_HTML += '<li><b>' + y.cert_user_id + '</b> was last seen <i>' + moment(y.value, "x").utc().format("MMMM Do, YYYY - HH:mm:ss") + '</i></li>'
+                lsl_HTML += '<li><b>' + y.cert_user_id + '</b> was last seen <i>' + moment(y.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></li>'
             }
             $('#last_seen_list').html(lsl_HTML)
         })
@@ -5649,12 +5649,12 @@ class Da_Net extends ZeroFrame {
                 var idata = this.identicons[asv][message.params.cert_user_id]
 
                 var user_pic_1 = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
-                var user_pic_2 = '<figure class="avatar" data-initial="' + message.params.cert_user_id.substr(0, 2) + '">' + user_pic_1 + '</figure>'
+                var user_pic_2 = '<figure class="avatar" data-initial="' + message.params.cert_user_id.substr(0, 2) + '" onclick="">' + user_pic_1 + '</figure>'
 
                 $('.hideifnotloggedin').removeClass("hide")
                 $("#select_user").html("Change user")
                 $('#current_user_name').html(message.params.cert_user_id)
-                $("#current_user_avatar").html(user_pic_2)
+                $('#current_user_avatar').html(user_pic_2)
 
                 if (message.params.event[0] === "cert_changed" && message.params.event[1])
                     this.loadMessages()
@@ -5662,7 +5662,7 @@ class Da_Net extends ZeroFrame {
                 $('.hideifnotloggedin').addClass("hide")
                 $("#select_user").html("Select user")
                 $('#current_user_name').html("Please login first")
-                $("#current_user_avatar").html('<figure class="avatar" data-initial="TW"></figure>')
+                $('#current_user_avatar').html('<figure class="avatar" data-initial="TW"></figure>')
             }
 
             if (message.params.event[0] == "file_done")
