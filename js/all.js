@@ -5181,7 +5181,7 @@ class Da_Net extends ZeroFrame {
 
         this.verifyUserFiles()
 
-        var messag3 = message3 || false
+        var message3 = message3 || false
         var message2 = message3 || $("#message").val()
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
@@ -5227,15 +5227,19 @@ class Da_Net extends ZeroFrame {
                         autosize.update($('#message'))
 
                         // Publish the file to other users
-                        this.cmd("siteSign", {
-                            "inner_path": content_inner_path
-                        }, (res) => {
-                            this.loadMessages(false, data.messages.length === 1 ? false : true)
-                            this.cmd("sitePublish", {
-                                "inner_path": content_inner_path,
-                                "sign": false
-                            }, function() {})
+                        this.verifyUserFiles(null, function() {
+                            page.loadMessages(false, data.messages.length === 1 ? false : true)
                         })
+
+                        // this.cmd("siteSign", {
+                        //     "inner_path": content_inner_path
+                        // }, (res) => {
+                        //     this.loadMessages(false, data.messages.length === 1 ? false : true)
+                        //     this.cmd("sitePublish", {
+                        //         "inner_path": content_inner_path,
+                        //         "sign": false
+                        //     }, function() {})
+                        // })
 
                         // this.cmd("wrapperNotification", [
                         //     "done", "Sent message:<br>" + message, 5000
@@ -5358,14 +5362,16 @@ class Da_Net extends ZeroFrame {
                                                         add2MSGInput(' [TITLE](' + output_url + ') ')
 
                                                     // Publish the file to other users
-                                                    page.cmd("siteSign", {
-                                                        "inner_path": content_inner_path
-                                                    }, (res) => {
-                                                        page.cmd("sitePublish", {
-                                                            "inner_path": content_inner_path,
-                                                            "sign": false
-                                                        }, function() {})
-                                                    })
+                                                    this.verifyUserFiles()
+
+                                                    // page.cmd("siteSign", {
+                                                    //     "inner_path": content_inner_path
+                                                    // }, (res) => {
+                                                    //     page.cmd("sitePublish", {
+                                                    //         "inner_path": content_inner_path,
+                                                    //         "sign": false
+                                                    //     }, function() {})
+                                                    // })
                                                 } else {
                                                     page.cmd("wrapperNotification", [
                                                         "error", "File write error: " + JSON.stringify(res)
@@ -5981,11 +5987,11 @@ class Da_Net extends ZeroFrame {
         })
     }
 
-    verifyUserFiles() {
+    verifyUserFiles(cb1, cb2) {
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
         var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
 
-        function verifyData() {
+        function verifyData(cb1, cb2) {
             page.cmd("fileGet", {
                 "inner_path": data_inner_path,
                 "required": false
@@ -5994,7 +6000,7 @@ class Da_Net extends ZeroFrame {
                     var data = JSON.parse(data)
                 else
                     var data = {}
-                var olddata = data
+                var olddata = JSON.parse(JSON.stringify(data))
 
                 if (!data.hasOwnProperty("messages"))
                     data.messages = [{
@@ -6003,29 +6009,36 @@ class Da_Net extends ZeroFrame {
                     }]
                 if (!data.hasOwnProperty("images"))
                     data.images = []
+                if (!data.hasOwnProperty("last_seen") || parseInt(moment().utc().format("x")) !== data.last_seen)
+                    data.last_seen = parseInt(moment().utc().format("x"))
+                console.log("VERIFIED data.json", olddata, data)
 
                 var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
                 var json_rawA = btoa(json_raw)
 
-                if (data !== olddata)
+                if (data !== olddata) {
+                    console.log("data.json HAS RECEIVED A UPDATE!")
                     page.cmd("fileWrite", [
                         data_inner_path,
                         json_rawA
                     ], (res) => {
                         if (res == "ok") {
-                            verifyContent(data)
+                            console.log("data.json HAS BEEN UPDATED!")
+                            if (typeof cb1 === "function")
+                                cb1()
+                            verifyContent(data, olddata, cb2)
                         } else {
                             page.cmd("wrapperNotification", [
                                 "error", "File write error: " + JSON.stringify(res)
                             ])
                         }
                     })
-                else
-                    verifyContent(data)
+                } else
+                    verifyContent(data, olddata, cb2)
             })
         }
 
-        function verifyContent(data) {
+        function verifyContent(data, olddata, cb2) {
             page.cmd("fileGet", {
                 "inner_path": content_inner_path,
                 "required": false
@@ -6034,22 +6047,26 @@ class Da_Net extends ZeroFrame {
                     var data2 = JSON.parse(data2)
                 else
                     var data2 = {}
-                var olddata2 = data2
+                var olddata2 = JSON.parse(JSON.stringify(data2))
 
                 var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg)"
-                console.log("VERIFYING content.json", data2, curoptional)
                 if (!data2.hasOwnProperty("optional") || data2.optional !== curoptional)
                     data2.optional = curoptional
+                console.log("VERIFIED content.json", olddata2, data2)
 
                 var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
                 var json_rawA2 = btoa(json_raw2)
 
-                if (data2 !== olddata2)
+                if (data2 !== olddata2 || data !== olddata) {
+                    console.log("content.json HAS RECEIVED A UPDATE!")
                     page.cmd("fileWrite", [
                         content_inner_path,
                         json_rawA2
                     ], (res) => {
                         if (res == "ok") {
+                            console.log("content.json HAS BEEN UPDATED!")
+                            if (typeof cb2 === "function")
+                                cb2()
                             page.cmd("siteSign", {
                                 "inner_path": content_inner_path
                             }, (res) => {
@@ -6070,9 +6087,10 @@ class Da_Net extends ZeroFrame {
                             ])
                         }
                     })
+                }
             })
         }
-        verifyData()
+        verifyData(cb1, cb2)
     }
 
     verifyUser() {
