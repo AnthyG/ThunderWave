@@ -670,10 +670,30 @@ class Da_Net extends ZeroFrame {
             })
     }
 
+    lastSeenList() {
+        var verified = this.verifyUser()
+        if (!verified)
+            return false
+
+        console.log("Loading last-seen-List")
+        this.cmd("dbQuery", [
+            "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND value NOT NULL ORDER BY value DESC"
+        ], (lsl) => {
+            var lsl_HTML = ''
+            for (var x in lsl) {
+                var y = lsl[x]
+                lsl_HTML += '<li><b>' + y.cert_user_id + '</b> was last seen <i>' + moment(y.value, "x").utc().format("MMMM Do, YYYY - HH:mm:ss") + '</i></li>'
+            }
+            $('#last_seen_list').html(lsl_HTML)
+        })
+    }
+
     loadMessages(override, to_now, from_time, to_time, ADESC, goingback) {
         var verified = this.verifyUser()
         if (!verified)
             return false
+
+        this.lastSeenList()
 
         console.log("Loading messages..")
         var override = override === false ? false : true
