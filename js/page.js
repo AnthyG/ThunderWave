@@ -373,13 +373,13 @@ class ThunderWave extends ZeroFrame {
 
                         // Publish the file to other users
                         this.verifyUserFiles(null, function() {
-                            page.loadMessages(false, data.messages.length === 1 ? false : true)
+                            page.loadMessages("sent message", false, data.messages.length === 1 ? false : true)
                         })
 
                         // this.cmd("siteSign", {
                         //     "inner_path": content_inner_path
                         // }, (res) => {
-                        //     this.loadMessages(false, data.messages.length === 1 ? false : true)
+                        //     this.loadMessages("sent message", false, data.messages.length === 1 ? false : true)
                         //     this.cmd("sitePublish", {
                         //         "inner_path": content_inner_path,
                         //         "sign": false
@@ -676,26 +676,31 @@ class ThunderWave extends ZeroFrame {
             return false
 
         console.log("Loading last-seen-List")
+        var count = 0
         this.cmd("dbQuery", [
             "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND value NOT NULL ORDER BY value DESC"
         ], (lsl) => {
             var lsl_HTML = ''
             for (var x in lsl) {
                 var y = lsl[x]
-                lsl_HTML += '<li><b>' + y.cert_user_id + '</b> was last seen <i>' + moment(y.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></li>'
+                if (y) {
+                    lsl_HTML += '<li><b>' + y.cert_user_id + '</b> was last seen <i>' + moment(y.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></li>'
+                    count++
+                }
             }
             $('#last_seen_list').html(lsl_HTML)
+            $('#last_seen_list_c').html(count)
         })
     }
 
-    loadMessages(override, to_now, from_time, to_time, ADESC, goingback) {
+    loadMessages(loadcode, override, to_now, from_time, to_time, ADESC, goingback) {
         var verified = this.verifyUser()
         if (!verified)
             return false
 
         this.lastSeenList()
 
-        console.log("Loading messages..")
+        console.log("Loading messages with code >" + loadcode + "<..")
         var override = override === false ? false : true
         var to_now = to_now || false
         var goingback = goingback || false
@@ -719,7 +724,11 @@ class ThunderWave extends ZeroFrame {
         var from_time = from_time || from_time2,
             to_time = to_time || to_time2,
             mmntfrmt = "MMMM Do, YYYY - HH:mm:ss"
-        console.log(moment(from_time, "x").format(mmntfrmt) + " :: " + moment(to_time, "x").format(mmntfrmt), v)
+
+        if (override)
+            this.messageCounterArr = []
+
+        console.log(moment(from_time, "x").format(mmntfrmt) + " :: " + moment(to_time, "x").format(mmntfrmt), v, override, to_now, goingback, ADESC)
 
         this.cmd("dbQuery", [
             "SELECT * FROM messages LEFT JOIN json USING (json_id) WHERE date_added > " + from_time + " ORDER BY date_added DESC" //WHERE date_added > " + from_time + " AND date_added < " + to_time + " ORDER BY date_added " + ADESC + " LIMIT 5" // OFFSET " + offset
@@ -747,7 +756,10 @@ class ThunderWave extends ZeroFrame {
             console.log(messages[0], page.firstmessagewas)
 
             for (var i = 0; i < messages.length; i++) {
-                this.addMessage(messages[i].message_id, messages[i].cert_user_id, messages[i].body, messages[i].date_added, override ? false : true)
+                if (this.messageCounterArr.indexOf(messages[i].message_id) === -1) {
+                    this.addMessage(messages[i].message_id, messages[i].cert_user_id, messages[i].body, messages[i].date_added, override ? false : true)
+                    this.messageCounterArr.push(messages[i].message_id)
+                }
             }
             $m.children('.loading').remove()
 
@@ -802,7 +814,7 @@ class ThunderWave extends ZeroFrame {
                 $('#current_user_avatar').html(user_pic_2)
 
                 if (message.params.event[0] === "cert_changed" && message.params.event[1])
-                    this.loadMessages()
+                    this.loadMessages("cert changed")
             } else {
                 $('.hideifnotloggedin').addClass("hide")
                 $("#select_user").html("Select user")
@@ -811,7 +823,7 @@ class ThunderWave extends ZeroFrame {
             }
 
             if (message.params.event[0] == "file_done")
-                this.loadMessages()
+                this.loadMessages("file done", false, true)
         }
     }
 
@@ -1134,7 +1146,7 @@ class ThunderWave extends ZeroFrame {
                             if (typeof eval(page.LS.opts[x].cb.change) === "function")
                                 eval(page.LS.opts[x].cb.change + '()')
                             if (r_ms)
-                                page.loadMessages()
+                                page.loadMessages("r_ms")
                         })
                     } else if (y.type === "checkbox" || y.type === "switch" || (typeof y.value === "boolean" && y.type === "")) {
                         var el = $('<div class="form-group">' + (cntrls.checkbox
@@ -1157,7 +1169,7 @@ class ThunderWave extends ZeroFrame {
                             if (typeof eval(page.LS.opts[x].cb.change) === "function")
                                 eval(page.LS.opts[x].cb.change + '()')
                             if (r_ms)
-                                page.loadMessages()
+                                page.loadMessages("r_ms")
                         })
                     } else if (y.type === "select" || (y.values && y.values.constructor === Array && y.type === "")) {
                         var valuesHTML = ''
@@ -1184,7 +1196,7 @@ class ThunderWave extends ZeroFrame {
                             if (typeof eval(page.LS.opts[x].cb.change) === "function")
                                 eval(page.LS.opts[x].cb.change + '()')
                             if (r_ms)
-                                page.loadMessages()
+                                page.loadMessages("r_ms")
                         })
                     } else if (y.type === "button") {
                         var el = $('<div class="form-group">' + (cntrls.button
@@ -1200,7 +1212,7 @@ class ThunderWave extends ZeroFrame {
                             if (typeof eval(page.LS.opts[x].cb.click) === "function")
                                 eval(page.LS.opts[x].cb.click + '()')
                             if (r_ms)
-                                page.loadMessages()
+                                page.loadMessages("r_ms")
                         })
                     }
                     // console.log(el, el2)
@@ -1299,7 +1311,7 @@ class ThunderWave extends ZeroFrame {
                                     "inner_path": content_inner_path,
                                     "sign": false
                                 }, function() {
-                                    console.log(data.messages, data.messages.length)
+                                    // console.log(data.messages, data.messages.length)
                                     if (data.messages.length === 1)
                                         page.cmd("wrapperNotification", [
                                             "done", "Your first message was sent successfully! :)"
@@ -1354,7 +1366,8 @@ class ThunderWave extends ZeroFrame {
                 $("#select_user").text(site_info.cert_user_id)
 
                 this.verifyUserFiles()
-                this.loadMessages()
+                this.messageCounterArr = []
+                this.loadMessages("First-time-load")
             }
         })
 
