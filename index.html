@@ -250,25 +250,28 @@
         function config$bH(goingback) {
             console.log("configuring bodyHeight..")
 
-            function configIt(noalert) {
-                var noalert = noalert || false
+            function configIt(alert) {
+                var alert = alert || false
 
                 // $('body').height($('body>.container')[0].scrollHeight + 28) // Disabling this, is visually preferred, but the complete thing doesn't work without it >:|
                 // $('body').css('overflow-x', 'hidden')
 
                 var $mp = $('#messages').parent()
-                if ($('#main-tabs').attr('curtab') === "Home" && !goingback) {
+                if ($('#main-tabs').attr('curtab') === "Home" && (!goingback || $mp[0].scrollHeight - 25 <= $mp.scrollTop())) {
                     $mp.scrollTop($mp[0].scrollHeight)
                         //     $(document).scrollTop($('body>.container')[0].scrollHeight + 28)
                 }
+                if (goingback && page.hasOwnProperty("hadscrollheight") && page.hadscrollheight) {
+                    $mp.scrollTop(($mp[0].scrollHeight - page.hadscrollheight))
+                }
 
-                if (noalert)
+                if (alert)
                     console.log("bodyHeight configured!")
             }
             $(document).ready(function() {
-                configIt(true)
+                configIt(false)
                 setTimeout(function() {
-                    configIt(false)
+                    configIt(true)
                 }, 1000)
             })
         }
@@ -583,6 +586,11 @@
                         clearTimeout(messagesAtTO)
                         $('#messagesAt').html("")
                             // page.loadMessages(false, false, false, false, "DESC", true)
+                    }
+
+                    if ($mp.scrollTop() - 250 <= 0) {
+                        console.log("LOADING MORE")
+                        page.loadMessages("load more", false)
                     }
 
                     setTimeout(function() {
