@@ -112,7 +112,7 @@ markedR.image = function(href, title, text) {
 
 
 
-class Da_Net extends ZeroFrame {
+class ThunderWave extends ZeroFrame {
     addMessage(msgkey, username, message, date_added, addattop) {
         // var message_escaped = message.replace(/</g, "&lt;").replace(/>/g, "&gt;") // Escape html tags in the message
         var message_escaped = message
@@ -1227,10 +1227,11 @@ class Da_Net extends ZeroFrame {
                 var olddata = JSON.parse(JSON.stringify(data))
 
                 if (!data.hasOwnProperty("messages"))
-                    data.messages = [{
-                        "body": emojione.toShort("## Joined Da_Net :wave::blush:"),
-                        "date_added": parseInt(moment().utc().format("x"))
-                    }]
+                    data.messages = []
+                    // data.messages = [{
+                    //     "body": emojione.toShort("## Joined ThunderWave :wave::blush:"),
+                    //     "date_added": parseInt(moment().utc().format("x"))
+                    // }]
                 if (!data.hasOwnProperty("images"))
                     data.images = []
                 if (!data.hasOwnProperty("last_seen") || parseInt(moment().utc().format("x")) !== data.last_seen)
@@ -1360,4 +1361,4 @@ class Da_Net extends ZeroFrame {
         console.log("Ready to call ZeroFrame API!")
     }
 }
-page = new Da_Net();
+page = new ThunderWave();
