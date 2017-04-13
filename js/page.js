@@ -82,13 +82,24 @@ markedR.link = function(href, title, text) {
 }
 
 function imageViewGen(res, href, title, text) {
-    return '<div class="popover #popover-bottom"><a href="' + href + '" target="_blank">' +
-        '<img src="' + href +
-        '" alt="' + text +
-        '" class="img-responsive rounded" ' +
-        (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
-        (markedR.options.xhtml ? '/>' : '>') +
-        '</a><div class="popover-container">' +
+    var imgHTML = ''
+    var isgif = res.inner_path.match('.+\\.(.*)')[1] === "gif"
+    if (isgif) {
+        imgHTML = '<img data-gifffer="' + href +
+            '" data-gifffer-alt="' + text +
+            '" class="img-responsive rounded" ' +
+            (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
+            (markedR.options.xhtml ? '/>' : '>')
+    } else {
+        imgHTML = '<img src="' + href +
+            '" alt="' + text +
+            '" class="img-responsive rounded" ' +
+            (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
+            (markedR.options.xhtml ? '/>' : '>')
+    }
+    return '<div class="popover #popover-bottom">' +
+        imgHTML +
+        '<div class="popover-container">' +
         '<div class="card"><div class="card-header">' +
         (title ? ('<div class="card-title">' + title + '</div>') :
             (text ? ('<div class="card-title">' + text + '</div>') : '')) +
@@ -98,7 +109,8 @@ function imageViewGen(res, href, title, text) {
         '<br>Type: ' + res.inner_path.match('.+\\.(.*)')[1] +
         '</div><div class="card-footer"><button class="btn" onclick="page.imageDeleter(this, \'' +
         href + '\', \'' + escape(title) + '\', \'' + escape(text) +
-        '\')">Delete file</button></div></div></div>'
+        '\')">Delete file</button><a class="btn btn-link" href="' +
+        href + '" target="_blank">Open in new tab</a></div></div></div>'
 }
 markedR.image = function(href, title, text) {
     var href = href || '',
@@ -586,9 +598,11 @@ class ThunderWave extends ZeroFrame {
                 // console.log("Image result: ", res)
 
                 var $mfr = $('#MEDIAFILEREPLACE_' + uh)
-                if (res.is_downloaded === 1)
-                    $mfr.replaceWith($(imageViewGen(res, href, title, text)))
-                else
+                if (res.is_downloaded === 1) {
+                    var el2 = $mfr.replaceWith($(imageViewGen(res, href, title, text)))
+                    if (res.inner_path.match('.+\\.(.*)')[1] === "gif")
+                        Gifffer(el2.find('img'));
+                } else {
                     $mfr.replaceWith($('<div class="popover">' +
                         '<button class="btn" onclick="page.imageDownloader(this, \'' +
                         href + '\', \'' + escape(title) + '\', \'' + escape(text) +
@@ -602,6 +616,7 @@ class ThunderWave extends ZeroFrame {
                         res.peer + '<br>Size: ' + res.size +
                         '<br>Type: ' + res.inner_path.match('.+\\.(.*)')[1] +
                         '</div></div></div>'))
+                }
             })
         })
     }
@@ -640,7 +655,9 @@ class ThunderWave extends ZeroFrame {
             // console.log("Loading image..", image)
             page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
                 console.log("Image result: ", res)
-                $(el).parent().replaceWith($(imageViewGen(res, href, unescape(title), unescape(text))))
+                var el2 = $(el).parent().replaceWith($(imageViewGen(res, href, unescape(title), unescape(text))))
+                if (res.inner_path.match('.+\\.(.*)')[1] === "gif")
+                    Gifffer(el2.find('img'));
             })
         })
     }
