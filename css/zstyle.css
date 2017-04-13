@@ -180,6 +180,29 @@ ul.unstyled {
     transform: translateX(-50%);
 }
 
+.gifffer-play-button {
+    width: 4rem !important;
+    height: 4rem !important;
+    border-radius: 50% !important;
+    background: #1DE9B6 !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    margin: -2rem
+}
+
+.gifffer-play-button>div {
+    width: 0 !important;
+    height: 0 !important;
+    border-top: 10px solid transparent !important;
+    border-bottom: 10px solid transparent !important;
+    border-left: 16px solid #eeeeee !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-40%, -50%) !important;
+}
+
 .navbar.fixed {
     top: 0px;
     left: 0px;
