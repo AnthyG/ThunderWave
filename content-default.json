@@ -1,0 +1,38 @@
+{
+    "address": "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky",
+    "address_index": 74056983,
+    "background-color": "#202a2f",
+    "clone_root": "template-new",
+    "cloned_from": "1HeLLo4uzjaLetFx6NH3PMwFP3qbRbTf3D",
+    "description": "A beautiful chat for ZeroNet.",
+    "domain": "thunderwave.bit",
+    "favicon": "favicon.ico",
+    "files": {},
+    "files_optional": {},
+    "ignore": "(data/.*db|data/users/.*/.*|disabled/.*|merged-.*|(js|css)/(?!(all.(js|css))|png)|^.git)",
+    "includes": {
+        "data/users/content.json": {
+            "signers": [],
+            "signers_required": 1
+        }
+    },
+    "inner_path": "content.json",
+    "modified": 1492086178,
+    "optional": "(css/png/.*)",
+    "postmessage_nonce_security": true,
+    "sign": [
+        14115725452903820272092336789830774822571477418418326150898258332815549684725,
+        97739951410282571562597567078090000523758535829206440535386107507954118808939
+    ],
+    "signers_sign": "G9GfWM6HdGV88sk+BfmHKZFouIpc0kRQSb7KY1YnP0IiRoNsQBb8Cke8eBEOgF7QiRYXb1ganqIa1TXqDHSaOUk=",
+    "signs": {
+        "1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky": "HOOn2iCwOgzcrM7TBYFc7pxH4Y0txcw4eUUN651saA7UDoFMINagPfsMHoNjB1qQIYEREw0nocycgJKJH32Ik2k="
+    },
+    "signs_required": 1,
+    "title": "ThunderWave",
+    "translate": [
+        "js/all.js"
+    ],
+    "viewport": "width=device-width, initial-scale=1.0, shrink-to-fit=no",
+    "zeronet_version": "0.5.3"
+}
