@@ -693,7 +693,7 @@ class ThunderWave extends ZeroFrame {
         })
     }
 
-    loadMessages(loadcode, override, to_now, from_time, to_time, ADESC, goingback) {
+    loadMessages(loadcode, override, to_now, ADESC, goingback, from_time, to_time) {
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -707,9 +707,14 @@ class ThunderWave extends ZeroFrame {
 
         var ADESC = ADESC === "ASC" ? "ASC" : "DESC"
 
-        if (page.hasOwnProperty("firstmessagewas") && page.firstmessagewas.date_added && !to_now) {
-            var from_time2 = moment(page.firstmessagewas.date_added, "x").subtract(2, "d").format("x"),
-                to_time2 = moment(page.firstmessagewas.date_added, "x").format("x"),
+        // if (page.hasOwnProperty("firstmessagewas") && page.firstmessagewas.date_added && !to_now) {
+        //     var from_time2 = moment(page.firstmessagewas.date_added, "x").subtract(2, "d").format("x"),
+        //         to_time2 = page.firstmessagewas.date_added,
+        //         v = 1
+        // } else 
+        if (page.hasOwnProperty("firstmessagewas") && page.firstmessagewas.date_added && (!to_now || loadcode === "load more")) {
+            var from_time2 = moment(page.firstmessagewas.date_added, "x").subtract(12, "h").format("x"),
+                to_time2 = page.firstmessagewas.date_added,
                 v = 1
         } else if (to_now) {
             var from_time2 = page.lastmessagewas.date_added,
@@ -725,13 +730,21 @@ class ThunderWave extends ZeroFrame {
             to_time = to_time || to_time2,
             mmntfrmt = "MMMM Do, YYYY - HH:mm:ss"
 
-        if (override)
-            this.messageCounterArr = []
+        // if (override)
+        //     this.messageCounterArr = {}
 
-        console.log(moment(from_time, "x").format(mmntfrmt) + " :: " + moment(to_time, "x").format(mmntfrmt), v, override, to_now, goingback, ADESC)
+        if (loadcode === "load more")
+            page.hadscrollheight = $('#messages').parent()[0].scrollHeight
+
+        console.log(loadcode, override, to_now, from_time, to_time, ADESC, goingback, moment(from_time, "x").format(mmntfrmt) + " :: " + moment(to_time, "x").format(mmntfrmt), v)
 
         this.cmd("dbQuery", [
-            "SELECT * FROM messages LEFT JOIN json USING (json_id) WHERE date_added > " + from_time + " ORDER BY date_added DESC" //WHERE date_added > " + from_time + " AND date_added < " + to_time + " ORDER BY date_added " + ADESC + " LIMIT 5" // OFFSET " + offset
+            "SELECT * FROM messages LEFT JOIN json USING (json_id) WHERE date_added > " + from_time +
+            (loadcode === "load more" ? " AND date_added < " + to_time : "") +
+            " ORDER BY date_added DESC" +
+            (loadcode === "first time" || loadcode === "load more" ? " LIMIT 25" : " ")
+
+            //WHERE date_added > " + from_time + " AND date_added < " + to_time + " ORDER BY date_added " + ADESC + " LIMIT 5" // OFFSET " + offset
         ], (messages) => {
             messages.reverse()
             console.log("Messages: ", messages)
@@ -751,19 +764,28 @@ class ThunderWave extends ZeroFrame {
             }
 
             page.firstmessagewas = {
-                "date_added": !messages[0] ? 0 : messages.length > 1 ? 0 : messages[0].date_added
+                "date_added": !messages[0] ? 0 : messages.length > 1 ? messages[0].date_added : 0
             }
             console.log(messages[0], page.firstmessagewas)
 
             for (var i = 0; i < messages.length; i++) {
-                if (this.messageCounterArr.indexOf(messages[i].message_id) === -1) {
-                    this.addMessage(messages[i].message_id, messages[i].cert_user_id, messages[i].body, messages[i].date_added, override ? false : true)
-                    this.messageCounterArr.push(messages[i].message_id)
+                var msg = messages[i]
+                if (!this.messageCounterArr.hasOwnProperty(msg.message_id)) {
+                    this.addMessage(msg.message_id, msg.cert_user_id, msg.body, msg.date_added, override ? false : true)
+                    this.messageCounterArr[msg.message_id] = {
+                        body: msg.body,
+                        cert_user_id: msg.cert_user_id,
+                        date_added: msg.date_added,
+                        // directory: "users/14K7EydgyeP84L1NKaAHBZTPQCev8BbqCy",
+                        // file_name: "data.json",
+                        json_id: msg.json_id,
+                        message_id: msg.message_id
+                    }
                 }
             }
             $m.children('.loading').remove()
 
-            config$bH(goingback)
+            config$bH(loadcode === "load more" || goingback)
 
             // $m.addClass("bounce-bottom")
             // setTimeout(function() {
@@ -813,8 +835,10 @@ class ThunderWave extends ZeroFrame {
                 $('#current_user_name').html(message.params.cert_user_id)
                 $('#current_user_avatar').html(user_pic_2)
 
-                if (message.params.event[0] === "cert_changed" && message.params.event[1])
+                if (message.params.event[0] === "cert_changed" && message.params.event[1]) {
+                    // this.messageCounterArr = {}
                     this.loadMessages("cert changed")
+                }
             } else {
                 $('.hideifnotloggedin').addClass("hide")
                 $("#select_user").html("Select user")
@@ -1366,8 +1390,8 @@ class ThunderWave extends ZeroFrame {
                 $("#select_user").text(site_info.cert_user_id)
 
                 this.verifyUserFiles()
-                this.messageCounterArr = []
-                this.loadMessages("First-time-load")
+                this.messageCounterArr = {}
+                this.loadMessages("first time")
             }
         })
 
