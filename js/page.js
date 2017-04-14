@@ -78,7 +78,12 @@ markedR.link = function(href, title, text) {
         }
     }
 
-    return '<a href="' + href + '" target="_blank" ' + (title ? ('title="' + title + '"') : '') + '>' + text + '</a>'
+    return '<a href="' + href + '" onclick="return openNewTab(\'' + href + '\');" ' + (title ? ('title="' + title + '"') : '') + '>' + text + '</a>'
+}
+
+function openNewTab(url) {
+    page.cmd("wrapperOpenWindow", [url, "_blank", ""])
+    return false
 }
 
 function imageViewGen(res, href, title, text) {
@@ -177,7 +182,7 @@ class ThunderWave extends ZeroFrame {
         if (typeof CDalreadyexists !== "undefined" && CDalreadyexists !== false) {
             CDalreadyexists = $(CDalreadyexists)
         } else {
-            CDalreadyexists = $("<li id='d_" + curdate2 + "' timestamp-date='" + curdate2 + "'><div class='divider text-center' data-content='" + (curdate3) + "' onclick='javascript:window.location.hash=\"#d_" + curdate2 + "\";'></div><ul class='times-messages unstyled'></ul></li>")
+            CDalreadyexists = $("<li id='d_" + curdate2 + "' timestamp-date='" + curdate2 + "'><div class='divider text-center' data-content='" + (curdate3) + "' onclick='window.location.hash=\"#d_" + curdate2 + "\";'></div><ul class='times-messages unstyled'></ul></li>")
                 // if (addattop && !thismessageis.after)
                 //     CDalreadyexists = CDalreadyexists.prependTo("#messages")
                 // else
@@ -331,6 +336,502 @@ class ThunderWave extends ZeroFrame {
         // ).prependTo(CDalreadyexistsC)
     }
 
+    addPrivateContact(username, cb) {
+        page.listPrivateContacts(function(data, cList) {
+            console.log(data, cList, cList.indexOf(username))
+            if (cList.indexOf(username) === -1) {
+                page.cmd("eciesEncrypt", [
+                    username
+                ], (username2) => {
+                    console.log("ENCRYPTED USERNAME", username2)
+
+                    // Add the new contact to data
+                    var di = data.private_messages_with.push(username2)
+
+                    // Encode data array to utf8 json text
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    // Write file to disk
+                    page.cmd("fileWrite", [
+                        "data/users/" + page.site_info.auth_address + "/data_private.json",
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            console.log("Added contact", username)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                        if (typeof cb === "function")
+                            cb()
+                    })
+                })
+            } else {
+                console.log("Contact already added")
+                if (typeof cb === "function")
+                    cb()
+            }
+        })
+    }
+
+    genContactsList() {
+        page.listPrivateContacts(function(data, cList) {
+            var $pcl = $('#private_contacts_list')
+            $pcl.html("")
+            for (var x in cList) {
+                var y = cList[x]
+                $pcl.append('<li class="tab-item"><a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');">' + y + '</a></li>')
+            }
+        })
+    }
+
+    listPrivateContacts(cb) {
+        var cList = []
+        this.cmd("fileGet", {
+            "inner_path": "data/users/" + this.site_info.auth_address + "/data_private.json",
+            "required": false
+        }, (data) => {
+            if (data)
+                var data = JSON.parse(data)
+            else
+                var data = {}
+
+            if (!data.hasOwnProperty("private_messages"))
+                data.private_messages = []
+            if (!data.hasOwnProperty("private_messages_with"))
+                data.private_messages_with = []
+
+            var contacts = JSON.parse(JSON.stringify(data.private_messages_with))
+
+            console.log("Listing contacts.. ", data.private_messages_with, data.private_messages_with.length, contacts, contacts.length)
+            if (contacts.length > 0) {
+                var addC = function(x) {
+                    var x = x - 1
+                    var y = contacts[x]
+                    console.log(x, y)
+                    page.cmd("eciesDecrypt", y, (contact) => {
+                        console.log(x, y, contact)
+                        if (contact)
+                            cList.push(contact)
+
+                        if (x === 0) {
+                            contacts = contacts.reverse()
+                            console.log("Listing private contacts", data, cList)
+                            if (typeof cb === "function")
+                                cb(data, cList)
+                        } else {
+                            addC(x)
+                        }
+                    })
+                }
+                contacts = contacts.reverse()
+                addC(contacts.length)
+            } else {
+                if (typeof cb === "function")
+                    cb(data, [])
+            }
+
+            // for (var x in data.private_messages_with) {
+            //     var y = data.private_messages_with[x]
+            //     page.cmd("eciesDecrypt", y, (contact) => {
+            //         console.log(x, y, contact)
+            //         if (contact)
+            //             cList.push(contact)
+            //     })
+            // }
+
+            // console.log(data, cList)
+            // if (typeof cb === "function")
+            //     cb(data, cList)
+        })
+    }
+
+    addPrivateMessage(msgkey, username, message, date_added, addattop) {
+        var message_escaped = message
+
+        if (parseInt(page.LS.opts.avatar_size.value) !== 0) {
+            this.identicons = this.identicons || {}
+            var asv = parseInt(page.LS.opts.avatar_size.value) || 64
+            if (!this.identicons.hasOwnProperty(asv)) {
+                this.identicons[asv] = {}
+            }
+            if (!this.identicons.hasOwnProperty(username)) {
+                var uhash = stringToHex(username).split(' ').join('')
+                this.identicons[asv][username] = new Identicon(uhash, {
+                    margin: 0.2,
+                    size: asv,
+                    format: 'svg'
+                }).toString()
+            }
+            var idata = this.identicons[asv][username]
+        }
+        var message_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
+
+        var mmnt = moment(date_added, "x")
+
+        var curdate = mmnt.format("MMMM Do, YYYY")
+        var curtime = mmnt.format("HH:mm:ss")
+
+        var curdate2 = moment(curdate, "MMMM Do, YYYY").format("x")
+        var rcurdate = moment().format("MMMM Do, YYYY")
+        var curdate3 = (curdate === rcurdate ? "Today" : (moment(rcurdate, "MMMM Do, YYYY").subtract(1, "d").format("MMMM Do, YYYY") === curdate ? "Yesterday" : curdate));
+        var CDalreadyexists = $("#private_messages").find('[P_timestamp-date="' + curdate2 + '"]')[0] || false
+
+        var users_own_message = (username === page.site_info.cert_user_id)
+        var user_is_mentioned = (message_escaped.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
+        var user_mention_badge = (page.LS.opts.user_mention_badge.value && user_is_mentioned) ? "badge" : ""
+
+        var thismessageis = {
+            "same_user": (page.lastmessagewas.hasOwnProperty("username") && page.lastmessagewas.username === username),
+            "same_date": (page.lastmessagewas.hasOwnProperty("curdate2") && page.lastmessagewas.curdate2 === curdate2),
+            "in_time_range": (page.lastmessagewas.hasOwnProperty("date_added") && moment(page.lastmessagewas.date_added, "x").add(15, "minutes").isSameOrAfter(date_added))
+        }
+
+        var dCDalreadyexists = CDalreadyexists === false ? false : true
+
+        if (typeof CDalreadyexists !== "undefined" && CDalreadyexists !== false) {
+            CDalreadyexists = $(CDalreadyexists)
+        } else {
+            CDalreadyexists = $("<li id='P_d_" + curdate2 + "' P_timestamp-date='" + curdate2 + "'><div class='divider text-center' data-content='" + (curdate3) + "' onclick='window.location.hash=\"#d_" + curdate2 + "\";'></div><ul class='times-messages unstyled'></ul></li>")
+            CDalreadyexists = CDalreadyexists.appendTo("#private_messages")
+
+            var items = $("#private_messages").children("[P_timestamp-date]").get()
+
+            items.sort(function(a, b) {
+                var A = parseInt($(a).attr('id').split("P_d_")[1])
+                var B = parseInt($(b).attr('id').split("P_d_")[1])
+
+                if (A < B) return -1
+                if (A > B) return 1
+                return 0
+            });
+            $("#private_messages").html("").append(items)
+        }
+        var CDalreadyexistsC = CDalreadyexists.children('.times-messages')
+
+        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#P_tc_' + msgkey + '">' + curtime + '</a>')
+
+        var message_parsed = marked(message_escaped, {
+                renderer: markedR
+            })
+            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+                var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
+                var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
+                return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
+            })
+        if (!page.LS.opts.disable_emojis.value)
+            message_parsed = emojione.toImage(message_parsed)
+
+        var msg_part_2_1 = '<div id="P_tc_' + msgkey + '" P_tc="' + date_added + '" class="card mb-5">' +
+            ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
+                '<div class="card-header"><small class="tile-title"><a onclick="add2MSGInput(\'' + username + ' \'); return false;" href="?u/' + encodeURI(username) + '">' + username + '</a></small></div>') + '<div class="card-body text-break">' +
+            message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
+
+        if (((users_own_message && thismessageis.same_user) || thismessageis.same_user) && thismessageis.same_date && thismessageis.in_time_range) {
+            var el2 = $(msg_part_2_1).appendTo($(page.lastmessagewas.el).find('.tile-content'))
+            var el = page.lastmessagewas.el
+
+            var items = $(page.lastmessagewas.el).find('.tile-content').children('.card').get()
+
+            items.sort(function(a, b) {
+                var A = parseInt($(a).attr('P_tc'))
+                var B = parseInt($(b).attr('P_tc'))
+
+                if (A < B) return -1
+                if (A > B) return 1
+                return 0
+            });
+            $(page.lastmessagewas.el).find('.tile-content').html("").append(items)
+        } else {
+            var msg_part_1 = '<div class="tile-icon"><figure class="avatar avatar-lg message-user-avatar ' + user_mention_badge + '" data-initial="' + username.substr(0, 2) + '">' + message_pic + '</figure></div>',
+                msg_part_2 = '<div class="tile-content">' + msg_part_2_1 + '</div>'
+
+            var el = $('<li id="P_t_' + msgkey + '" P_t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
+
+            el = el.appendTo(CDalreadyexistsC)
+
+            var items = CDalreadyexistsC.children("li.message-container").get()
+
+            items.sort(function(a, b) {
+                var A = parseInt($(a).attr('P_t'))
+                var B = parseInt($(b).attr('P_t'))
+
+                if (A < B) return -1
+                if (A > B) return 1
+                return 0
+            });
+            CDalreadyexistsC.html("").append(items)
+        }
+
+        page.lastmessagewas = {
+            "username": username,
+            "curdate2": curdate2,
+            "date_added": date_added,
+            "el": el
+        }
+        if (page.firstprivatemessagewas.date_added > date_added)
+            page.firstprivatemessagewas.date_added = date_added
+    }
+
+    sendPrivateMessage(message3, recipient2) {
+        var verified = this.verifyUser()
+        if (!verified)
+            return false
+
+        this.verifyUserFiles()
+
+        // {
+        //     "recipient": "cert_user_id",
+        //     "body": "BODY",
+        //     "date_added": parseInt(moment().utc().format("x"))
+        // }
+
+        var recipient2 = recipient2 || false
+        var recipient = recipient2 || $('#recipient').val()
+        if (!recipient)
+            recipient = this.site_info.cert_user_id
+
+        var message3 = message3 || false
+        var message2 = message3 || $('#private_message').val()
+        var message = message2
+            .replace(/\n{3,}/gm, "\n\n")
+            .trim()
+
+        var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
+        var data2_inner_path = "data/users/" + this.site_info.auth_address + "/data_private.json"
+        var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
+
+        this.cmd("dbQuery", [
+            "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'public_key' AND value NOT NULL AND json.cert_user_id = '" + recipient + "'"
+        ], (users) => {
+            var user = users[0]
+            console.log(user)
+            if (user && user.hasOwnProperty("value") && user.value) {
+                this.cmd("fileGet", {
+                    "inner_path": data_inner_path,
+                    "required": false
+                }, (data) => {
+                    if (data)
+                        var data = JSON.parse(data)
+                    else
+                        var data = {}
+
+                    if (!data.hasOwnProperty("private_messages"))
+                        data.private_messages = []
+
+                    if (message && /\S/.test(message)) {
+                        page.cmd("eciesEncrypt", [
+                            JSON.stringify({
+                                "recipient": recipient,
+                                "body": emojione.toShort(message),
+                                "date_added": parseInt(moment().utc().format("x"))
+                            }),
+                            user.value
+                        ], (res) => {
+                            console.log("Res: ", res)
+
+                            // Add the new message to data
+                            var di = data.private_messages.push({
+                                "message": res
+                            })
+
+                            // Encode data array to utf8 json text
+                            var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                            var json_rawA = btoa(json_raw)
+
+                            page.addPrivateContact(recipient, function() {
+                                // Write file to disk
+                                page.cmd("fileWrite", [
+                                    data_inner_path,
+                                    json_rawA
+                                ], (res2) => {
+                                    if (res2 == "ok") {
+                                        page.cmd("fileGet", {
+                                            "inner_path": data2_inner_path,
+                                            "required": false
+                                        }, (data2) => {
+                                            if (data2)
+                                                var data2 = JSON.parse(data2)
+                                            else
+                                                var data2 = {}
+
+                                            if (!data2.hasOwnProperty("private_messages"))
+                                                data2.private_messages = []
+                                            if (!data.hasOwnProperty("private_messages_with"))
+                                                data2.private_messages_with = []
+
+                                            page.cmd("eciesEncrypt", [
+                                                JSON.stringify({
+                                                    "recipient": recipient,
+                                                    "body": emojione.toShort(message),
+                                                    "date_added": parseInt(moment().utc().format("x"))
+                                                })
+                                            ], (res3) => {
+                                                console.log("Res3: ", res3)
+                                                    // page.cmd("aesEncrypt", [
+                                                    //     res3,
+                                                    //     btoa(recipient),
+                                                    //     btoa(recipient)
+                                                    // ], (res4) => {
+                                                    //     console.log("Res4: ", res4)
+
+                                                // Add the new message to data
+                                                var di2 = data2.private_messages.push({
+                                                    "message": res3 // res4[2]
+                                                })
+
+                                                // Encode data array to utf8 json text
+                                                var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
+                                                var json_rawA2 = btoa(json_raw2)
+
+                                                // Write file to disk
+                                                page.cmd("fileWrite", [
+                                                        data2_inner_path,
+                                                        json_rawA2
+                                                    ], (res5) => {
+                                                        if (res5 == "ok") {
+                                                            if (!message3)
+                                                                $('#private_message').val("")
+                                                            autosize.update($('#private_message'))
+
+                                                            // Publish the file to other users
+                                                            page.verifyUserFiles(null, function() {
+                                                                console.log("Sent private message", {
+                                                                    "recipient": recipient,
+                                                                    "body": emojione.toShort(message),
+                                                                    "SOMEWHAT-date_added": parseInt(moment().utc().format("x"))
+                                                                })
+
+                                                                // page.loadPrivateMessages("sent private message")
+                                                            })
+                                                        } else {
+                                                            page.cmd("wrapperNotification", [
+                                                                "error", "File write error: " + JSON.stringify(res5)
+                                                            ])
+                                                        }
+                                                    })
+                                                    // })
+                                            })
+                                        })
+                                    } else {
+                                        page.cmd("wrapperNotification", [
+                                            "error", "File write error: " + JSON.stringify(res2)
+                                        ])
+                                    }
+                                })
+                            })
+                        })
+                    } else {
+                        // this.cmd("wrapperNotification", [
+                        //     "error", "Invalid message!", 5000
+                        // ])
+                    }
+                })
+            } else {
+                this.cmd("wrapperNotification", [
+                    "error", "Invalid recipient!", 5000
+                ])
+            }
+        })
+
+        return false
+    }
+
+    loadPrivateMessages(loadcode, override, sender) {
+        var verified = this.verifyUser()
+        if (!verified)
+            return false
+
+        console.log("Loading private messages with code >" + loadcode + "<..")
+        var override = override || false
+        var goingback = goingback || false
+
+        page.cmd("dbQuery", [
+            "SELECT * FROM private_messages LEFT JOIN json USING (json_id) WHERE cert_user_id = '" + sender + "'"
+        ], (messages1) => {
+            var $m = $('#private_messages')
+
+            var message_design_type = parseInt(page.LS.opts.message_design_type.value)
+            if (message_design_type === 1) {
+                $('#private_messages').removeAttr("design-type")
+            } else {
+                $('#private_messages').attr("design-type", message_design_type)
+            }
+
+            if (override) {
+                page.lastprivatemessagewas = ""
+                $m.html('<div class="icon icons loading"></div>')
+            }
+
+            page.cmd("fileQuery", [
+                "data/users/" + page.site_info.auth_address + "/data_private.json",
+                "private_messages"
+            ], (messages2) => {
+                var first = true
+                for (var x in messages1) {
+                    var y = messages1[x]
+
+                    page.cmd("eciesDecrypt", y.message, (msg) => {
+                        if (msg)
+                            var msg = JSON.parse(msg)
+                        if (msg !== null) {
+                            console.log(x, y, msg)
+
+                            if (first) {
+                                page.firstprivatemessagewas = {
+                                    "date_added": msg.date_added
+                                }
+                                first = false
+                            }
+
+                            this.addPrivateMessage(y.message_id, sender, msg.body, msg.date_added, override ? false : true)
+                        }
+                    })
+                }
+
+                for (var x in messages2) {
+                    var y = messages2[x]
+
+                    var msg2 = y
+                        // page.cmd("aesDecrypt", [
+                        //     btoa(sender),
+                        //     y.message,
+                        //     btoa(sender)
+                        // ], (msg2) => {
+                        //     console.log("AES-DECRYPTED OWN MESSAGE", msg2)
+                    if (msg2) {
+                        page.cmd("eciesDecrypt", msg2, (msg) => {
+                            if (msg) {
+                                var msg = JSON.parse(msg)
+                                if (msg.recipient !== sender)
+                                    return false
+                                console.log("ECIES-DECRYPTED OWN MESSAGE", msg)
+                                if (msg !== null) {
+                                    console.log(x, y, msg)
+
+                                    if (first) {
+                                        page.firstprivatemessagewas = {
+                                            "date_added": msg.date_added
+                                        }
+                                        first = false
+                                    }
+
+                                    this.addPrivateMessage(y.message_id, page.site_info.cert_user_id, msg.body, msg.date_added, override ? false : true)
+                                }
+                            }
+                        })
+                    }
+                    // })
+                }
+                $m.children('.loading').remove()
+
+                config$bH(loadcode === "load more" || goingback)
+            })
+        })
+    }
+
     sendMessage(message3) {
         var verified = this.verifyUser()
         if (!verified)
@@ -339,7 +840,10 @@ class ThunderWave extends ZeroFrame {
         this.verifyUserFiles()
 
         var message3 = message3 || false
-        var message2 = message3 || $("#message").val()
+        var message2 = message3 || $('#message').val()
+        var message = message2
+            .replace(/\n{3,}/gm, "\n\n")
+            .trim()
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
         var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
@@ -357,9 +861,6 @@ class ThunderWave extends ZeroFrame {
                 data.messages = []
             if (!data.hasOwnProperty("images"))
                 data.images = []
-            var message = message2
-                .replace(/\n{3,}/gm, "\n\n")
-                .trim()
 
             // console.log(data, message)
             if (message && /\S/.test(message)) {
@@ -380,7 +881,7 @@ class ThunderWave extends ZeroFrame {
                 ], (res) => {
                     if (res == "ok") {
                         if (!message3)
-                            $("#message").val("")
+                            $('#message').val("")
                         autosize.update($('#message'))
 
                         // Publish the file to other users
@@ -852,6 +1353,8 @@ class ThunderWave extends ZeroFrame {
                 $('#current_user_name').html(message.params.cert_user_id)
                 $('#current_user_avatar').html(user_pic_2)
 
+                page.genContactsList()
+
                 if (message.params.event[0] === "cert_changed" && message.params.event[1]) {
                     // this.messageCounterArr = {}
                     this.loadMessages("cert changed")
@@ -1266,7 +1769,49 @@ class ThunderWave extends ZeroFrame {
 
     verifyUserFiles(cb1, cb2) {
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
+        var data2_inner_path = "data/users/" + this.site_info.auth_address + "/data_private.json"
         var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
+
+        function verifyData2() {
+            page.cmd("fileGet", {
+                "inner_path": data2_inner_path,
+                "required": false
+            }, (data) => {
+                // console.log("BEFORE 1", data)
+                if (data)
+                    var data = JSON.parse(data)
+                else
+                    var data = {}
+                var olddata = JSON.parse(JSON.stringify(data))
+                console.log("BEFORE 2", olddata)
+
+                if (!data.hasOwnProperty("private_messages"))
+                    data.private_messages = []
+                if (!data.hasOwnProperty("private_messages_with"))
+                    data.private_messages_with = []
+
+                console.log("VERIFIED data_private.json", olddata, data)
+
+                var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                var json_rawA = btoa(json_raw)
+
+                if (JSON.stringify(data) !== JSON.stringify(olddata)) {
+                    console.log("data_private.json HAS RECEIVED A UPDATE!")
+                    page.cmd("fileWrite", [
+                        data2_inner_path,
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            console.log("data_private.json HAS BEEN UPDATED!")
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                    })
+                }
+            })
+        }
 
         function verifyData(cb1, cb2) {
             page.cmd("fileGet", {
@@ -1289,31 +1834,45 @@ class ThunderWave extends ZeroFrame {
                     data.images = []
                 if (!data.hasOwnProperty("last_seen") || parseInt(moment().utc().format("x")) !== data.last_seen)
                     data.last_seen = parseInt(moment().utc().format("x"))
-                console.log("VERIFIED data.json", olddata, data)
-
-                var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
-                var json_rawA = btoa(json_raw)
-
-                if (data !== olddata) {
-                    console.log("data.json HAS RECEIVED A UPDATE!")
-                    page.cmd("fileWrite", [
-                        data_inner_path,
-                        json_rawA
-                    ], (res) => {
-                        if (res == "ok") {
-                            console.log("data.json HAS BEEN UPDATED!")
-                            if (typeof cb1 === "function")
-                                cb1()
-                            verifyContent(data, olddata, cb2)
-                        } else {
-                            page.cmd("wrapperNotification", [
-                                "error", "File write error: " + JSON.stringify(res)
-                            ])
-                        }
+                if (!data.hasOwnProperty("private_messages"))
+                    data.private_messages = []
+                if (!data.hasOwnProperty("public_key") || !data.public_key) {
+                    page.cmd("userPublickey", [], (public_key) => {
+                        data.public_key = public_key
+                        verifyData_2(data, olddata, cb1, cb2)
                     })
-                } else
-                    verifyContent(data, olddata, cb2)
+                } else {
+                    verifyData_2(data, olddata, cb1, cb2)
+                }
             })
+        }
+
+        function verifyData_2(data, olddata, cb1, cb2) {
+            console.log("VERIFIED data.json", olddata, data)
+
+            var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+            var json_rawA = btoa(json_raw)
+
+            if (JSON.stringify(data) !== JSON.stringify(olddata)) {
+                console.log("data.json HAS RECEIVED A UPDATE!")
+                page.cmd("fileWrite", [
+                    data_inner_path,
+                    json_rawA
+                ], (res) => {
+                    if (res == "ok") {
+                        console.log("data.json HAS BEEN UPDATED!")
+
+                        if (typeof cb1 === "function")
+                            cb1(data, olddata)
+                        verifyContent(data, olddata, cb2)
+                    } else {
+                        page.cmd("wrapperNotification", [
+                            "error", "File write error: " + JSON.stringify(res)
+                        ])
+                    }
+                })
+            } else
+                verifyContent(data, olddata, cb2)
         }
 
         function verifyContent(data, olddata, cb2) {
@@ -1328,14 +1887,17 @@ class ThunderWave extends ZeroFrame {
                 var olddata2 = JSON.parse(JSON.stringify(data2))
 
                 var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg)"
+                var curignore = "(?!(.+\\.(png|jpg|jpeg|gif|mp3|ogg)|data.json))"
                 if (!data2.hasOwnProperty("optional") || data2.optional !== curoptional)
                     data2.optional = curoptional
+                if (!data2.hasOwnProperty("ignore") || data2.ignore !== curignore)
+                    data2.ignore = curignore
                 console.log("VERIFIED content.json", olddata2, data2)
 
                 var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
                 var json_rawA2 = btoa(json_raw2)
 
-                if (data2 !== olddata2 || data !== olddata) {
+                if (JSON.stringify(data2) !== JSON.stringify(olddata2) || JSON.stringify(data) !== JSON.stringify(olddata)) {
                     console.log("content.json HAS RECEIVED A UPDATE!")
                     page.cmd("fileWrite", [
                         content_inner_path,
@@ -1344,7 +1906,7 @@ class ThunderWave extends ZeroFrame {
                         if (res == "ok") {
                             console.log("content.json HAS BEEN UPDATED!")
                             if (typeof cb2 === "function")
-                                cb2()
+                                cb2(data2, olddata2)
                             page.cmd("siteSign", {
                                 "inner_path": content_inner_path
                             }, (res) => {
@@ -1369,6 +1931,7 @@ class ThunderWave extends ZeroFrame {
             })
         }
         verifyData(cb1, cb2)
+        verifyData2()
     }
 
     verifyUser() {
@@ -1404,7 +1967,7 @@ class ThunderWave extends ZeroFrame {
             this.site_info = site_info
             this.setSiteInfo(site_info)
             if (site_info.cert_user_id) {
-                $("#select_user").text(site_info.cert_user_id)
+                // $("#select_user").text(site_info.cert_user_id)
 
                 this.verifyUserFiles()
                 this.messageCounterArr = {}

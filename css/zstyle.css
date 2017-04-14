@@ -76,12 +76,13 @@ ul.unstyled {
     padding-top: 4.4rem;
 }
 
-#main-tabs>div[tab="Home"] {
+#main-tabs>div[tab="Lobby"],
+#main-tabs>div[tab="PrivateChat"] {
     /*margin-top: 4.4rem;*/
     height: 100vh;
 }
 
-#messages {
+.message-list {
     margin-left: 0px;
     /*height: 75vh;
     overflow-y: overlay;
@@ -98,11 +99,11 @@ ul.unstyled {
     position: absolute;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content {
+.message-list>li>ul.times-messages>li>.tile>.tile-content {
     position: relative;
 }
 
-#messages[design-type]>li>ul.times-messages>li>.tile>.tile-content:before {
+.message-list[design-type]>li>ul.times-messages>li>.tile>.tile-content:before {
     content: " ";
     position: absolute;
     top: 0px;
@@ -115,21 +116,21 @@ ul.unstyled {
     z-index: 1;
 }
 
-#messages[design-type]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
+.message-list[design-type]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
     right: 0px;
     left: initial;
 }
 
-#messages[design-type="3"]>li>ul.times-messages>li>.tile>.tile-content:before {
+.message-list[design-type="3"]>li>ul.times-messages>li>.tile>.tile-content:before {
     top: 22px;
     left: 2px;
 }
 
-#messages[design-type="3"]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
+.message-list[design-type="3"]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
     right: 2px
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card {
     max-width: 50rem;
     padding-left: 1rem;
     padding-right: 1rem;
@@ -137,35 +138,35 @@ ul.unstyled {
     display: table;
 }
 
-#messages>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card {
+.message-list>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card {
     margin-right: auto;
 }
 
-#messages>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content>.card {
+.message-list>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content>.card {
     margin-left: auto;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body {
     /*white-space: pre-line;*/
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:first-child {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:first-child {
     margin-top: 0;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:last-child {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:last-child {
     margin-bottom: 0px;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:only-child>img.emojione:only-child {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:only-child>img.emojione:only-child {
     font-size: xx-large;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-footer:last-child {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-footer:last-child {
     padding-bottom: 0;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle>a.message-timestamp {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle>a.message-timestamp {
     color: #1c2429;
 }
 
@@ -173,7 +174,7 @@ ul.unstyled {
     margin-left: 0px;
 }
 
-#messagesAt {
+.message-listAt {
     top: 50px;
     left: 50%;
     z-index: 998;
@@ -262,7 +263,7 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
     background-color: pink !important;
 }
 
-#messages::-webkit-scrollbar-thumb {
+.message-list::-webkit-scrollbar-thumb {
     background: purple !important;
 }
 
