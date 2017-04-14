@@ -5633,7 +5633,6 @@ class ThunderWave extends ZeroFrame {
                 var first = true
                 for (var x in messages1) {
                     var y = messages1[x]
-
                     page.cmd("eciesDecrypt", y.message, (msg) => {
                         if (msg)
                             var msg = JSON.parse(msg)
@@ -5655,7 +5654,7 @@ class ThunderWave extends ZeroFrame {
                 for (var x in messages2) {
                     var y = messages2[x]
 
-                    var msg2 = y
+                    var msg2 = y.message
                         // page.cmd("aesDecrypt", [
                         //     btoa(sender),
                         //     y.message,
@@ -6646,6 +6645,12 @@ class ThunderWave extends ZeroFrame {
                 var olddata = JSON.parse(JSON.stringify(data))
                 console.log("BEFORE 2", olddata)
 
+                var curpversion = 1
+                if (data.pversion !== curpversion)
+                    data = {
+                        "pversion": curpversion
+                    }
+
                 if (!data.hasOwnProperty("private_messages"))
                     data.private_messages = []
                 if (!data.hasOwnProperty("private_messages_with"))
@@ -6684,6 +6689,12 @@ class ThunderWave extends ZeroFrame {
                 else
                     var data = {}
                 var olddata = JSON.parse(JSON.stringify(data))
+
+                var curpversion = 1
+                if (data.pversion !== curpversion) {
+                    data.pversion = curpversion
+                    data.private_messages = []
+                }
 
                 if (!data.hasOwnProperty("messages"))
                     data.messages = []
