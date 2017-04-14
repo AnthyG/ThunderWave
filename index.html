@@ -33,14 +33,18 @@
                 <section class="navbar-section">
                     <ul class="tab workin-tabber" tabs-target="#main-tabs" style="border-bottom-color: transparent;">
                         <li class="tab-item active">
-                            <a target-tab="Home" href="javascript:void(0)">Home</a>
+                            <a target-tab="Lobby" href="javascript:void(0)">Lobby</a>
+                        </li>
+
+                        <li class="tab-item hideifnotloggedin hide">
+                            <a target-tab="PrivateChat" href="javascript:void(0)">Private Chats</a>
                         </li>
 
                         <li class="tab-item hideifnotloggedin hide">
                             <a target-tab="LastSeen" href="javascript:void(0)">Last seen</a>
                         </li>
 
-                        <li class="tab-item hideifnotloggedin hide">
+                        <!--<li class="tab-item hideifnotloggedin hide">
                             <a target-tab="Media" href="javascript:void(0)">Media</a>
                         </li>
 
@@ -49,7 +53,7 @@
                         </li>
                         <li class="tab-item">
                             <a target-tab="About" href="javascript:void(0)">About</a>
-                        </li>
+                        </li>-->
                     </ul>
                 </section>
                 <section class="navbar-center">
@@ -65,7 +69,7 @@
                         <button class="btn btn-primary btn-action btn-lg btn-link dropdown-toggle" tabindex="0">
                             <i class="icon icon-menu"></i>
                         </button>
-                        <ul class="menu">
+                        <ul class="menu workin-tabber" tabs-target="#main-tabs">
                             <li class="menu-item">
                                 <div class="tile tile-centered">
                                     <div class="tile-icon" id="current_user_avatar">
@@ -75,6 +79,17 @@
                                         Please login first
                                     </div>
                                 </div>
+                            </li>
+                            <li class="divider hideifnotloggedin hide"></li>
+                            <li class="menu-item hideifnotloggedin hide">
+                                <a target-tab="Media" href="javascript:void(0)">Media</a>
+                            </li>
+                            <li class="menu-item hideifnotloggedin hide">
+                                <a target-tab="Settings" href="javascript:void(0)">Settings</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li class="menu-item">
+                                <a target-tab="About" href="javascript:void(0)">About</a>
                             </li>
                             <li class="divider"></li>
                             <li class="menu-item">
@@ -92,7 +107,7 @@
                 <section class="navbar-section">
                     <ul class="tab tab-block workin-tabber" tabs-target="#main-tabs" style="width: 100%;">
                         <li class="tab-item active">
-                            <a target-tab="Home" href="javascript:void(0)">Home</a>
+                            <a target-tab="Lobby" href="javascript:void(0)">Lobby</a>
                         </li>
                         <li class="tab-item">
                             <a target-tab="Settings" href="javascript:void(0)">Settings</a>
@@ -104,14 +119,15 @@
                 </section>
             </div>
         </header>
-        <div id="main-tabs" curtab="Home">
-            <div tab="Home" style="/*padding-bottom: 30px;*/ border: none;" class="panel">
-                <div id="messagesAt" class="label fixed"></div>
+
+        <div id="main-tabs" curtab="Lobby">
+            <div tab="Lobby" style="/*padding-bottom: 30px;*/ border: none;" class="panel">
+                <div id="messagesAt" class="label fixed message-listAt"></div>
 
                 <div class="panel-body" style="overflow-x: hidden;">
                     <button id="scrolltobottombtn" class="btn btn-action btn-lg btn-primary shadow-drop-2-bottom circle hide"><i class="icon icon-arrow-down"></i></button>
 
-                    <ul id="messages" class="unstyled"></ul>
+                    <ul id="messages" class="unstyled message-list"></ul>
 
                     <!--<div class="container grid-960 fixed" style="bottom: 0px; z-index: 998;">
                         <button id="scrolltobottombtn" class="btn btn-action btn-lg btn-primary shadow-drop-2-bottom circle hide"><i class="icon icon-arrow-down"></i></button>
@@ -137,6 +153,20 @@
                             <button class="btn btn-primary btn-lg btn-action input-group-btn" id="send" onclick="return page.sendMessage()"><i class="icon icon-forward"></i></button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div tab="PrivateChat" style="border: none;" class="panel">
+                <div class="panel-nav">
+                    <ul class="tab" id="private_contacts_list">
+                    </ul>
+                </div>
+                <div id="private_messagesAt" class="label fixed"></div>
+
+                <div class="panel-body" style="overflow-x: hidden;">
+                    <button id="private_scrolltobottombtn" class="btn btn-action btn-lg btn-primary shadow-drop-2-bottom circle hide"><i class="icon icon-arrow-down"></i></button>
+
+                    <ul id="private_messages" class="unstyled message-list"></ul>
                 </div>
             </div>
 
@@ -258,7 +288,7 @@
                 // $('body').css('overflow-x', 'hidden')
 
                 var $mp = $('#messages').parent()
-                if ($('#main-tabs').attr('curtab') === "Home" && (!goingback || $mp[0].scrollHeight - 25 <= $mp.scrollTop())) {
+                if ($('#main-tabs').attr('curtab') === "Lobby" && (!goingback || $mp[0].scrollHeight - 25 <= $mp.scrollTop())) {
                     $mp.scrollTop($mp[0].scrollHeight)
                         //     $(document).scrollTop($('body>.container')[0].scrollHeight + 28)
                 }
@@ -288,13 +318,15 @@
 
             $(".workin-tabber").each(function(elX, elY) {
                 var $dis = $(elY)
+                var $dis4 = $('.workin-tabber[tabs-target="' + $dis.attr('tabs-target') + '"]')
                 var $dis2 = $($dis.attr('tabs-target'))
 
                 var curtab = $dis2.attr('curtab')
                 var $curtab = $dis2.find('[tab="' + curtab + '"]')
 
                 $dis2.children().not($curtab).hide()
-                    // console.log($dis, $dis2, curtab, $curtab)
+
+                // console.log($dis, $dis2, curtab, $curtab)
 
                 $dis.find('[target-tab]').on('click', function() {
                     var $dis3 = $(this)
@@ -307,7 +339,7 @@
 
                     // console.log($dis3, ncurtab, $ncurtab)
 
-                    $dis.find('[target-tab="' + curtab + '"]').parent().removeClass("active")
+                    $dis4.find('[target-tab="' + curtab + '"]').parent().removeClass("active")
                     $dis3.parent().addClass("active")
 
                     $curtab.hide()
@@ -369,7 +401,7 @@
             $('#message').on('autosize:resized', function() {
                 var h = $('#inputsC2').height() - 20
 
-                // $('#main-tabs > [tab="Home"]').css({
+                // $('#main-tabs > [tab="Lobby"]').css({
                 //     "paddingBottom": h
                 // })
                 config$bH(true)
@@ -566,7 +598,7 @@
                     console.log($mp[0].scrollHeight, bcsH, $mp.scrollTop())
 
                     // var bcsH = $('body>.container')[0].scrollHeight - ($('body>.container')[0].scrollHeight / 10)
-                    if ($('#main-tabs').attr("curtab") === "Home" && $mp.scrollTop() < bcsH) {
+                    if ($('#main-tabs').attr("curtab") === "Lobby" && $mp.scrollTop() < bcsH) {
                         $('#scrolltobottombtn').removeClass("hide")
                     } else {
                         $('#scrolltobottombtn').addClass("hide")
