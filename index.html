@@ -134,7 +134,7 @@
                     </div>-->
                 </div>
 
-                <div id="inputsC2" class="panel-footer #fixed shadow-drop-top">
+                <div id="inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
                     <div class="hide" id="media_preview">
                         <figure class="figure">
                             <img src="" class="img-responsive img-fit-contain" alt="" />
@@ -169,7 +169,7 @@
                     <ul id="private_messages" class="unstyled message-list"></ul>
                 </div>
 
-                <div id="private_inputsC2" class="panel-footer #fixed shadow-drop-top">
+                <div id="private_inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
                     <div class="hide" id="private_media_preview">
                         <figure class="figure">
                             <img src="" class="img-responsive img-fit-contain" alt="" />
@@ -191,9 +191,9 @@
             <div tab="LastSeen" class="panel">
                 <div class="panel-body" style="overflow-x: hidden;">
                     <p>Total number of logged-in users: <b id="last_seen_list_c">0</b></p>
-                    <ul id="last_seen_list">
+                    <dl id="last_seen_list">
 
-                    </ul>
+                    </dl>
                 </div>
             </div>
 
@@ -343,16 +343,14 @@
         function add2PMSGInput(text) {
             $('#private_message').val($('#private_message').val() + text)
         }
-    </script>
-    <script type="text/javascript" src="js/all.js"></script>
-    <script>
-        (function() {
-            $("body").addClass("loaded")
 
-            $(".workin-tabber").each(function(elX, elY) {
+        function workinTabberS(s) {
+            var s = s || '.workin-tabber'
+            $(s).each(function(elX, elY) {
                 var $dis = $(elY)
-                var $dis4 = $('.workin-tabber[tabs-target="' + $dis.attr('tabs-target') + '"]')
-                var $dis2 = $($dis.attr('tabs-target'))
+                var mtab = $dis.attr('tabs-target')
+
+                var $dis2 = $(mtab)
 
                 var curtab = $dis2.attr('curtab')
                 var $curtab = $dis2.find('[tab="' + curtab + '"]')
@@ -361,27 +359,43 @@
 
                 // console.log($dis, $dis2, curtab, $curtab)
 
-                $dis.find('[target-tab]').on('click', function() {
-                    var $dis3 = $(this)
-
-                    var curtab = $dis2.attr('curtab')
-                    var $curtab = $dis2.find('[tab="' + curtab + '"]')
-
-                    var ncurtab = $dis3.attr('target-tab')
-                    var $ncurtab = $dis2.find('[tab="' + ncurtab + '"]')
-
-                    // console.log($dis3, ncurtab, $ncurtab)
-
-                    $dis4.find('[target-tab="' + curtab + '"]').parent().removeClass("active")
-                    $dis3.parent().addClass("active")
-
-                    $curtab.hide()
-                    $ncurtab.show()
-
-                    $dis2.attr('curtab', ncurtab)
-                    config$bH()
+                var $tt = $dis.find('[target-tab]')
+                $tt.off('click')
+                $tt.on('click', function() {
+                    changeWorkinTabber(mtab, $(this).attr("target-tab"))
                 })
             })
+        }
+
+        function changeWorkinTabber(mtab, ntab) {
+            var $dis = $('.workin-tabber[tabs-target="' + mtab + '"]')
+            var $dis2 = $(mtab)
+
+            var $dis3 = $dis.find('[target-tab="' + ntab + '"]')
+            var curtab = $dis2.attr('curtab')
+            var $curtab = $dis2.find('[tab="' + curtab + '"]')
+
+            var ncurtab = ntab
+            var $ncurtab = $dis2.find('[tab="' + ncurtab + '"]')
+
+            $dis.find('[target-tab="' + curtab + '"]').parent().removeClass("active")
+            $dis3.parent().addClass("active")
+
+            $curtab.hide()
+            $ncurtab.show()
+
+            $dis2.attr('curtab', ncurtab)
+            config$bH()
+
+            // console.log(mtab, ntab, $dis, $dis2, $dis3, $curtab, $ncurtab)
+        }
+    </script>
+    <script type="text/javascript" src="js/all.js"></script>
+    <script>
+        (function() {
+            $("body").addClass("loaded")
+
+            workinTabberS()
 
             $('.message').textcomplete([{
                 match: /\B:([\-+\w]*)$/,
@@ -423,7 +437,7 @@
                 index: 1,
                 maxCount: 5
             }], {
-                appendTo: '#inputsC2',
+                appendTo: '.inputsC2',
                 dropdownClassName: 'menu dropdown-menu-messageinput',
                 footer: '<a href="https://emoji.codes" target="_blank">Browse All<span class="arrow">»</span></a>',
                 maxCount: 5
