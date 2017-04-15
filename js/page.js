@@ -624,12 +624,14 @@ class ThunderWave extends ZeroFrame {
                     if (!data.hasOwnProperty("private_messages"))
                         data.private_messages = []
 
+                    var msg_date_added = parseInt(moment().utc().format("x"))
+
                     if (message && /\S/.test(message)) {
                         page.cmd("eciesEncrypt", [
                             JSON.stringify({
                                 "recipient": recipient,
                                 "body": emojione.toShort(message),
-                                "date_added": parseInt(moment().utc().format("x"))
+                                "date_added": msg_date_added
                             }),
                             user.value
                         ], (res) => {
@@ -669,7 +671,7 @@ class ThunderWave extends ZeroFrame {
                                                 JSON.stringify({
                                                     "recipient": recipient,
                                                     "body": emojione.toShort(message),
-                                                    "date_added": parseInt(moment().utc().format("x"))
+                                                    "date_added": msg_date_added
                                                 })
                                             ], (res3) => {
                                                 console.log("Res3: ", res3)
