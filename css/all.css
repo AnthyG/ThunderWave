@@ -1865,3 +1865,7 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
     background: #e5fcf7;
     color: #1de9b6;
 }
+
+dl dd+dd {
+    margin-top: -1.5rem;
+}

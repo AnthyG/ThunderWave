@@ -653,10 +653,13 @@ class ThunderWave extends ZeroFrame {
                                         //     "inner_path": data2_inner_path,
                                         //     "required": false
                                         // }, (data2) => {
-                                        if (data2)
-                                            var data2 = JSON.parse(data2)
-                                        else
-                                            var data2 = {}
+
+                                        var data2 = data2 || {}
+
+                                        // if (data2)
+                                        //     var data2 = JSON.parse(data2)
+                                        // else
+                                        //     var data2 = {}
 
                                         if (!data2.hasOwnProperty("private_messages"))
                                             data2.private_messages = []
@@ -755,6 +758,8 @@ class ThunderWave extends ZeroFrame {
         console.log("Loading private messages with code >" + loadcode + "<..")
         var override = override || false
         var goingback = goingback || false
+
+        changeWorkinTabber('#main-tabs', 'PrivateChat');
 
         page.cmd("dbQuery", [
             "SELECT * FROM private_messages LEFT JOIN json USING (json_id) WHERE cert_user_id = '" + sender + "'"
@@ -1211,17 +1216,85 @@ class ThunderWave extends ZeroFrame {
         console.log("Loading last-seen-List")
         var count = 0
         this.cmd("dbQuery", [
-            "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND value NOT NULL ORDER BY value DESC"
+            "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND keyvalue.value NOT NULL OR key = 'public_key' AND keyvalue.value NOT NULL ORDER BY keyvalue.json_id"
         ], (lsl) => {
             var lsl_HTML = ''
+
+            var lsl2 = []
             for (var x in lsl) {
                 var y = lsl[x]
                 if (y) {
-                    lsl_HTML += '<li><b>' + y.cert_user_id + '</b> was last seen <i>' + moment(y.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></li>'
-                    count++
+                    if (!lsl2[y.json_id])
+                        lsl2[y.json_id] = {
+                            "y1": false,
+                            "y2": false
+                        }
+
+                    if (y.key === "last_seen")
+                        lsl2[y.json_id].y1 = y
+                    else if (y.key === "public_key")
+                        lsl2[y.json_id].y2 = y
                 }
             }
+
+            console.log(lsl2)
+
+            lsl2.sort(function(a, b) {
+                if (typeof a.y1 === "object" && a.y1.key === "last_seen")
+                    var A = a.y1.value
+                else
+                    var A = -1
+
+                if (typeof b.y1 === "object" && b.y1.key === "last_seen")
+                    var B = b.y1.value
+                else
+                    var B = -1
+
+                console.log(a, b, A, B, A < B)
+
+                if (A < B) return 1
+                if (A > B) return -1
+                return 0
+            })
+
+            for (var x in lsl2) {
+                var y = lsl2[x]
+
+                var y1 = y.y1,
+                    y2 = y.y2
+
+                var y3 = y1 || y2
+
+                lsl_HTML += '<dt class="divider" data-content="' + y3.cert_user_id + '"></dt>'
+
+                if (y1)
+                    lsl_HTML += '<dd>last seen <i>' + moment(y1.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
+                if (y2)
+                    lsl_HTML += '<dd>public key: <a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y3.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y3.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
+            }
+            // for (var x in lsl1) {
+            //     var y1 = lsl1[x]
+            //     console.log(lsl1, y1)
+            //         //     this.cmd("dbQuery", [
+            //         //         "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'public_key' AND value NOT NULL AND keyvalue.json_id = '" + y1.json_id + "' ORDER BY value DESC"
+            //         //     ], (y2) => {
+            //         //         console.log(y1, y2)
+
+            //     //         lsl_HTML += '<dt class="divider" data-content="' + y1.cert_user_id + '"></dt>'
+
+            //     //         if (y1 && y1.value)
+            //     //             lsl_HTML += '<dd>last seen <i>' + moment(y1.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
+
+            //     //         if (y2 && y2.value)
+            //     //             lsl_HTML += '<dd>public key: <a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y2.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y2.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
+            //     //         else
+            //     //             lsl_HTML += '<dd><i>no public key found</i></dd>'
+
+            //     //         count++
+            //     //     })
+            // }
             $('#last_seen_list').html(lsl_HTML)
+
             $('#last_seen_list_c').html(count)
         })
     }
@@ -1814,7 +1887,7 @@ class ThunderWave extends ZeroFrame {
 
                 console.log("VERIFIED data_private.json", olddata, data)
 
-                addPrivateContact(page.site_info.cert_user_id, function(data2, cList) {
+                page.addPrivateContact(page.site_info.cert_user_id, function(data2, cList) {
                     var json_raw = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
                     var json_rawA = btoa(json_raw)
 
