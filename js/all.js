@@ -5454,6 +5454,9 @@ class ThunderWave extends ZeroFrame {
         if (!recipient)
             recipient = this.site_info.cert_user_id
 
+        var randI = Math.random().toString(36).substr(2, 5) + Math.random().toString(36).substr(2, 5) + Math.random().toString(36).substr(2, 5)
+        var bR = btoa(randI + recipient)
+
         var message3 = message3 || false
         var message2 = message3 || $('#private_message').val()
         var message = message2
@@ -5531,24 +5534,25 @@ class ThunderWave extends ZeroFrame {
                                                 })
                                             ], (res3) => {
                                                 console.log("Res3: ", res3)
-                                                    // page.cmd("aesEncrypt", [
-                                                    //     res3,
-                                                    //     btoa(recipient),
-                                                    //     btoa(recipient)
-                                                    // ], (res4) => {
-                                                    //     console.log("Res4: ", res4)
+                                                page.cmd("aesEncrypt", [
+                                                    res3,
+                                                    bR,
+                                                    bR
+                                                ], (res4) => {
+                                                    console.log("Res4: ", res4)
 
-                                                // Add the new message to data
-                                                var di2 = data2.private_messages.push({
-                                                    "message": res3 // res4[2]
-                                                })
+                                                    // Add the new message to data
+                                                    var di2 = data2.private_messages.push({
+                                                        "randI": randI,
+                                                        "message": res4[2] // res3
+                                                    })
 
-                                                // Encode data array to utf8 json text
-                                                var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
-                                                var json_rawA2 = btoa(json_raw2)
+                                                    // Encode data array to utf8 json text
+                                                    var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
+                                                    var json_rawA2 = btoa(json_raw2)
 
-                                                // Write file to disk
-                                                page.cmd("fileWrite", [
+                                                    // Write file to disk
+                                                    page.cmd("fileWrite", [
                                                         data2_inner_path,
                                                         json_rawA2
                                                     ], (res5) => {
@@ -5573,7 +5577,7 @@ class ThunderWave extends ZeroFrame {
                                                             ])
                                                         }
                                                     })
-                                                    // })
+                                                })
                                             })
                                         })
                                     } else {
@@ -5598,6 +5602,86 @@ class ThunderWave extends ZeroFrame {
         })
 
         return false
+    }
+
+    testPrivateCrypto(oU) {
+        var oU = oU || page.site_info.cert_user_id
+        var randI = Math.random().toString(36).substr(2, 5) + Math.random().toString(36).substr(2, 5) + Math.random().toString(36).substr(2, 5)
+        var boU = btoa(randI + oU)
+        var sdata = {
+            "private_messages": []
+        }
+
+        page.cmd("eciesEncrypt", [
+            JSON.stringify({
+                "recipient": oU,
+                "body": emojione.toShort("Hello :wave::smile:"),
+                "date_added": parseInt(moment().utc().format("x"))
+            })
+        ], (res1) => {
+            console.log("Ecies Encrypt", res1)
+
+            page.cmd("aesEncrypt", [
+                res1,
+                boU,
+                boU
+            ], (res2) => {
+                console.log("Aes Encrypt", res2)
+                var di = sdata.private_messages.push({
+                    "randI": randI,
+                    "message": res2[2]
+                })
+
+                var json_raw = unescape(encodeURIComponent(JSON.stringify(sdata, undefined, '\t')))
+                var json_rawA = btoa(json_raw)
+
+                page.cmd("fileWrite", [
+                    "disabled/EXAMPLE.json",
+                    json_rawA
+                ], (res3) => {
+                    if (res3 == "ok") {
+
+                        page.cmd("fileQuery", [
+                            "disabled/EXAMPLE.json",
+                            "private_messages"
+                        ], (res4) => {
+                            console.log("File read", res4)
+
+                            for (var x in res4) {
+                                var y = res4[x]
+                                var E1msg = y.message
+                                console.log("At ", x, y, E1msg)
+
+                                if (E1msg) {
+                                    page.cmd("aesDecrypt", [
+                                        boU,
+                                        E1msg,
+                                        boU
+                                    ], (E2msg) => {
+                                        console.log("Aes Decrypt", E2msg)
+
+                                        if (E2msg) {
+                                            page.cmd("eciesDecrypt", E2msg, (res6) => {
+                                                console.log("Ecies Decrypt", res6)
+
+                                                var msg = JSON.parse(res6)
+                                                if (msg) {
+                                                    console.log("Valid MSG", msg)
+                                                } else {
+                                                    console.log("Invalid MSG", msg)
+                                                }
+                                            })
+                                        }
+                                    })
+                                }
+                            }
+                        })
+                    } else {
+                        console.log("File write", res3)
+                    }
+                })
+            })
+        })
     }
 
     loadPrivateMessages(loadcode, override, sender) {
@@ -5654,36 +5738,38 @@ class ThunderWave extends ZeroFrame {
                 for (var x in messages2) {
                     var y = messages2[x]
 
-                    var msg2 = y.message
-                        // page.cmd("aesDecrypt", [
-                        //     btoa(sender),
-                        //     y.message,
-                        //     btoa(sender)
-                        // ], (msg2) => {
-                        //     console.log("AES-DECRYPTED OWN MESSAGE", msg2)
-                    if (msg2) {
-                        page.cmd("eciesDecrypt", msg2, (msg) => {
-                            if (msg) {
-                                var msg = JSON.parse(msg)
-                                if (msg.recipient !== sender)
-                                    return false
-                                console.log("ECIES-DECRYPTED OWN MESSAGE", msg)
-                                if (msg !== null) {
-                                    console.log(x, y, msg)
+                    // var msg2 = y.message
+                    var randI = y.randI
+                    var bS = btoa(randI + sender)
+                    page.cmd("aesDecrypt", [
+                        bS,
+                        y.message,
+                        bS
+                    ], (msg2) => {
+                        console.log("AES-DECRYPTED OWN MESSAGE", msg2)
+                        if (msg2) {
+                            page.cmd("eciesDecrypt", msg2, (msg) => {
+                                if (msg) {
+                                    var msg = JSON.parse(msg)
+                                    if (msg.recipient !== sender)
+                                        return false
+                                    console.log("ECIES-DECRYPTED OWN MESSAGE", msg)
+                                    if (msg !== null) {
+                                        console.log(x, y, msg)
 
-                                    if (first) {
-                                        page.firstprivatemessagewas = {
-                                            "date_added": msg.date_added
+                                        if (first) {
+                                            page.firstprivatemessagewas = {
+                                                "date_added": msg.date_added
+                                            }
+                                            first = false
                                         }
-                                        first = false
-                                    }
 
-                                    this.addPrivateMessage(y.message_id, page.site_info.cert_user_id, msg.body, msg.date_added, override ? false : true)
+                                        this.addPrivateMessage(y.message_id, page.site_info.cert_user_id, msg.body, msg.date_added, override ? false : true)
+                                    }
                                 }
-                            }
-                        })
-                    }
-                    // })
+                            })
+                        }
+                    })
                 }
                 $m.children('.loading').remove()
 
@@ -6645,7 +6731,7 @@ class ThunderWave extends ZeroFrame {
                 var olddata = JSON.parse(JSON.stringify(data))
                 console.log("BEFORE 2", olddata)
 
-                var curpversion = 1
+                var curpversion = 2
                 if (data.pversion !== curpversion)
                     data = {
                         "pversion": curpversion
@@ -6690,7 +6776,7 @@ class ThunderWave extends ZeroFrame {
                     var data = {}
                 var olddata = JSON.parse(JSON.stringify(data))
 
-                var curpversion = 1
+                var curpversion = 2
                 if (data.pversion !== curpversion) {
                     data.pversion = curpversion
                     data.private_messages = []
