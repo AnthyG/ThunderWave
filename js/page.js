@@ -338,7 +338,7 @@ class ThunderWave extends ZeroFrame {
 
     addPrivateContact(username, cb) {
         page.listPrivateContacts(function(data, cList) {
-            console.log(data, cList, cList.indexOf(username))
+            // console.log(data, cList, cList.indexOf(username))
             if (cList.indexOf(username) === -1) {
                 page.cmd("eciesEncrypt", [
                     username
@@ -382,7 +382,7 @@ class ThunderWave extends ZeroFrame {
             $pcl.html("")
             for (var x in cList) {
                 var y = cList[x]
-                $pcl.append('<li class="tab-item"><a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');">' + y + '</a></li>')
+                $pcl.append('<li class="tab-item"><a href="javascript:page.loadPrivateMessages(\'selected user\', false, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');">' + y + '</a></li>')
             }
         })
     }
@@ -405,14 +405,14 @@ class ThunderWave extends ZeroFrame {
 
             var contacts = JSON.parse(JSON.stringify(data.private_messages_with))
 
-            console.log("Listing contacts.. ", data.private_messages_with, data.private_messages_with.length, contacts, contacts.length)
+            // console.log("Listing contacts.. ", data.private_messages_with, data.private_messages_with.length, contacts, contacts.length)
             if (contacts.length > 0) {
                 var addC = function(x) {
                     var x = x - 1
                     var y = contacts[x]
-                    console.log(x, y)
+                        // console.log(x, y)
                     page.cmd("eciesDecrypt", y, (contact) => {
-                        console.log(x, y, contact)
+                        // console.log(x, y, contact)
                         if (contact)
                             cList.push(contact)
 
@@ -629,7 +629,7 @@ class ThunderWave extends ZeroFrame {
                             }),
                             user.value
                         ], (res) => {
-                            console.log("Res: ", res)
+                            // console.log("Res: ", res)
 
                             // Add the new message to data
                             var di = data.private_messages.push({
@@ -673,13 +673,13 @@ class ThunderWave extends ZeroFrame {
                                                 "date_added": msg_date_added
                                             })
                                         ], (res3) => {
-                                            console.log("Res3: ", res3)
+                                            // console.log("Res3: ", res3)
                                             page.cmd("aesEncrypt", [
                                                 res3,
                                                 bR,
                                                 bR
                                             ], (res4) => {
-                                                console.log("Res4: ", res4)
+                                                // console.log("Res4: ", res4)
 
                                                 // Add the new message to data
                                                 var di2 = data2.private_messages.push({
@@ -789,7 +789,7 @@ class ThunderWave extends ZeroFrame {
                         if (msg)
                             var msg = JSON.parse(msg)
                         if (msg !== null) {
-                            console.log(x, y, msg)
+                            // console.log(x, y, msg)
 
                             if (first) {
                                 page.firstprivatemessagewas = {
@@ -815,16 +815,16 @@ class ThunderWave extends ZeroFrame {
                             y.message,
                             bS
                         ], (msg2) => {
-                            console.log("AES-DECRYPTED OWN MESSAGE", msg2)
+                            // console.log("AES-DECRYPTED OWN MESSAGE", msg2)
                             if (msg2) {
                                 page.cmd("eciesDecrypt", msg2, (msg) => {
                                     if (msg) {
                                         var msg = JSON.parse(msg)
                                         if (msg.recipient !== sender)
                                             return false
-                                        console.log("ECIES-DECRYPTED OWN MESSAGE", msg)
+                                                // console.log("ECIES-DECRYPTED OWN MESSAGE", msg)
                                         if (msg !== null) {
-                                            console.log(x, y, msg)
+                                            // console.log(x, y, msg)
 
                                             if (first) {
                                                 page.firstprivatemessagewas = {
@@ -959,16 +959,16 @@ class ThunderWave extends ZeroFrame {
 
         for (var fX in files) {
             var fY = files[fX]
-            console.log(fX, fY)
+                // console.log(fX, fY)
 
             if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\/(png|jpg|jpeg|gif)|(audio)\/(mp3|ogg)|(video)\/(ogg)')) // |audio|video      || !fY.name.match(/\.IMAGETYPE$/gm)
                 continue
 
             var reader = new FileReader()
             reader.onload = (function(f2) {
-                console.log("reading", f2)
+                // console.log("reading", f2)
                 return function(event) {
-                    console.log("with event", event)
+                    // console.log("with event", event)
 
                     var f_data = btoa(event.target.result)
 
@@ -1175,7 +1175,7 @@ class ThunderWave extends ZeroFrame {
 
             // console.log("Loading image..", image)
             page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
-                console.log("Image result: ", res)
+                // console.log("Image result: ", res)
                 var el2 = $(el).parent().replaceWith($(imageViewGen(res, href, unescape(title), unescape(text))))
                 if (res.inner_path.match('.+\\.(.*)')[1] === "gif")
                     Gifffer(el2.find('img'));
@@ -1237,7 +1237,7 @@ class ThunderWave extends ZeroFrame {
                 }
             }
 
-            console.log(lsl2)
+            // console.log(lsl2)
 
             lsl2.sort(function(a, b) {
                 if (typeof a.y1 === "object" && a.y1.key === "last_seen")
@@ -1250,7 +1250,7 @@ class ThunderWave extends ZeroFrame {
                 else
                     var B = -1
 
-                console.log(a, b, A, B, A < B)
+                //  console.log(a, b, A, B, A < B)
 
                 if (A < B) return 1
                 if (A > B) return -1
@@ -1271,7 +1271,7 @@ class ThunderWave extends ZeroFrame {
                 if (y1)
                     lsl_HTML += '<dd>last seen <i>' + moment(y1.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
                 if (y2)
-                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y3.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y3.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y3.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
+                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y3.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', false, \'' + y3.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y3.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
             }
 
             $('#last_seen_list').html(lsl_HTML)
@@ -1333,7 +1333,7 @@ class ThunderWave extends ZeroFrame {
             //WHERE date_added > " + from_time + " AND date_added < " + to_time + " ORDER BY date_added " + ADESC + " LIMIT 5" // OFFSET " + offset
         ], (messages) => {
             messages.reverse()
-            console.log("Messages: ", messages)
+                // console.log("Messages: ", messages)
 
             var $m = $('#messages')
 
@@ -1350,9 +1350,9 @@ class ThunderWave extends ZeroFrame {
             }
 
             page.firstmessagewas = {
-                "date_added": !messages[0] ? 0 : messages.length > 1 ? messages[0].date_added : 0
-            }
-            console.log(messages[0], page.firstmessagewas)
+                    "date_added": !messages[0] ? 0 : messages.length > 1 ? messages[0].date_added : 0
+                }
+                // console.log(messages[0], page.firstmessagewas)
 
             for (var i = 0; i < messages.length; i++) {
                 var msg = messages[i]
@@ -1392,7 +1392,7 @@ class ThunderWave extends ZeroFrame {
     }
 
     onRequest(cmd, message) {
-        // console.log("COMMAND", cmd, message)
+        //  console.log("COMMAND", cmd, message)
         if (cmd == "setSiteInfo") {
             this.site_info = message.params // Save site info data to allow access it later
             this.setSiteInfo(message.params)
