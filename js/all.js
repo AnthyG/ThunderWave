@@ -6127,6 +6127,7 @@ class ThunderWave extends ZeroFrame {
                 var y3 = y1 || y2
 
                 lsl_HTML += '<dt class="divider" data-content="' + y3.cert_user_id + '"></dt>'
+                count++
 
                 if (y1)
                     lsl_HTML += '<dd>last seen <i>' + moment(y1.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
