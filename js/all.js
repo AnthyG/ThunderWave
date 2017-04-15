@@ -5657,41 +5657,43 @@ class ThunderWave extends ZeroFrame {
                     })
                 }
 
-                for (var x in messages2) {
-                    var y = messages2[x]
+                if (sender !== page.site_info.cert_user_id) {
+                    for (var x in messages2) {
+                        var y = messages2[x]
 
-                    // var msg2 = y.message
-                    var randI = y.randI
-                    var bS = btoa(randI + sender)
-                    page.cmd("aesDecrypt", [
-                        bS,
-                        y.message,
-                        bS
-                    ], (msg2) => {
-                        console.log("AES-DECRYPTED OWN MESSAGE", msg2)
-                        if (msg2) {
-                            page.cmd("eciesDecrypt", msg2, (msg) => {
-                                if (msg) {
-                                    var msg = JSON.parse(msg)
-                                    if (msg.recipient !== sender)
-                                        return false
-                                    console.log("ECIES-DECRYPTED OWN MESSAGE", msg)
-                                    if (msg !== null) {
-                                        console.log(x, y, msg)
+                        // var msg2 = y.message
+                        var randI = y.randI
+                        var bS = btoa(randI + sender)
+                        page.cmd("aesDecrypt", [
+                            bS,
+                            y.message,
+                            bS
+                        ], (msg2) => {
+                            console.log("AES-DECRYPTED OWN MESSAGE", msg2)
+                            if (msg2) {
+                                page.cmd("eciesDecrypt", msg2, (msg) => {
+                                    if (msg) {
+                                        var msg = JSON.parse(msg)
+                                        if (msg.recipient !== sender)
+                                            return false
+                                        console.log("ECIES-DECRYPTED OWN MESSAGE", msg)
+                                        if (msg !== null) {
+                                            console.log(x, y, msg)
 
-                                        if (first) {
-                                            page.firstprivatemessagewas = {
-                                                "date_added": msg.date_added
+                                            if (first) {
+                                                page.firstprivatemessagewas = {
+                                                    "date_added": msg.date_added
+                                                }
+                                                first = false
                                             }
-                                            first = false
-                                        }
 
-                                        this.addPrivateMessage(y.message_id, page.site_info.cert_user_id, msg.body, msg.date_added, override ? false : true)
+                                            this.addPrivateMessage(y.message_id, page.site_info.cert_user_id, msg.body, msg.date_added, override ? false : true)
+                                        }
                                     }
-                                }
-                            })
-                        }
-                    })
+                                })
+                            }
+                        })
+                    }
                 }
                 $m.children('.loading').remove()
 
