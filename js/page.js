@@ -1270,31 +1270,10 @@ class ThunderWave extends ZeroFrame {
                 if (y1)
                     lsl_HTML += '<dd>last seen <i>' + moment(y1.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
                 if (y2)
-                    lsl_HTML += '<dd>public key: <a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y3.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y3.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
+                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y3.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y3.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y3.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
             }
-            // for (var x in lsl1) {
-            //     var y1 = lsl1[x]
-            //     console.log(lsl1, y1)
-            //         //     this.cmd("dbQuery", [
-            //         //         "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'public_key' AND value NOT NULL AND keyvalue.json_id = '" + y1.json_id + "' ORDER BY value DESC"
-            //         //     ], (y2) => {
-            //         //         console.log(y1, y2)
 
-            //     //         lsl_HTML += '<dt class="divider" data-content="' + y1.cert_user_id + '"></dt>'
-
-            //     //         if (y1 && y1.value)
-            //     //             lsl_HTML += '<dd>last seen <i>' + moment(y1.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
-
-            //     //         if (y2 && y2.value)
-            //     //             lsl_HTML += '<dd>public key: <a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y2.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y2.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
-            //     //         else
-            //     //             lsl_HTML += '<dd><i>no public key found</i></dd>'
-
-            //     //         count++
-            //     //     })
-            // }
             $('#last_seen_list').html(lsl_HTML)
-
             $('#last_seen_list_c').html(count)
         })
     }
