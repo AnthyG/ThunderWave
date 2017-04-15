@@ -73,13 +73,15 @@ ul.unstyled {
 }
 
 #main-tabs>[tab] {
+    border: none;
+    height: 100vh;
     padding-top: 4.4rem;
 }
 
 #main-tabs>div[tab="Lobby"],
 #main-tabs>div[tab="PrivateChat"] {
     /*margin-top: 4.4rem;*/
-    height: 100vh;
+    /*height: 100vh;*/
 }
 
 .message-list {

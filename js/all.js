@@ -5226,13 +5226,13 @@ class ThunderWave extends ZeroFrame {
                             ])
                         }
                         if (typeof cb === "function")
-                            cb()
+                            cb(data, cList)
                     })
                 })
             } else {
                 console.log("Contact already added")
                 if (typeof cb === "function")
-                    cb()
+                    cb(data, cList)
             }
         })
     }
@@ -5243,7 +5243,7 @@ class ThunderWave extends ZeroFrame {
             $pcl.html("")
             for (var x in cList) {
                 var y = cList[x]
-                $pcl.append('<li class="tab-item"><a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');">' + y + '</a></li>')
+                $pcl.append('<li class="tab-item"><a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');">' + y + '</a></li>')
             }
         })
     }
@@ -5378,7 +5378,7 @@ class ThunderWave extends ZeroFrame {
                 renderer: markedR
             })
             .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
-                var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
+                var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2PMSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
@@ -5387,7 +5387,7 @@ class ThunderWave extends ZeroFrame {
 
         var msg_part_2_1 = '<div id="P_tc_' + msgkey + '" P_tc="' + date_added + '" class="card mb-5">' +
             ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
-                '<div class="card-header"><small class="tile-title"><a onclick="add2MSGInput(\'' + username + ' \'); return false;" href="?u/' + encodeURI(username) + '">' + username + '</a></small></div>') + '<div class="card-body text-break">' +
+                '<div class="card-header"><small class="tile-title"><a onclick="add2PMSGInput(\'' + username + ' \'); return false;" href="?u/' + encodeURI(username) + '">' + username + '</a></small></div>') + '<div class="card-body text-break">' +
             message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
 
         if (((users_own_message && thismessageis.same_user) || thismessageis.same_user) && thismessageis.same_date && thismessageis.in_time_range) {
@@ -5443,14 +5443,8 @@ class ThunderWave extends ZeroFrame {
 
         this.verifyUserFiles()
 
-        // {
-        //     "recipient": "cert_user_id",
-        //     "body": "BODY",
-        //     "date_added": parseInt(moment().utc().format("x"))
-        // }
-
         var recipient2 = recipient2 || false
-        var recipient = recipient2 || $('#recipient').val()
+        var recipient = recipient2 || $('#private_recipient').val()
         if (!recipient)
             recipient = this.site_info.cert_user_id
 
@@ -5507,87 +5501,90 @@ class ThunderWave extends ZeroFrame {
                             var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
                             var json_rawA = btoa(json_raw)
 
-                            page.addPrivateContact(recipient, function() {
-                                // Write file to disk
-                                page.cmd("fileWrite", [
-                                    data_inner_path,
-                                    json_rawA
-                                ], (res2) => {
-                                    if (res2 == "ok") {
-                                        page.cmd("fileGet", {
-                                            "inner_path": data2_inner_path,
-                                            "required": false
-                                        }, (data2) => {
-                                            if (data2)
-                                                var data2 = JSON.parse(data2)
-                                            else
-                                                var data2 = {}
+                            // Write file to disk
+                            page.cmd("fileWrite", [
+                                data_inner_path,
+                                json_rawA
+                            ], (res2) => {
+                                if (res2 == "ok") {
+                                    page.addPrivateContact(recipient, function(data2, cList) {
+                                        page.genContactsList()
 
-                                            if (!data2.hasOwnProperty("private_messages"))
-                                                data2.private_messages = []
-                                            if (!data.hasOwnProperty("private_messages_with"))
-                                                data2.private_messages_with = []
+                                        // page.cmd("fileGet", {
+                                        //     "inner_path": data2_inner_path,
+                                        //     "required": false
+                                        // }, (data2) => {
+                                        if (data2)
+                                            var data2 = JSON.parse(data2)
+                                        else
+                                            var data2 = {}
 
-                                            page.cmd("eciesEncrypt", [
-                                                JSON.stringify({
-                                                    "recipient": recipient,
-                                                    "body": emojione.toShort(message),
-                                                    "date_added": msg_date_added
+                                        if (!data2.hasOwnProperty("private_messages"))
+                                            data2.private_messages = []
+                                        if (!data.hasOwnProperty("private_messages_with"))
+                                            data2.private_messages_with = []
+
+                                        page.cmd("eciesEncrypt", [
+                                            JSON.stringify({
+                                                "recipient": recipient,
+                                                "body": emojione.toShort(message),
+                                                "date_added": msg_date_added
+                                            })
+                                        ], (res3) => {
+                                            console.log("Res3: ", res3)
+                                            page.cmd("aesEncrypt", [
+                                                res3,
+                                                bR,
+                                                bR
+                                            ], (res4) => {
+                                                console.log("Res4: ", res4)
+
+                                                // Add the new message to data
+                                                var di2 = data2.private_messages.push({
+                                                    "randI": randI,
+                                                    "message": res4[2] // res3
                                                 })
-                                            ], (res3) => {
-                                                console.log("Res3: ", res3)
-                                                page.cmd("aesEncrypt", [
-                                                    res3,
-                                                    bR,
-                                                    bR
-                                                ], (res4) => {
-                                                    console.log("Res4: ", res4)
 
-                                                    // Add the new message to data
-                                                    var di2 = data2.private_messages.push({
-                                                        "randI": randI,
-                                                        "message": res4[2] // res3
-                                                    })
+                                                // Encode data array to utf8 json text
+                                                var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
+                                                var json_rawA2 = btoa(json_raw2)
 
-                                                    // Encode data array to utf8 json text
-                                                    var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
-                                                    var json_rawA2 = btoa(json_raw2)
+                                                // Write file to disk
+                                                page.cmd("fileWrite", [
+                                                    data2_inner_path,
+                                                    json_rawA2
+                                                ], (res5) => {
+                                                    if (res5 == "ok") {
+                                                        if (!message3)
+                                                            $('#private_message').val("")
+                                                        autosize.update($('#private_message'))
 
-                                                    // Write file to disk
-                                                    page.cmd("fileWrite", [
-                                                        data2_inner_path,
-                                                        json_rawA2
-                                                    ], (res5) => {
-                                                        if (res5 == "ok") {
-                                                            if (!message3)
-                                                                $('#private_message').val("")
-                                                            autosize.update($('#private_message'))
+                                                        page.loadPrivateMessages("sent private message", false)
 
-                                                            // Publish the file to other users
-                                                            page.verifyUserFiles(null, function() {
-                                                                console.log("Sent private message", {
-                                                                    "recipient": recipient,
-                                                                    "body": emojione.toShort(message),
-                                                                    "SOMEWHAT-date_added": parseInt(moment().utc().format("x"))
-                                                                })
-
-                                                                // page.loadPrivateMessages("sent private message")
+                                                        // Publish the file to other users
+                                                        page.verifyUserFiles(null, function() {
+                                                            console.log("Sent private message", {
+                                                                "recipient": recipient,
+                                                                "body": emojione.toShort(message),
+                                                                "SOMEWHAT-date_added": parseInt(moment().utc().format("x"))
                                                             })
-                                                        } else {
-                                                            page.cmd("wrapperNotification", [
-                                                                "error", "File write error: " + JSON.stringify(res5)
-                                                            ])
-                                                        }
-                                                    })
+                                                        })
+                                                    } else {
+                                                        page.cmd("wrapperNotification", [
+                                                            "error", "File write error: " + JSON.stringify(res5)
+                                                        ])
+                                                    }
                                                 })
                                             })
                                         })
-                                    } else {
-                                        page.cmd("wrapperNotification", [
-                                            "error", "File write error: " + JSON.stringify(res2)
-                                        ])
-                                    }
-                                })
+
+                                        // })
+                                    })
+                                } else {
+                                    page.cmd("wrapperNotification", [
+                                        "error", "File write error: " + JSON.stringify(res2)
+                                    ])
+                                }
                             })
                         })
                     } else {
@@ -5606,10 +5603,15 @@ class ThunderWave extends ZeroFrame {
         return false
     }
 
-    loadPrivateMessages(loadcode, override, sender) {
+    loadPrivateMessages(loadcode, override, sender2) {
         var verified = this.verifyUser()
         if (!verified)
             return false
+
+        var sender2 = sender2 || false
+        var sender = sender2 || $('#private_recipient').val()
+        if (!sender)
+            sender = this.site_info.cert_user_id
 
         console.log("Loading private messages with code >" + loadcode + "<..")
         var override = override || false
@@ -5754,9 +5756,10 @@ class ThunderWave extends ZeroFrame {
                             $('#message').val("")
                         autosize.update($('#message'))
 
-                        // Publish the file to other users
+                        page.loadMessages("sent message", false, data.messages.length === 1 ? false : true)
+                            // Publish the file to other users
                         this.verifyUserFiles(null, function() {
-                            page.loadMessages("sent message", false, data.messages.length === 1 ? false : true)
+
                         })
 
                         // this.cmd("siteSign", {
@@ -5788,7 +5791,7 @@ class ThunderWave extends ZeroFrame {
         return false
     }
 
-    uploadMedia() {
+    uploadMedia(cb) {
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -5885,12 +5888,15 @@ class ThunderWave extends ZeroFrame {
                                                     var output_url = '/' + page.site_info.address + '/' + f_path
                                                     console.log(output_url, f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                     if (f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
-                                                        add2MSGInput(' ![ALTTEXT](' + output_url + ') ')
+                                                        var rtrn = ' ![ALTTEXT](' + output_url + ') '
                                                     else
-                                                        add2MSGInput(' [TITLE](' + output_url + ') ')
+                                                        var rtrn = ' [TITLE](' + output_url + ') '
 
                                                     // Publish the file to other users
                                                     this.verifyUserFiles()
+
+                                                    if (typeof cb === "function")
+                                                        cb(rtrn)
 
                                                     // page.cmd("siteSign", {
                                                     //     "inner_path": content_inner_path
@@ -6642,6 +6648,8 @@ class ThunderWave extends ZeroFrame {
         var data2_inner_path = "data/users/" + this.site_info.auth_address + "/data_private.json"
         var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
 
+        var curpversion = 2
+
         function verifyData2() {
             page.cmd("fileGet", {
                 "inner_path": data2_inner_path,
@@ -6655,7 +6663,6 @@ class ThunderWave extends ZeroFrame {
                 var olddata = JSON.parse(JSON.stringify(data))
                 console.log("BEFORE 2", olddata)
 
-                var curpversion = 2
                 if (data.pversion !== curpversion)
                     data = {
                         "pversion": curpversion
@@ -6668,24 +6675,26 @@ class ThunderWave extends ZeroFrame {
 
                 console.log("VERIFIED data_private.json", olddata, data)
 
-                var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
-                var json_rawA = btoa(json_raw)
+                addPrivateContact(page.site_info.cert_user_id, function(data2, cList) {
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
 
-                if (JSON.stringify(data) !== JSON.stringify(olddata)) {
-                    console.log("data_private.json HAS RECEIVED A UPDATE!")
-                    page.cmd("fileWrite", [
-                        data2_inner_path,
-                        json_rawA
-                    ], (res) => {
-                        if (res == "ok") {
-                            console.log("data_private.json HAS BEEN UPDATED!")
-                        } else {
-                            page.cmd("wrapperNotification", [
-                                "error", "File write error: " + JSON.stringify(res)
-                            ])
-                        }
-                    })
-                }
+                    if (JSON.stringify(data2) !== JSON.stringify(olddata)) {
+                        console.log("data_private.json HAS RECEIVED A UPDATE!")
+                        page.cmd("fileWrite", [
+                            data2_inner_path,
+                            json_rawA
+                        ], (res) => {
+                            if (res == "ok") {
+                                console.log("data_private.json HAS BEEN UPDATED!")
+                            } else {
+                                page.cmd("wrapperNotification", [
+                                    "error", "File write error: " + JSON.stringify(res)
+                                ])
+                            }
+                        })
+                    }
+                })
             })
         }
 
@@ -6700,7 +6709,6 @@ class ThunderWave extends ZeroFrame {
                     var data = {}
                 var olddata = JSON.parse(JSON.stringify(data))
 
-                var curpversion = 2
                 if (data.pversion !== curpversion) {
                     data.pversion = curpversion
                     data.private_messages = []
@@ -6813,6 +6821,7 @@ class ThunderWave extends ZeroFrame {
             })
         }
         verifyData(cb1, cb2)
+
         verifyData2()
     }
 
