@@ -5243,7 +5243,7 @@ class ThunderWave extends ZeroFrame {
             $pcl.html("")
             for (var x in cList) {
                 var y = cList[x]
-                $pcl.append('<li class="tab-item"><a href="javascript:page.loadPrivateMessages(\'selected user\', false, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');">' + y + '</a></li>')
+                $pcl.append('<li class="tab-item"><a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');">' + y + '</a></li>')
             }
         })
     }
@@ -5562,7 +5562,7 @@ class ThunderWave extends ZeroFrame {
                                                             $('#private_message').val("")
                                                         autosize.update($('#private_message'))
 
-                                                        page.loadPrivateMessages("sent private message", false)
+                                                        page.loadPrivateMessages("sent private message", true)
 
                                                         // Publish the file to other users
                                                         page.verifyUserFiles(null, function() {
@@ -6132,7 +6132,7 @@ class ThunderWave extends ZeroFrame {
                 if (y1)
                     lsl_HTML += '<dd>last seen <i>' + moment(y1.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
                 if (y2)
-                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y3.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', false, \'' + y3.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y3.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
+                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y3.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y3.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y3.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
             }
 
             $('#last_seen_list').html(lsl_HTML)
