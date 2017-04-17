@@ -5709,7 +5709,7 @@ class ThunderWave extends ZeroFrame {
                 config$bH(loadcode === "load more" || goingback)
 
                 page.getAvatar(sender, (img) => {
-                    console.log("IMAGE FOR ", sender, img)
+                    // console.log("IMAGE FOR ", sender, img)
                     $('[avatarimg="' + sender + '"]').replaceWith(img)
                 })
             })
@@ -6084,7 +6084,7 @@ class ThunderWave extends ZeroFrame {
         console.log("Loading last-seen-List")
         var count = 0
         this.cmd("dbQuery", [
-            "SELECT * FROM extra_data LEFT JOIN json USING (json_id) ORDER BY last_seen" // "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND keyvalue.value NOT NULL OR key = 'public_key' AND keyvalue.value NOT NULL ORDER BY keyvalue.json_id"
+            "SELECT * FROM extra_data LEFT JOIN json USING (json_id) ORDER BY extra_data.last_seen DESC" // "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND keyvalue.value NOT NULL OR key = 'public_key' AND keyvalue.value NOT NULL ORDER BY keyvalue.json_id"
         ], (lsl) => {
             var lsl_HTML = ''
 
@@ -6234,7 +6234,7 @@ class ThunderWave extends ZeroFrame {
 
                     path = ""
 
-                console.log(ov, ov_s, av, av_n, av_u, path)
+                // console.log(ov, ov_s, av, av_n, av_u, path)
 
                 if (ov === 0 && av >= 0 && (av_n || av_u)) {
                     path = (av_n ? "data/" + data.directory + "/" + av_n : av_u)
@@ -6364,7 +6364,7 @@ class ThunderWave extends ZeroFrame {
                 (function(sender) {
                     // console.log("LOADING IMAGE FOR ", sender)
                     page.getAvatar(sender, (img, ov, ov_s, av, av_n, av_u, path) => {
-                        console.log("IMAGE FOR ", sender, img, ov, ov_s, av, av_n, av_u, path)
+                        // console.log("IMAGE FOR ", sender, img, ov, ov_s, av, av_n, av_u, path)
                         $('[avatarimg="' + sender + '"]').replaceWith(img)
                     })
                 })(sender2)
