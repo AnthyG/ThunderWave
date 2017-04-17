@@ -136,23 +136,24 @@ class ThunderWave extends ZeroFrame {
 
         // var addattop = addattop || false
 
-        if (parseInt(page.LS.opts.avatar_size.value) !== 0) {
-            this.identicons = this.identicons || {}
-            var asv = parseInt(page.LS.opts.avatar_size.value) || 64
-            if (!this.identicons.hasOwnProperty(asv)) {
-                this.identicons[asv] = {}
-            }
-            if (!this.identicons.hasOwnProperty(username)) {
-                var uhash = stringToHex(username).split(' ').join('')
-                this.identicons[asv][username] = new Identicon(uhash, {
-                    margin: 0.2,
-                    size: asv,
-                    format: 'svg'
-                }).toString()
-            }
-            var idata = this.identicons[asv][username]
-        }
-        var message_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
+        var message_pic = '<div avatarimg="' + username + '"></div>'
+            // if (parseInt(page.LS.opts.avatar_size.value) !== 0) {
+            //     this.identicons = this.identicons || {}
+            //     var asv = parseInt(page.LS.opts.avatar_size.value) || 64
+            //     if (!this.identicons.hasOwnProperty(asv)) {
+            //         this.identicons[asv] = {}
+            //     }
+            //     if (!this.identicons.hasOwnProperty(username)) {
+            //         var uhash = stringToHex(username).split(' ').join('')
+            //         this.identicons[asv][username] = new Identicon(uhash, {
+            //             margin: 0.2,
+            //             size: asv,
+            //             format: 'svg'
+            //         }).toString()
+            //     }
+            //     var idata = this.identicons[asv][username]
+            // }
+            // var message_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
 
         var mmnt = moment(date_added, "x")
 
@@ -451,23 +452,24 @@ class ThunderWave extends ZeroFrame {
     addPrivateMessage(msgkey, username, message, date_added, addattop) {
         var message_escaped = message
 
-        if (parseInt(page.LS.opts.avatar_size.value) !== 0) {
-            this.identicons = this.identicons || {}
-            var asv = parseInt(page.LS.opts.avatar_size.value) || 64
-            if (!this.identicons.hasOwnProperty(asv)) {
-                this.identicons[asv] = {}
-            }
-            if (!this.identicons.hasOwnProperty(username)) {
-                var uhash = stringToHex(username).split(' ').join('')
-                this.identicons[asv][username] = new Identicon(uhash, {
-                    margin: 0.2,
-                    size: asv,
-                    format: 'svg'
-                }).toString()
-            }
-            var idata = this.identicons[asv][username]
-        }
-        var message_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
+        var message_pic = '<div avatarimg="' + username + '"></div>'
+            // if (parseInt(page.LS.opts.avatar_size.value) !== 0) {
+            //     this.identicons = this.identicons || {}
+            //     var asv = parseInt(page.LS.opts.avatar_size.value) || 64
+            //     if (!this.identicons.hasOwnProperty(asv)) {
+            //         this.identicons[asv] = {}
+            //     }
+            //     if (!this.identicons.hasOwnProperty(username)) {
+            //         var uhash = stringToHex(username).split(' ').join('')
+            //         this.identicons[asv][username] = new Identicon(uhash, {
+            //             margin: 0.2,
+            //             size: asv,
+            //             format: 'svg'
+            //         }).toString()
+            //     }
+            //     var idata = this.identicons[asv][username]
+            // }
+            // var message_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
 
         var mmnt = moment(date_added, "x")
 
@@ -844,6 +846,11 @@ class ThunderWave extends ZeroFrame {
                 $m.children('.loading').remove()
 
                 config$bH(loadcode === "load more" || goingback)
+
+                page.getAvatar(sender, (img) => {
+                    console.log("IMAGE FOR ", sender, img)
+                    $('[avatarimg="' + sender + '"]').replaceWith(img)
+                })
             })
         })
     }
@@ -1216,68 +1223,180 @@ class ThunderWave extends ZeroFrame {
         console.log("Loading last-seen-List")
         var count = 0
         this.cmd("dbQuery", [
-            "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND keyvalue.value NOT NULL OR key = 'public_key' AND keyvalue.value NOT NULL ORDER BY keyvalue.json_id"
+            "SELECT * FROM extra_data LEFT JOIN json USING (json_id) ORDER BY last_seen" // "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND keyvalue.value NOT NULL OR key = 'public_key' AND keyvalue.value NOT NULL ORDER BY keyvalue.json_id"
         ], (lsl) => {
             var lsl_HTML = ''
 
-            var lsl2 = []
             for (var x in lsl) {
                 var y = lsl[x]
-                if (y) {
-                    if (!lsl2[y.json_id])
-                        lsl2[y.json_id] = {
-                            "y1": false,
-                            "y2": false
-                        }
 
-                    if (y.key === "last_seen")
-                        lsl2[y.json_id].y1 = y
-                    else if (y.key === "public_key")
-                        lsl2[y.json_id].y2 = y
-                }
-            }
-
-            // console.log(lsl2)
-
-            lsl2.sort(function(a, b) {
-                if (typeof a.y1 === "object" && a.y1.key === "last_seen")
-                    var A = a.y1.value
-                else
-                    var A = -1
-
-                if (typeof b.y1 === "object" && b.y1.key === "last_seen")
-                    var B = b.y1.value
-                else
-                    var B = -1
-
-                //  console.log(a, b, A, B, A < B)
-
-                if (A < B) return 1
-                if (A > B) return -1
-                return 0
-            })
-
-            for (var x in lsl2) {
-                var y = lsl2[x]
-
-                var y1 = y.y1,
-                    y2 = y.y2
-
-                var y3 = y1 || y2
-
-                lsl_HTML += '<dt class="divider" data-content="' + y3.cert_user_id + '"></dt>'
+                lsl_HTML += '<dt class="divider" data-content="' + y.cert_user_id + '"></dt>'
                 count++
 
-                if (y1)
-                    lsl_HTML += '<dd>last seen <i>' + moment(y1.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
-                if (y2)
-                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y3.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y3.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y3.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
+                if (y.last_seen)
+                    lsl_HTML += '<dd>last seen <i>' + moment(y.last_seen, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
+                if (y.public_key)
+                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y.cert_user_id + '\');"><i>' + y.public_key + '</i></a></dd>'
             }
+
+            // var lsl2 = []
+            // for (var x in lsl) {
+            //     var y = lsl[x]
+            //     if (y) {
+            //         if (!lsl2[y.json_id])
+            //             lsl2[y.json_id] = {
+            //                 "y1": false,
+            //                 "y2": false
+            //             }
+
+            //         if (y.key === "last_seen")
+            //             lsl2[y.json_id].y1 = y
+            //         else if (y.key === "public_key")
+            //             lsl2[y.json_id].y2 = y
+            //     }
+            // }
+
+            // // console.log(lsl2)
+
+            // lsl2.sort(function(a, b) {
+            //     if (typeof a.y1 === "object" && a.y1.key === "last_seen")
+            //         var A = a.y1.value
+            //     else
+            //         var A = -1
+
+            //     if (typeof b.y1 === "object" && b.y1.key === "last_seen")
+            //         var B = b.y1.value
+            //     else
+            //         var B = -1
+
+            //     //  console.log(a, b, A, B, A < B)
+
+            //     if (A < B) return 1
+            //     if (A > B) return -1
+            //     return 0
+            // })
+
+            // for (var x in lsl2) {
+            //     var y = lsl2[x]
+
+            //     var y1 = y.y1,
+            //         y2 = y.y2
+
+            //     var y3 = y1 || y2
+
+            //     lsl_HTML += '<dt class="divider" data-content="' + y3.cert_user_id + '"></dt>'
+            //     count++
+
+            //     if (y1)
+            //         lsl_HTML += '<dd>last seen <i>' + moment(y1.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
+            //     if (y2)
+            //         lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y3.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y3.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y3.cert_user_id + '\');"><i>' + y2.value + '</i></a></dd>'
+            // }
 
             $('#last_seen_list').html(lsl_HTML)
             $('#last_seen_list_c').html(count)
         })
     }
+
+    getAvatar(username, cb) {
+        var ov = parseInt(page.LS.opts.avatar_type.value),
+            ov_s = parseInt(page.LS.opts.avatar_size.value)
+
+        function avatarGen() {
+            page.identicons = page.identicons || {}
+            var asv = ov_s || 64
+            if (!page.identicons.hasOwnProperty(asv)) {
+                page.identicons[asv] = {}
+            }
+            if (!page.identicons.hasOwnProperty(username)) {
+                var uhash = stringToHex(username).split(' ').join('')
+                page.identicons[asv][username] = new Identicon(uhash, {
+                    margin: 0.2,
+                    size: asv,
+                    format: 'svg'
+                }).toString()
+            }
+            var idata = page.identicons[asv][username]
+
+            var avatar_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
+            return avatar_pic
+        }
+
+        if (ov >= 3 && ov_s !== 0) {
+            if (typeof cb === "function")
+                cb(avatarGen(), ov, ov_s, "", "", "", "")
+        } else if (ov >= 3) {
+            if (typeof cb === "function")
+                cb("", ov, ov_s, "", "", "", "")
+        } else {
+            page.cmd("dbQuery", [
+                "SELECT * FROM extra_data LEFT JOIN json USING (json_id) WHERE json.cert_user_id = '" + username + "'"
+            ], (lsl) => {
+                if (lsl[0])
+                    var data = lsl[0]
+                else
+                    var data = {
+                        "avatar_file_name": "",
+                        "avatar_file_url": "",
+                        "avatar_type": 0
+                    }
+
+                // console.log(data)
+
+                // avatar_file_name:""
+                // avatar_file_url:"/Me.Mkg20001.bit/merged-ZeroMe/1oranGeS2xsKZ4jVsu9SVttzgkYXu4k9v/data/users/14K7EydgyeP84L1NKaAHBZTPQCev8BbqCy/avatar.jpg"
+                // avatar_type:0
+                // cert_user_id:"glightstar@kaffie.bit"
+                // directory:"users/1G5FwRWF7PRWos66wTcZPtFSbH7vQDnvNb"
+                // file_name:"data.json"
+                // json_id:5
+                // last_seen:1492423647362
+                // public_key:"A20isepB/O/tXpu8VXPrYzgx9DsQ1hndJMf7qTnFQLv7"
+
+                /*
+                ov:
+                0 TW
+                 & ZM -> use TW if TW || ZM if ZM || gen if gen #
+                1 TW  -> use TW if TW || gen if gen
+                2 ZM  -> use ZM if ZM || gen if gen
+                3 /   -> use gen if gen
+
+                av:
+                0 /   -> use gen if gen
+                1 TW  -> use name
+                2 ZM  -> use url
+                */
+
+                var av = parseInt(data.avatar_type),
+                    av_n = data.avatar_file_name,
+                    av_u = data.avatar_file_url,
+
+                    path = ""
+
+                console.log(ov, ov_s, av, av_n, av_u, path)
+
+                if (ov === 0 && av >= 0 && (av_n || av_u)) {
+                    path = (av_n ? "data/" + data.directory + "/" + av_n : av_u)
+                } else if (ov === 1 && av === 1 && av_n) {
+                    path = "data/" + data.directory + "/" + av_n
+                } else if (ov === 2 && av === 2 && av_u) {
+                    path = av_u + "?" + moment()
+                }
+
+                if (path) {
+                    if (typeof cb === "function")
+                        cb("<img src='" + path + "' />", ov, ov_s, av, av_n, av_u, path)
+                } else if (ov_s !== 0) {
+                    if (typeof cb === "function")
+                        cb(avatarGen(), ov, ov_s, av, av_n, av_u, path)
+                } else {
+                    if (typeof cb === "function")
+                        cb("", ov, ov_s, av, av_n, av_u, path)
+                }
+            })
+        }
+    }
+
 
     loadMessages(loadcode, override, to_now, ADESC, goingback, from_time, to_time) {
         var verified = this.verifyUser()
@@ -1354,8 +1473,13 @@ class ThunderWave extends ZeroFrame {
                 }
                 // console.log(messages[0], page.firstmessagewas)
 
+            var senders = []
             for (var i = 0; i < messages.length; i++) {
                 var msg = messages[i]
+
+                if (senders.indexOf(msg.cert_user_id) === -1)
+                    senders.push(msg.cert_user_id)
+
                 if (!this.messageCounterArr.hasOwnProperty(msg.message_id)) {
                     this.addMessage(msg.message_id, msg.cert_user_id, msg.body, msg.date_added, override ? false : true)
                     this.messageCounterArr[msg.message_id] = {
@@ -1372,6 +1496,18 @@ class ThunderWave extends ZeroFrame {
             $m.children('.loading').remove()
 
             config$bH(loadcode === "load more" || goingback)
+
+            for (var x in senders) {
+                var sender2 = senders[x];
+
+                (function(sender) {
+                    // console.log("LOADING IMAGE FOR ", sender)
+                    page.getAvatar(sender, (img, ov, ov_s, av, av_n, av_u, path) => {
+                        console.log("IMAGE FOR ", sender, img, ov, ov_s, av, av_n, av_u, path)
+                        $('[avatarimg="' + sender + '"]').replaceWith(img)
+                    })
+                })(sender2)
+            }
 
             // $m.addClass("bounce-bottom")
             // setTimeout(function() {
@@ -1451,253 +1587,291 @@ class ThunderWave extends ZeroFrame {
 
     setSettingsOptions() {
         console.log("Settings options..")
-        $('#sttngs_container').html('<div class="icon icons loading"></div>')
 
         var dis = this
         this.cmd("wrapperGetLocalStorage", [], (LS) => {
             var LS = (typeof LS === "object" ? (LS || {}) : {})
 
             // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
-            var curOptsV = 7
-            if (!LS.hasOwnProperty("opts") || LS.optsV !== curOptsV) {
+            var curOptsV = 11
+            var defaultOpts = {
+                // "parse_links": {
+                //     "label": "Parse Links", // The Label of this option
+                //     "desc": "Activate to parse links in messages", // The description of this option
+                //     "value": false, // The value of this option
+                //     "r_ms": false, // Reload messages
+                //     "cb": { // Callback ..
+                //         "change": '(' + ( // .. on change
+                //             function() {
+                //                 $('#messages').find('.message-link').each(function() {
+                //                     var elY = $(this);
+                //                     if (page.LS.opts.parse_links.value) {
+                //                         elY.replaceWith($('<a class="message-link" href="' + elY.text() + '" target="_blank">' + elY.text() + '</a>'));
+                //                     } else {
+                //                         elY.replaceWith($('<span class="message-link">' + elY.text() + '</span>'));
+                //                     }
+                //                 })
+                //             }
+                //         ).toString() + ')'
+                //     }
+                // },
+                "parse_profile_links": {
+                    "label": "Parse Profile Links",
+                    "desc": "Activate to parse profile links in messages (@...)",
+                    "value": true,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                $('#messages').find('.message-profile-link').each(function() {
+                                    var elY = $(this);
+                                    if (page.LS.opts.parse_profile_links.value) {
+                                        elY.replaceWith($('<a class="message-profile-link" href="?u/' + elY.text() + '">' + elY.text() + '</a>'));
+                                    } else {
+                                        elY.replaceWith($('<span class="message-profile-link">' + elY.text() + '</span>'));
+                                    }
+                                })
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "user_mention_badge": {
+                    "label": "User mention badge",
+                    "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
+                    "value": true,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                if (page.LS.opts.user_mention_badge.value) {
+                                    $('#messages').find('.user-is-mentioned').find('.message-user-avatar').addClass("badge")
+                                        // $('#messages').find('.message-user-mention-badge').removeClass("hide")
+                                } else {
+                                    $('#messages').find('.user-is-mentioned').find('.message-user-avatar').removeClass("badge")
+                                        // $('#messages').find('.message-user-mention-badge').addClass("hide")
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "show_timestamps": {
+                    "label": "Toggle Timestamps",
+                    "desc": "Activate to show Timestamps in chat",
+                    "value": true,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                $('#messages').find('.message-timestamp').each(function() {
+                                    var elY = $(this);
+                                    if (page.LS.opts.show_timestamps.value) {
+                                        elY.parent().parent().removeClass("card-footer")
+                                        elY.removeClass("hide")
+                                    } else {
+                                        elY.parent().parent().addClass("card-footer")
+                                        elY.addClass("hide")
+                                    }
+                                })
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "avatar_type": {
+                    "label": "Allow specific avatar-types only",
+                    "desc": "Choose which avatar-locations are allowed (if a user has no location specified, the avatar-generator will be used)",
+                    "value": 1,
+                    "values": [
+                        [0, "TW & ZM"],
+                        [1, "ThunderWave"],
+                        [2, "ZeroMe"],
+                        [3, "none"]
+                    ],
+                    "type": "select",
+                    "r_ms": true,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                var parsedVal = parseInt(page.LS.opts.avatar_type.value)
+                                page.LS.opts.avatar_type.value = (parsedVal < 4 && parsedVal > -1 ? parsedVal : 1)
+                            }
+                        ).toString() + ')'
+                    }
+
+                },
+                "avatar_size": {
+                    "label": "Set avatar-size",
+                    "desc": "Sets the avatar-size to this dimensions",
+                    "value": 64,
+                    "values": [
+                        [0, "Off (2char-initial)"],
+                        [32, "32x32"],
+                        [64, "64x64 (default)"],
+                        [128, "128x128"],
+                        [256, "256x256"],
+                        [512, "512x512"]
+                    ],
+                    "type": "select",
+                    "r_ms": true,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                var parsedVal = parseInt(page.LS.opts.avatar_size.value)
+                                page.LS.opts.avatar_size.value = (parsedVal > 0 ? parsedVal : (parsedVal === 0 ? 0 : 64))
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "message_design_type": {
+                    "label": "Change design of messages",
+                    "desc": "Changes the design of the messages",
+                    "value": 2,
+                    "values": [
+                        [1, "Square"],
+                        [2, "Arrow at top (default)"],
+                        [3, "Arrow at middle of avatar"]
+                    ],
+                    "type": "select",
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                var parsedVal = parseInt(page.LS.opts.message_design_type.value)
+                                if (parsedVal === 1) {
+                                    $('#messages').removeAttr("design-type")
+                                } else {
+                                    $('#messages').attr("design-type", parsedVal)
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "divider_1": "",
+                "disable_emojis": {
+                    "label": "Disable loading of Emoji's",
+                    "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
+                    "value": false,
+                    "r_ms": true,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "seed_all_emojis": {
+                    "label": "Seed all Emoji's",
+                    "desc": "Downloads and seeds all Emoji's automatically!",
+                    "value": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                if (page.LS.opts.seed_all_emojis.value) {
+                                    page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
+                                        (res) => {
+                                            console.log(res)
+                                        })
+                                } else {
+                                    page.cmd("OptionalHelpRemove", ["css/png"],
+                                        (res) => {
+                                            console.log(res)
+                                            page.cmd("wrapperNotification", [
+                                                "done", "You are no longer Auto-Seeding Emoji's!", 5000
+                                            ])
+                                        })
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "delete_all_emojis": {
+                    "label": "Delete all Emoji's",
+                    "desc": "All Emoji's in your \"cache\" will be deleted",
+                    "value": "Delete",
+                    "type": "button",
+                    "r_ms": true,
+                    "cb": {
+                        "click": '(' + (
+                            function() {
+                                if (page.site_info.cert_user_id !== "glightstar@zeroid.bit") {
+                                    var count = 0
+                                    page.cmd("optionalFileList", [], (data) => {
+                                        for (var x in data) {
+                                            var y = data[x]
+                                            if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
+                                                page.cmd("optionalFileDelete", y.inner_path, (res) => {
+                                                    console.log("deleted emoji at path " + y.inner_path)
+                                                    count++
+                                                })
+                                        }
+                                        page.cmd("wrapperNotification", [
+                                            "done", "Removed " + count + " Emoji's!", 5000
+                                        ])
+                                    })
+                                } else {
+                                    page.cmd("wrapperNotification", [
+                                        "error", "You can't delete Emoji's!", 5000
+                                    ])
+                                    var count = 0
+                                    page.cmd("optionalFileList", [], (data) => {
+                                        console.log(data)
+                                        for (var x in data) {
+                                            var y = data[x]
+                                            if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/") {
+                                                console.log("would have removed emoji at path " + y.inner_path)
+                                                count++
+                                            }
+                                        }
+                                        page.cmd("wrapperNotification", [
+                                            "done", "Would have removed " + count + " Emoji's!", 5000
+                                        ])
+                                    })
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "divider_2": "",
+                "reset_options_to_default": {
+                    "label": "Reset to default",
+                    "desc": "Resets all options to their default values",
+                    "value": "Reset",
+                    "type": "button",
+                    "r_ms": true,
+                    "cb": {
+                        "click": '(' + (
+                            function() {
+                                delete page.LS.opts;
+                                page.cmd("wrapperSetLocalStorage", page.LS, function() {});
+                                page.setSettingsOptions();
+                            }
+                        ).toString() + ')'
+                    }
+                }
+            }
+
+            if (!LS.hasOwnProperty("opts")) {
                 LS.optsV = curOptsV
 
                 if (LS.hasOwnProperty("opts"))
                     var oldOpts = LS.opts
 
-                LS.opts = {
-                    // "parse_links": {
-                    //     "label": "Parse Links", // The Label of this option
-                    //     "desc": "Activate to parse links in messages", // The description of this option
-                    //     "value": false, // The value of this option
-                    //     "r_ms": false, // Reload messages
-                    //     "cb": { // Callback ..
-                    //         "change": '(' + ( // .. on change
-                    //             function() {
-                    //                 $('#messages').find('.message-link').each(function() {
-                    //                     var elY = $(this);
-                    //                     if (page.LS.opts.parse_links.value) {
-                    //                         elY.replaceWith($('<a class="message-link" href="' + elY.text() + '" target="_blank">' + elY.text() + '</a>'));
-                    //                     } else {
-                    //                         elY.replaceWith($('<span class="message-link">' + elY.text() + '</span>'));
-                    //                     }
-                    //                 })
-                    //             }
-                    //         ).toString() + ')'
-                    //     }
-                    // },
-                    "parse_profile_links": {
-                        "label": "Parse Profile Links",
-                        "desc": "Activate to parse profile links in messages (@...)",
-                        "value": true,
-                        "r_ms": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    $('#messages').find('.message-profile-link').each(function() {
-                                        var elY = $(this);
-                                        if (page.LS.opts.parse_profile_links.value) {
-                                            elY.replaceWith($('<a class="message-profile-link" href="?u/' + elY.text() + '">' + elY.text() + '</a>'));
-                                        } else {
-                                            elY.replaceWith($('<span class="message-profile-link">' + elY.text() + '</span>'));
-                                        }
-                                    })
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "user_mention_badge": {
-                        "label": "User mention badge",
-                        "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
-                        "value": true,
-                        "r_ms": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    if (page.LS.opts.user_mention_badge.value) {
-                                        $('#messages').find('.user-is-mentioned').find('.message-user-avatar').addClass("badge")
-                                            // $('#messages').find('.message-user-mention-badge').removeClass("hide")
-                                    } else {
-                                        $('#messages').find('.user-is-mentioned').find('.message-user-avatar').removeClass("badge")
-                                            // $('#messages').find('.message-user-mention-badge').addClass("hide")
-                                    }
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "show_timestamps": {
-                        "label": "Toggle Timestamps",
-                        "desc": "Activate to show Timestamps in chat",
-                        "value": true,
-                        "r_ms": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    $('#messages').find('.message-timestamp').each(function() {
-                                        var elY = $(this);
-                                        if (page.LS.opts.show_timestamps.value) {
-                                            elY.parent().parent().removeClass("card-footer")
-                                            elY.removeClass("hide")
-                                        } else {
-                                            elY.parent().parent().addClass("card-footer")
-                                            elY.addClass("hide")
-                                        }
-                                    })
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "avatar_size": {
-                        "label": "Set avatar-size",
-                        "desc": "Sets the avatar-size to this dimensions",
-                        "value": 64,
-                        "values": [
-                            [0, "Off (2char-initial)"],
-                            [32, "32x32"],
-                            [64, "64x64 (default)"],
-                            [128, "128x128"],
-                            [256, "256x256"],
-                            [512, "512x512"]
-                        ],
-                        "type": "select",
-                        "r_ms": true,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    var parsedVal = parseInt(page.LS.opts.avatar_size.value)
-                                    page.LS.opts.avatar_size.value = (parsedVal > 0 ? parsedVal : (parsedVal === 0 ? 0 : 64))
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "message_design_type": {
-                        "label": "Change design of messages",
-                        "desc": "Changes the design of the messages",
-                        "value": 2,
-                        "values": [
-                            [1, "Square"],
-                            [2, "Arrow at top (default)"],
-                            [3, "Arrow at middle of avatar"]
-                        ],
-                        "type": "select",
-                        "r_ms": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    var parsedVal = parseInt(page.LS.opts.message_design_type.value)
-                                    if (parsedVal === 1) {
-                                        $('#messages').removeAttr("design-type")
-                                    } else {
-                                        $('#messages').attr("design-type", parsedVal)
-                                    }
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "divider_1": "",
-                    "disable_emojis": {
-                        "label": "Disable loading of Emoji's",
-                        "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
-                        "value": false,
-                        "r_ms": true,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
+                LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+            }
 
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "seed_all_emojis": {
-                        "label": "Seed all Emoji's",
-                        "desc": "Downloads and seeds all Emoji's automatically!",
-                        "value": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    if (page.LS.opts.seed_all_emojis.value) {
-                                        page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
-                                            (res) => {
-                                                console.log(res)
-                                            })
-                                    } else {
-                                        page.cmd("OptionalHelpRemove", ["css/png"],
-                                            (res) => {
-                                                console.log(res)
-                                                page.cmd("wrapperNotification", [
-                                                    "done", "You are no longer Auto-Seeding Emoji's!", 5000
-                                                ])
-                                            })
-                                    }
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "delete_all_emojis": {
-                        "label": "Delete all Emoji's",
-                        "desc": "All Emoji's in your \"cache\" will be deleted",
-                        "value": "Delete",
-                        "type": "button",
-                        "r_ms": true,
-                        "cb": {
-                            "click": '(' + (
-                                function() {
-                                    if (page.site_info.cert_user_id !== "glightstar@zeroid.bit") {
-                                        var count = 0
-                                        page.cmd("optionalFileList", [], (data) => {
-                                            for (var x in data) {
-                                                var y = data[x]
-                                                if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
-                                                    page.cmd("optionalFileDelete", y.inner_path, (res) => {
-                                                        console.log("deleted emoji at path " + y.inner_path)
-                                                        count++
-                                                    })
-                                            }
-                                            page.cmd("wrapperNotification", [
-                                                "done", "Removed " + count + " Emoji's!", 5000
-                                            ])
-                                        })
-                                    } else {
-                                        page.cmd("wrapperNotification", [
-                                            "error", "You can't delete Emoji's!", 5000
-                                        ])
-                                        var count = 0
-                                        page.cmd("optionalFileList", [], (data) => {
-                                            console.log(data)
-                                            for (var x in data) {
-                                                var y = data[x]
-                                                if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/") {
-                                                    console.log("would have removed emoji at path " + y.inner_path)
-                                                    count++
-                                                }
-                                            }
-                                            page.cmd("wrapperNotification", [
-                                                "done", "Would have removed " + count + " Emoji's!", 5000
-                                            ])
-                                        })
-                                    }
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "divider_2": "",
-                    "reset_options_to_default": {
-                        "label": "Reset to default",
-                        "desc": "Resets all options to their default values",
-                        "value": "Reset",
-                        "type": "button",
-                        "r_ms": true,
-                        "cb": {
-                            "click": '(' + (
-                                function() {
-                                    delete page.LS.opts;
-                                    page.cmd("wrapperSetLocalStorage", page.LS, function() {});
-                                    page.setSettingsOptions();
-                                }
-                            ).toString() + ')'
-                        }
-                    }
-                }
+            if (LS.optsV !== curOptsV) {
+                page.cmd("wrapperConfirm", [
+                    "There are some new Options available, do you want to update?",
+                    "Update"
+                ], (confirmed) => {
+                    LS.optsV = curOptsV
+
+                    if (LS.hasOwnProperty("opts"))
+                        var oldOpts = LS.opts
+
+                    LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+                    page.genSettingsHTML(LS)
+                })
             }
 
             // if (oldOpts) {
@@ -1711,128 +1885,131 @@ class ThunderWave extends ZeroFrame {
             //             y2.value = y2.value
             //     }
             // }
-
             dis.LS = LS
-            var opts = LS.opts
-
-            // console.log(LS, dis.LS, opts)
+                // console.log(LS, dis.LS)
             dis.cmd("wrapperSetLocalStorage", LS, function() {})
-
-            var cntrls = {
-                "button": '<div class="col-3"><label class="form-label">Y_LABEL</label></div><div class="col-3"><button class="btn" type="button" name="sttngs-button-X" id="sttngs-button-X">Y_VALUE</button></div><div class="col-6">Y_DESC</div>',
-                "input": '<div class="col-3><label class="form-label" for="sttngs-input-X">Y_LABEL</label></div><div class="col-3"><input class="form-input" type="text" name="sttngs-input-X" id="sttngs-input-X" placeholder="X" value="Y_VALUE" /></div><div class="col-6">Y_DESC</div>',
-                "checkbox": '<div class="col-3"></div><div class="col-3"><label class="form-switch"><input type="checkbox" name="sttngs-checkbox-X" id="sttngs-checkbox-X" /><i class="form-icon"></i>Y_LABEL</label></div><div class="col-6">Y_DESC</div>',
-                "select": '<div class="col-3"><label class="form-label" for="sttngs-select-X">Y_LABEL</label></div><div class="col-3"><select class="form-select" name="sttngs-select-X" id="sttngs-select-X">Y_VALUE</select></div><div class="col-6">Y_DESC</div>'
-            }
-
-            var sHTML = $('<form class="form-horizontal"></form>');
-
-            for (var x in opts) {
-                var y = opts[x]
-
-                if (y === "") {
-                    $('<hr>').appendTo(sHTML)
-                    continue
-                }
-
-                y.type = y.type || "";
-
-                (function(x, y, cntrls) {
-                    // console.log(x, y)
-                    if (y.type === "input" || (typeof y.value === "string" && y.type === "")) {
-                        var el = $('<div class="form-group">' + (cntrls.input
-                            .replace(/X/gm, x)
-                            .replace(/Y_LABEL/gm, y.label)
-                            .replace(/Y_DESC/gm, y.desc)
-                            .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
-                        var el2 = el.find('#sttngs-input-' + x)[0]
-                        var $el2 = $(el2)
-
-                        $el2.on('change', function() {
-                            page.LS.opts[x].value = this.value
-
-                            page.LS = LS
-                            page.cmd("wrapperSetLocalStorage", page.LS, function() {})
-
-                            var r_ms = page.LS.opts[x].r_ms
-                            if (typeof eval(page.LS.opts[x].cb.change) === "function")
-                                eval(page.LS.opts[x].cb.change + '()')
-                            if (r_ms)
-                                page.loadMessages("r_ms")
-                        })
-                    } else if (y.type === "checkbox" || y.type === "switch" || (typeof y.value === "boolean" && y.type === "")) {
-                        var el = $('<div class="form-group">' + (cntrls.checkbox
-                            .replace(/X/gm, x)
-                            .replace(/Y_LABEL/gm, y.label)
-                            .replace(/Y_DESC/gm, y.desc)
-                            .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
-                        var el2 = el.find('#sttngs-checkbox-' + x)[0]
-                        var $el2 = $(el2)
-
-                        el2.checked = y.value
-
-                        $el2.on('change', function() {
-                            page.LS.opts[x].value = this.checked
-
-                            page.LS = LS
-                            page.cmd("wrapperSetLocalStorage", page.LS, function() {})
-
-                            var r_ms = page.LS.opts[x].r_ms
-                            if (typeof eval(page.LS.opts[x].cb.change) === "function")
-                                eval(page.LS.opts[x].cb.change + '()')
-                            if (r_ms)
-                                page.loadMessages("r_ms")
-                        })
-                    } else if (y.type === "select" || (y.values && y.values.constructor === Array && y.type === "")) {
-                        var valuesHTML = ''
-                        for (var vX in y.values) {
-                            var vY = y.values[vX]
-                            valuesHTML += '<option value="' + vY[0] + '">' + vY[1] + '</option>'
-                        }
-                        var el = $('<div class="form-group">' + (cntrls.select
-                            .replace(/X/gm, x)
-                            .replace(/Y_LABEL/gm, y.label)
-                            .replace(/Y_DESC/gm, y.desc)
-                            .replace(/Y_VALUE/gm, valuesHTML)) + '</div>').appendTo(sHTML)
-                        var el2 = el.find('#sttngs-select-' + x)[0]
-                        var $el2 = $(el2)
-                        $el2.val(y.value)
-
-                        $el2.on('change', function() {
-                            page.LS.opts[x].value = this.value
-
-                            page.LS = LS
-                            page.cmd("wrapperSetLocalStorage", page.LS, function() {})
-
-                            var r_ms = page.LS.opts[x].r_ms
-                            if (typeof eval(page.LS.opts[x].cb.change) === "function")
-                                eval(page.LS.opts[x].cb.change + '()')
-                            if (r_ms)
-                                page.loadMessages("r_ms")
-                        })
-                    } else if (y.type === "button") {
-                        var el = $('<div class="form-group">' + (cntrls.button
-                            .replace(/X/gm, x)
-                            .replace(/Y_LABEL/gm, y.label)
-                            .replace(/Y_DESC/gm, y.desc)
-                            .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
-                        var el2 = el.find('#sttngs-button-' + x)[0]
-                        var $el2 = $(el2)
-
-                        $el2.on('click', function() {
-                            var r_ms = page.LS.opts[x].r_ms
-                            if (typeof eval(page.LS.opts[x].cb.click) === "function")
-                                eval(page.LS.opts[x].cb.click + '()')
-                            if (r_ms)
-                                page.loadMessages("r_ms")
-                        })
-                    }
-                    // console.log(el, el2)
-                })(x, y, cntrls)
-            }
-            sHTML.appendTo('#sttngs_container')
-            $('#sttngs_container').children('.loading').remove()
+            page.genSettingsHTML(LS)
         })
+    }
+
+    genSettingsHTML(LS) {
+        $('#sttngs_container').html('<div class="icon icons loading"></div>')
+        var opts = LS.opts
+
+        var cntrls = {
+            "button": '<div class="col-3"><label class="form-label">Y_LABEL</label></div><div class="col-3"><button class="btn" type="button" name="sttngs-button-X" id="sttngs-button-X">Y_VALUE</button></div><div class="col-6">Y_DESC</div>',
+            "input": '<div class="col-3><label class="form-label" for="sttngs-input-X">Y_LABEL</label></div><div class="col-3"><input class="form-input" type="text" name="sttngs-input-X" id="sttngs-input-X" placeholder="X" value="Y_VALUE" /></div><div class="col-6">Y_DESC</div>',
+            "checkbox": '<div class="col-3"></div><div class="col-3"><label class="form-switch"><input type="checkbox" name="sttngs-checkbox-X" id="sttngs-checkbox-X" /><i class="form-icon"></i>Y_LABEL</label></div><div class="col-6">Y_DESC</div>',
+            "select": '<div class="col-3"><label class="form-label" for="sttngs-select-X">Y_LABEL</label></div><div class="col-3"><select class="form-select" name="sttngs-select-X" id="sttngs-select-X">Y_VALUE</select></div><div class="col-6">Y_DESC</div>'
+        }
+
+        var sHTML = $('<form class="form-horizontal"></form>');
+
+        for (var x in opts) {
+            var y = opts[x]
+
+            if (y === "") {
+                $('<hr>').appendTo(sHTML)
+                continue
+            }
+
+            y.type = y.type || "";
+
+            (function(x, y, cntrls) {
+                // console.log(x, y)
+                if (y.type === "input" || (typeof y.value === "string" && y.type === "")) {
+                    var el = $('<div class="form-group">' + (cntrls.input
+                        .replace(/X/gm, x)
+                        .replace(/Y_LABEL/gm, y.label)
+                        .replace(/Y_DESC/gm, y.desc)
+                        .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
+                    var el2 = el.find('#sttngs-input-' + x)[0]
+                    var $el2 = $(el2)
+
+                    $el2.on('change', function() {
+                        page.LS.opts[x].value = this.value
+
+                        page.LS = LS
+                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        var r_ms = page.LS.opts[x].r_ms
+                        if (typeof eval(page.LS.opts[x].cb.change) === "function")
+                            eval(page.LS.opts[x].cb.change + '()')
+                        if (r_ms)
+                            page.loadMessages("r_ms", true)
+                    })
+                } else if (y.type === "checkbox" || y.type === "switch" || (typeof y.value === "boolean" && y.type === "")) {
+                    var el = $('<div class="form-group">' + (cntrls.checkbox
+                        .replace(/X/gm, x)
+                        .replace(/Y_LABEL/gm, y.label)
+                        .replace(/Y_DESC/gm, y.desc)
+                        .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
+                    var el2 = el.find('#sttngs-checkbox-' + x)[0]
+                    var $el2 = $(el2)
+
+                    el2.checked = y.value
+
+                    $el2.on('change', function() {
+                        page.LS.opts[x].value = this.checked
+
+                        page.LS = LS
+                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        var r_ms = page.LS.opts[x].r_ms
+                        if (typeof eval(page.LS.opts[x].cb.change) === "function")
+                            eval(page.LS.opts[x].cb.change + '()')
+                        if (r_ms)
+                            page.loadMessages("r_ms", true)
+                    })
+                } else if (y.type === "select" || (y.values && y.values.constructor === Array && y.type === "")) {
+                    var valuesHTML = ''
+                    for (var vX in y.values) {
+                        var vY = y.values[vX]
+                        valuesHTML += '<option value="' + vY[0] + '">' + vY[1] + '</option>'
+                    }
+                    var el = $('<div class="form-group">' + (cntrls.select
+                        .replace(/X/gm, x)
+                        .replace(/Y_LABEL/gm, y.label)
+                        .replace(/Y_DESC/gm, y.desc)
+                        .replace(/Y_VALUE/gm, valuesHTML)) + '</div>').appendTo(sHTML)
+                    var el2 = el.find('#sttngs-select-' + x)[0]
+                    var $el2 = $(el2)
+                    $el2.val(y.value)
+
+                    $el2.on('change', function() {
+                        page.LS.opts[x].value = this.value
+
+                        page.LS = LS
+                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        var r_ms = page.LS.opts[x].r_ms
+                        if (typeof eval(page.LS.opts[x].cb.change) === "function")
+                            eval(page.LS.opts[x].cb.change + '()')
+                        if (r_ms)
+                            page.loadMessages("r_ms", true)
+                    })
+                } else if (y.type === "button") {
+                    var el = $('<div class="form-group">' + (cntrls.button
+                        .replace(/X/gm, x)
+                        .replace(/Y_LABEL/gm, y.label)
+                        .replace(/Y_DESC/gm, y.desc)
+                        .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
+                    var el2 = el.find('#sttngs-button-' + x)[0]
+                    var $el2 = $(el2)
+
+                    $el2.on('click', function() {
+                        var r_ms = page.LS.opts[x].r_ms
+                        if (typeof eval(page.LS.opts[x].cb.click) === "function")
+                            eval(page.LS.opts[x].cb.click + '()')
+                        if (r_ms)
+                            page.loadMessages("r_ms", true)
+                    })
+                }
+                // console.log(el, el2)
+            })(x, y, cntrls)
+        }
+        sHTML.appendTo('#sttngs_container')
+        $('#sttngs_container').children('.loading').remove()
     }
 
     verifyUserFiles(cb1, cb2) {
@@ -1914,13 +2091,28 @@ class ThunderWave extends ZeroFrame {
                     // }]
                 if (!data.hasOwnProperty("images"))
                     data.images = []
-                if (!data.hasOwnProperty("last_seen") || parseInt(moment().utc().format("x")) !== data.last_seen)
-                    data.last_seen = parseInt(moment().utc().format("x"))
+
                 if (!data.hasOwnProperty("private_messages"))
                     data.private_messages = []
-                if (!data.hasOwnProperty("public_key") || !data.public_key) {
+
+                if (data.hasOwnProperty("last_seen"))
+                    delete data.last_seen
+                if (data.hasOwnProperty("public_key"))
+                    delete data.public_key
+
+                if (!data.hasOwnProperty("extra_data") || !data.extra_data[0])
+                    data.extra_data = [{}]
+                if (!data.extra_data[0].hasOwnProperty("last_seen") || parseInt(moment().utc().format("x")) !== data.extra_data[0].last_seen)
+                    data.extra_data[0].last_seen = parseInt(moment().utc().format("x"))
+                if (!data.extra_data[0].hasOwnProperty("avatar_file_name"))
+                    data.extra_data[0].avatar_file_name = ""
+                if (!data.extra_data[0].hasOwnProperty("avatar_file_url"))
+                    data.extra_data[0].avatar_file_url = ""
+                if (!data.extra_data[0].hasOwnProperty("avatar_type"))
+                    data.extra_data[0].avatar_type = 0
+                if (!data.extra_data[0].hasOwnProperty("public_key") || !data.extra_data[0].public_key) {
                     page.cmd("userPublickey", [], (public_key) => {
-                        data.public_key = public_key
+                        data.extra_data[0].public_key = public_key
                         verifyData_2(data, olddata, cb1, cb2)
                     })
                 } else {

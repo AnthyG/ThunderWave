@@ -1,6 +1,6 @@
 {
     "db_name": "ThunderWave",
-    "db_file": "data/ThunderWave.db",
+    "db_file": "data/ThunderWave2.db",
     "version": 2,
     "maps": {
         "users/.+/data.json": {
@@ -15,11 +15,11 @@
                 {
                     "node": "private_messages",
                     "table": "private_messages"
+                },
+                {
+                    "node": "extra_data",
+                    "table": "extra_data"
                 }
-            ],
-            "to_keyvalue": [
-                "last_seen",
-                "public_key"
             ]
         },
         "users/.+/content.json": {
@@ -68,6 +68,18 @@
             ],
             "indexes": ["CREATE UNIQUE INDEX image_key ON images(json_id, date_added)"],
             "schema_changed": 7
+        },
+        "extra_data": {
+            "cols": [
+                ["last_seen", "INTEGER"],
+                ["public_key", "TEXT"],
+                ["avatar_file_name", "TEXT"],
+                ["avatar_file_url", "TEXT"],
+                ["avatar_type", "INTEGER"],
+                ["json_id", "INTEGER REFERENCES json (json_id)"]
+            ],
+            "indexes": ["CREATE UNIQUE INDEX extra_data_key ON extra_data(json_id)"],
+            "schema_changed": 6
         }
     }
 }
