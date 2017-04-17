@@ -6395,28 +6395,13 @@ class ThunderWave extends ZeroFrame {
             this.setSiteInfo(message.params)
 
             if (message.params.cert_user_id) {
-                this.identicons = this.identicons || {}
-                var asv = parseInt(page.LS.opts.avatar_size.value) || 64
-                if (!this.identicons.hasOwnProperty(asv)) {
-                    this.identicons[asv] = {}
-                }
-                if (!this.identicons.hasOwnProperty(message.params.cert_user_id)) {
-                    var uhash = stringToHex(message.params.cert_user_id).split(' ').join('')
-                    this.identicons[asv][message.params.cert_user_id] = new Identicon(uhash, {
-                        margin: 0.2,
-                        size: asv,
-                        format: 'svg'
-                    }).toString()
-                }
-                var idata = this.identicons[asv][message.params.cert_user_id]
-
-                var user_pic_1 = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
-                var user_pic_2 = '<figure class="avatar" data-initial="' + message.params.cert_user_id.substr(0, 2) + '" onclick="">' + user_pic_1 + '</figure>'
-
                 $('.hideifnotloggedin').removeClass("hide")
                 $("#select_user").html("Change user")
                 $('#current_user_name').html(message.params.cert_user_id)
-                $('#current_user_avatar').html(user_pic_2)
+
+                page.getAvatar(message.params.cert_user_id, (img) => {
+                    $('#current_user_avatar').html('<figure class="avatar" data-initial="' + message.params.cert_user_id.substr(0, 2) + '" onclick="">' + img + '</figure>')
+                })
 
                 page.genContactsList()
 
