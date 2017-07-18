@@ -135,7 +135,9 @@
                 </div>
 
                 <div id="inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
-                    <div class="hide" id="media_preview">
+                    <input class="hide form-input media_uploader" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg" />
+
+                    <div class="hide media_preview">
                         <figure class="figure">
                             <img src="" class="img-responsive img-fit-contain" alt="" />
                             <figcaption class="figure-caption text-center"></figcaption>
@@ -170,7 +172,9 @@
                 </div>
 
                 <div id="private_inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
-                    <div class="hide" id="private_media_preview">
+                    <input class="hide form-input media_uploader" is-private="true" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg" />
+
+                    <div class="hide media_preview" is-private="true">
                         <figure class="figure">
                             <img src="" class="img-responsive img-fit-contain" alt="" />
                             <figcaption class="figure-caption text-center"></figcaption>
@@ -226,8 +230,9 @@
                     <div id="about-tabs" curtab="page-1">
                         <div tab="page-1">
                             <img src="/1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky/ThunderWave_Logo1.png" class="img-responsive" style="height: 64px;" />
-                            <p><b>ThunderWave</b> (formerly Da_Net) is being developed with <span class="icons icons-heart active"></span> by <a href="/Me.Mkg20001.bit/?Profile/1oranGeS2xsKZ4jVsu9SVttzgkYXu4k9v/14K7EydgyeP84L1NKaAHBZTPQCev8BbqCy/glightstar@zeroid.bit">glightstar@zeroid.bit</a>                                and is based on <a href="https://decentralize.today/decentralized-p2p-chat-in-100-lines-of-code-d6e496034cd4" target="_blank">this</a> ZeroChat-Guide.<br> For style, it uses a work-in-progress-modified fork of <a href="https://picturepan2.github.io/spectre/"
-                                    target="_blank">Spectre.css</a> and some icons from <a href="/Me.ZeroNetwork.bit/">ZeroMe</a>.<br><a href="https://emojione.com/" target="_blank">EmojiOne</a> is used for Emoji's and for the Autocomplete-in-Message-input,
+                            <p><b>ThunderWave</b> is being developed with <span class="icons icons-heart active"></span> by <a href="/Me.Mkg20001.bit/?Profile/1oranGeS2xsKZ4jVsu9SVttzgkYXu4k9v/14K7EydgyeP84L1NKaAHBZTPQCev8BbqCy/glightstar@zeroid.bit">glightstar@zeroid.bit</a>                                and is based on <a href="https://decentralize.today/decentralized-p2p-chat-in-100-lines-of-code-d6e496034cd4" target="_blank">this</a> ZeroChat-Guide.<br> For style, it uses a <a href="https://github.com/AnthyG/spectre-dark"
+                                    target="_blank">work-in-progress-modified fork</a> of <a href="https://picturepan2.github.io/spectre/" target="_blank">Spectre.css</a> and some icons from <a href="/Me.ZeroNetwork.bit/">ZeroMe</a>.<br><a href="https://emojione.com/"
+                                    target="_blank">EmojiOne</a> is used for Emoji's and for the Autocomplete-in-Message-input,
                                 <a href="https://github.com/yuku-t/jquery-textcomplete" target="_blank">jQuery-Textcomplete</a>.<br>It uses <a href="https://github.com/krasimir/gifffer" target="_blank">Gifffer</a> for the feature of toggling the animation-state
                                 of Gifs.<br> Furthermore it makes use of <a href="https://github.com/chjj/marked" target="_blank">Marked</a> (with <a href="https://github.com/isagalaev/highlight.js" target="_blank">highlight.js</a> for Code-Syntax),<br>                                for the Avatars <a href="http://github.com/stewartlord/identicon.js" target="_blank">Identicon.js</a> (which requires <a href="http://www.xarg.org/download/pnglib.js">PNGLib</a>),
                                 <a href="https://github.com/jonathantneal/svg4everybody" target="_blank">SVG4Everybody</a>,<br> <a href="http://momentjs.com/" target="_blank">Moment.js</a> for date_time-parsing, <a href="https://github.com/jackmoore/autosize"
@@ -307,6 +312,12 @@
         </div>
     </PRESETS>-->
 
+    <!-- <script src="zerocdn.min.js"></script>
+    <script>
+        ZeroCDN.js("jquery", "2.1.4", function() {
+            console.log("jQuery loaded!");
+        });
+    </script> -->
     <script>
         function config$bH(goingback) {
             console.log("configuring bodyHeight..")
@@ -335,6 +346,16 @@
                     configIt(true)
                 }, 1000)
             })
+        }
+
+        function answer2MSG(msgkey) {
+            add2MSGInput('[' + msgkey + ']')
+
+            // if (typeof $('#tc_' + msgkey)[0] !== 'undefined') {
+            //     var toMSG = $($('#tc_' + msgkey).children('div.card-body.text-break')[0]).text()
+
+            //     add2MSGInput('> ' + toMSG + '\n\n')
+            // }
         }
 
         function add2MSGInput(text) {
@@ -562,7 +583,7 @@
                     $('.media_selector_cancel_btn' + isp).addClass('hide')
                     $('.media_selector_btn' + isp).html('<i class="icon icon-plus"></i>')
                 } else {
-                    $('.media_uploader' + isp).click();
+                    $('.media_uploader' + isp)[0].click();
                 }
             })
             $('.media_selector_cancel_btn').on('click', function() {
