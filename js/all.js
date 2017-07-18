@@ -5085,7 +5085,7 @@ class ThunderWave extends ZeroFrame {
         //         " :: " + moment(CDalreadyexistsC.children("li.message-container").first().attr("id").split("t_")[1], "x").format("MMMM Do, YYYY - HH:mm:ss"))
         // }
 
-        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#tc_' + msgkey + '">' + curtime + '</a>')
+        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="javascript:answer2MSG(' + msgkey + ');' + /*#tc_' + msgkey + '*/ '">' + curtime + '</a>')
             // var message_timestamp = ('<span class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '">' + curtime + '</span>')
         var message_parsed = marked(
                 message_escaped
@@ -6169,7 +6169,7 @@ class ThunderWave extends ZeroFrame {
             if (!page.identicons.hasOwnProperty(asv)) {
                 page.identicons[asv] = {}
             }
-            if (!page.identicons.hasOwnProperty(username)) {
+            if (!page.identicons[asv].hasOwnProperty(username)) {
                 var uhash = stringToHex(username).split(' ').join('')
                 page.identicons[asv][username] = new Identicon(uhash, {
                     margin: 0.2,
