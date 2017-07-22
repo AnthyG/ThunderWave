@@ -5200,12 +5200,12 @@ class ThunderWave extends ZeroFrame {
 
     addPrivateContact(username, cb) {
         page.listPrivateContacts(function(data, cList) {
-            // console.log(data, cList, cList.indexOf(username))
+            console.log("Encrypting username", username, data, cList, cList.indexOf(username))
             if (cList.indexOf(username) === -1) {
                 page.cmd("eciesEncrypt", [
                     username
                 ], (username2) => {
-                    console.log("ENCRYPTED USERNAME", username2)
+                    console.log(username, "> ENCRYPTED USERNAME >", username2)
 
                     // Add the new contact to data
                     var di = data.private_messages_with.push(username2)
@@ -5260,10 +5260,14 @@ class ThunderWave extends ZeroFrame {
             else
                 var data = {}
 
+            // console.log("lPC B", data)
+
             if (!data.hasOwnProperty("private_messages"))
                 data.private_messages = []
             if (!data.hasOwnProperty("private_messages_with"))
                 data.private_messages_with = []
+
+            // console.log("lPC A", data)
 
             var contacts = JSON.parse(JSON.stringify(data.private_messages_with))
 
@@ -5280,7 +5284,8 @@ class ThunderWave extends ZeroFrame {
 
                         if (x === 0) {
                             contacts = contacts.reverse()
-                            console.log("Listing private contacts", data, cList)
+
+                            // console.log("Listing private contacts", data, cList)
                             if (typeof cb === "function")
                                 cb(data, cList)
                         } else {
@@ -6353,13 +6358,13 @@ class ThunderWave extends ZeroFrame {
                 else
                     var data = {
                         "avatar_file_name": "",
-                        "avatar_file_url": "",
+                        // "avatar_file_url": "",
                         "avatar_type": 0
                     }
 
                 // console.log(data)
 
-                // avatar_file_name:""
+                // avatar_file_name:"avatar.jpg"
                 // avatar_file_url:"/Me.Mkg20001.bit/merged-ZeroMe/1oranGeS2xsKZ4jVsu9SVttzgkYXu4k9v/data/users/14K7EydgyeP84L1NKaAHBZTPQCev8BbqCy/avatar.jpg"
                 // avatar_type:0
                 // cert_user_id:"glightstar@kaffie.bit"
@@ -6380,35 +6385,197 @@ class ThunderWave extends ZeroFrame {
                 av:
                 0 /   -> use gen if gen
                 1 TW  -> use name
-                2 ZM  -> use url
+                2 ZM  -> use ~~url~~ ZeroMe
                 */
 
                 var av = parseInt(data.avatar_type),
-                    av_n = data.avatar_file_name,
-                    av_u = data.avatar_file_url,
+                    av_n = data.avatar_file_name || false,
+                    // av_u = data.avatar_file_url,
+                    av_u = false,
+                    path = false
 
-                    path = ""
+                var getPath_TW = function(callfrom) {
+                    // console.log("Setting " + username + "'s avatar-path to TW", callfrom)
 
-                // console.log(ov, ov_s, av, av_n, av_u, path)
-
-                if (ov === 0 && av >= 0 && (av_n || av_u)) {
-                    path = (av_n ? "data/" + data.directory + "/" + av_n : av_u)
-                } else if (ov === 1 && av === 1 && av_n) {
                     path = "data/" + data.directory + "/" + av_n
-                } else if (ov === 2 && av === 2 && av_u) {
-                    path = av_u + "?" + moment()
+
+                    finishGet(2.1)
+                }
+                var getPath_ZW = function(callfrom) {
+                    // console.log("Checking ZeroMe-Avatar-CORS.. ", callfrom, username, data.auth_address)
+
+                    if (page.site_info.settings.permissions.indexOf("Cors:1UDbADib99KE9d3qZ87NqJF2QLTHmMkoV") < 0) {
+                        page.cmd("corsPermission", "1UDbADib99KE9d3qZ87NqJF2QLTHmMkoV", () => {
+                            console.log("Got CORS-Permission for ZeroMe-User Registry (for avatar)")
+                            getPath_ZW2(3.1)
+                        })
+                    } else {
+                        console.log("Already have CORS-Permission for ZeroMe-User Registry (for avatar)")
+                        getPath_ZW2(3.2)
+                    }
+                }
+                var getPath_ZW2 = function(callfrom) {
+                    // console.log("ZeroMe-Avatar path.. ", callfrom, username, data.auth_address)
+
+                    if (data.hasOwnProperty("auth_address") && data.auth_address) {
+                        page.cmd("fileGet", {
+                            "inner_path": "cors-1UDbADib99KE9d3qZ87NqJF2QLTHmMkoV/data/userdb/" + data.auth_address + "/content.json",
+                            "required": false
+                        }, (data2) => {
+                            if (data2)
+                                data2 = JSON.parse(data2)
+                            else
+                                data2 = false
+
+                            // console.log("Avatar Hub-Data", data2)
+
+                            if (data2 && data2.hasOwnProperty("user") && data2.user.length > 0 && data2.user[0].hasOwnProperty("hub") && data2.user[0].hub) {
+                                var u_hub = data2.user[0].hub
+                                var avatar_type = data2.user[0].avatar
+
+                                av_u = "/" + u_hub + "/data/users/" + data.auth_address + "/avatar." + avatar_type
+                                path = av_u + "?" + moment()
+
+                                finishGet(4.1)
+                            } else {
+                                if (ov === 0 && av > 0 && av_n) {
+                                    getPath_TW(4.2)
+                                } else {
+                                    finishGet(4.2)
+                                }
+                            }
+                        })
+                    } else {
+                        if (ov === 0 && av > 0 && av_n) {
+                            getPath_TW(4.2)
+                        } else {
+                            finishGet(4.2)
+                        }
+                    }
+                }
+                var finishGet = function(callfrom) {
+                    // console.log("Avatar path.. ", callfrom, username, data.auth_address, ov, ov_s, av, "av_n=" + av_n, "av_u=" + av_u, "path=" + path)
+
+                    if (path) {
+                        if (typeof cb === "function")
+                            cb("<img src='" + path + "' />", ov, ov_s, av, av_n, av_u, path)
+                    } else if (ov_s !== 0) {
+                        if (typeof cb === "function")
+                            cb(avatarGen(), ov, ov_s, av, av_n, av_u, path)
+                    } else {
+                        if (typeof cb === "function")
+                            cb("", ov, ov_s, av, av_n, av_u, path)
+                    }
                 }
 
-                if (path) {
-                    if (typeof cb === "function")
-                        cb("<img src='" + path + "' />", ov, ov_s, av, av_n, av_u, path)
-                } else if (ov_s !== 0) {
-                    if (typeof cb === "function")
-                        cb(avatarGen(), ov, ov_s, av, av_n, av_u, path)
+                // console.log("Checking for " + username + "'s avatar.. ", ov, av, "av_n=" + av_n)
+                if (ov === 0 && av > 0) {
+                    if (av === 1 && av_n) {
+                        // TW
+                        getPath_TW(1.1)
+                    } else if (av === 2 || !av_n) {
+                        // ZM
+                        getPath_ZW(1.2)
+                    } else {
+                        // GEN
+                        finishGet(1.3)
+                    }
+                } else if (ov === 1 && av > -1 && av_n) {
+                    // TW
+                    getPath_TW(1.4)
+                } else if (ov === 2 && av > 0) {
+                    // ZM
+                    getPath_ZW(1.5)
                 } else {
-                    if (typeof cb === "function")
-                        cb("", ov, ov_s, av, av_n, av_u, path)
+                    // GEN
+                    finishGet(1.6)
                 }
+
+
+
+                // var pf1 = function() {
+                //     console.log("Checking for " + username + "'s avatar.. ", ov, av, av_n)
+                //     if (ov === 0 && av >= 0 && (av_n || true /*|| av_u*/ )) {
+                //         if (av_n) {
+                //             path = "data/" + data.directory + "/" + av_n
+                //             pf4(1.1)
+                //         } else {
+                //             pf2(1.1)
+                //         }
+
+                //         // path = (av_n ? "data/" + data.directory + "/" + av_n : av_u)
+                //     } else if (ov === 1 && av === 1 && av_n) {
+                //         path = "data/" + data.directory + "/" + av_n
+
+                //         pf4(1.2)
+                //     } else if (ov === 2 && av === 2 /* && av_u*/ ) {
+                //         pf2(1.2)
+
+                //         // path = av_u + "?" + moment()
+                //     } else {
+                //         console.log("Check for " + username + "'s avatar failed!")
+
+                //         pf4(1.3)
+                //     }
+                // }
+                // var pf2 = function(callfrom) {
+                //     console.log("Checking ZeroMe-Avatar-CORS.. ", callfrom, username, data.auth_address)
+                //     if (page.site_info.settings.permissions.indexOf("Cors:1UDbADib99KE9d3qZ87NqJF2QLTHmMkoV") < 0) {
+                //         page.cmd("corsPermission", "1UDbADib99KE9d3qZ87NqJF2QLTHmMkoV", () => {
+                //             console.log("Got CORS-Permission for ZeroMe-User Registry (for avatar)")
+                //             pf3(2.1)
+                //         })
+                //     } else {
+                //         console.log("Already have CORS-Permission for ZeroMe-User Registry (for avatar)")
+                //         pf3(2.2)
+                //     }
+                // }
+                // var pf3 = function(callfrom) {
+                //     console.log("ZeroMe-Avatar path.. ", callfrom, username, data.auth_address)
+                //     if (data.hasOwnProperty("auth_address") && data.auth_address) {
+                //         page.cmd("fileGet", {
+                //             "inner_path": "cors-1UDbADib99KE9d3qZ87NqJF2QLTHmMkoV/data/userdb/" + data.auth_address + "/content.json",
+                //             "required": false
+                //         }, (data2) => {
+                //             if (data2)
+                //                 data2 = JSON.parse(data2)
+                //             else
+                //                 data2 = false
+
+                //             console.log("Avatar Hub-Data", data2)
+
+                //             if (data2 && data2.hasOwnProperty("user") && data2.user.length > 0 && data2.user[0].hasOwnProperty("hub") && data2.user[0].hub) {
+                //                 var u_hub = data2.user[0].hub
+                //                 var avatar_type = data2.user[0].avatar
+
+                //                 av_u = "/" + u_hub + "/data/users/" + data.auth_address + "/avatar." + avatar_type
+                //                 path = av_u + "?" + moment()
+
+                //                 pf4(3.1)
+                //             } else {
+                //                 pf4(3.2)
+                //             }
+                //         })
+                //     } else {
+                //         pf4(3.3)
+                //     }
+                // }
+                // var pf4 = function(callfrom) {
+                //     console.log("Avatar path.. ", callfrom, username, data.auth_address, ov, ov_s, av, "av_n=" + av_n, "av_u=" + av_u, "path=" + path)
+
+                //     if (path) {
+                //         if (typeof cb === "function")
+                //             cb("<img src='" + path + "' />", ov, ov_s, av, av_n, av_u, path)
+                //     } else if (ov_s !== 0) {
+                //         if (typeof cb === "function")
+                //             cb(avatarGen(), ov, ov_s, av, av_n, av_u, path)
+                //     } else {
+                //         if (typeof cb === "function")
+                //             cb("", ov, ov_s, av, av_n, av_u, path)
+                //     }
+                // }
+
+                // pf1()
             })
         }
     }
@@ -7014,6 +7181,8 @@ class ThunderWave extends ZeroFrame {
     }
 
     verifyUserFiles(cb1, cb2) {
+        console.log("Verifying User Files...")
+
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
         var data2_inner_path = "data/users/" + this.site_info.auth_address + "/data_private.json"
         var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
@@ -7103,12 +7272,19 @@ class ThunderWave extends ZeroFrame {
 
                 if (!data.hasOwnProperty("extra_data") || !data.extra_data[0])
                     data.extra_data = [{}]
-                if (!data.extra_data[0].hasOwnProperty("last_seen") || parseInt(moment().utc().format("x")) !== data.extra_data[0].last_seen)
+                if (!data.extra_data[0].hasOwnProperty("last_seen") /*|| parseInt(moment().utc().format("x")) !== data.extra_data[0].last_seen*/ )
                     data.extra_data[0].last_seen = parseInt(moment().utc().format("x"))
                 if (!data.extra_data[0].hasOwnProperty("avatar_file_name"))
                     data.extra_data[0].avatar_file_name = ""
-                if (!data.extra_data[0].hasOwnProperty("avatar_file_url"))
-                    data.extra_data[0].avatar_file_url = ""
+
+                // if (!data.extra_data[0].hasOwnProperty("avatar_file_url"))
+                //     data.extra_data[0].avatar_file_url = ""
+                // if (data.extra_data[0].hasOwnProperty("avatar_file_url"))
+                //     delete data.extra_data[0]["avatar_file_url"]
+
+                if (!data.extra_data[0].hasOwnProperty("auth_address"))
+                    data.extra_data[0].auth_address = page.site_info.auth_address
+
                 if (!data.extra_data[0].hasOwnProperty("avatar_type"))
                     data.extra_data[0].avatar_type = 0
                 if (!data.extra_data[0].hasOwnProperty("public_key") || !data.extra_data[0].public_key) {
@@ -7125,11 +7301,15 @@ class ThunderWave extends ZeroFrame {
         function verifyData_2(data, olddata, cb1, cb2) {
             console.log("VERIFIED data.json", olddata, data)
 
-            var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
-            var json_rawA = btoa(json_raw)
-
             if (JSON.stringify(data) !== JSON.stringify(olddata)) {
                 console.log("data.json HAS RECEIVED A UPDATE!")
+
+                if (parseInt(moment().utc().format("x")) !== data.extra_data[0].last_seen)
+                    data.extra_data[0].last_seen = parseInt(moment().utc().format("x"))
+
+                var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                var json_rawA = btoa(json_raw)
+
                 page.cmd("fileWrite", [
                     data_inner_path,
                     json_rawA
@@ -7138,7 +7318,7 @@ class ThunderWave extends ZeroFrame {
                         console.log("data.json HAS BEEN UPDATED!")
 
                         if (typeof cb1 === "function")
-                            cb1(data, olddata)
+                            cb1(data, olddata, true)
                         verifyContent(data, olddata, cb2)
                     } else {
                         page.cmd("wrapperNotification", [
@@ -7146,8 +7326,11 @@ class ThunderWave extends ZeroFrame {
                         ])
                     }
                 })
-            } else
+            } else {
+                if (typeof cb1 === "function")
+                    cb1(data, olddata, false)
                 verifyContent(data, olddata, cb2)
+            }
         }
 
         function verifyContent(data, olddata, cb2) {
@@ -7169,11 +7352,12 @@ class ThunderWave extends ZeroFrame {
                     data2.ignore = curignore
                 console.log("VERIFIED content.json", olddata2, data2)
 
-                var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
-                var json_rawA2 = btoa(json_raw2)
-
                 if (JSON.stringify(data2) !== JSON.stringify(olddata2) || JSON.stringify(data) !== JSON.stringify(olddata)) {
                     console.log("content.json HAS RECEIVED A UPDATE!")
+
+                    var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
+                    var json_rawA2 = btoa(json_raw2)
+
                     page.cmd("fileWrite", [
                         content_inner_path,
                         json_rawA2
@@ -7181,7 +7365,7 @@ class ThunderWave extends ZeroFrame {
                         if (res == "ok") {
                             console.log("content.json HAS BEEN UPDATED!")
                             if (typeof cb2 === "function")
-                                cb2(data2, olddata2)
+                                cb2(data2, olddata2, true)
                             page.cmd("siteSign", {
                                 "inner_path": content_inner_path
                             }, (res) => {
@@ -7193,6 +7377,7 @@ class ThunderWave extends ZeroFrame {
                                     if (data.messages.length === 1)
                                         page.cmd("wrapperNotification", [
                                             "done", "Your first message was sent successfully! :)"
+                                            // "done", "Everything is set up! You are ready to go. :)"
                                         ])
                                 })
                             })
@@ -7202,6 +7387,9 @@ class ThunderWave extends ZeroFrame {
                             ])
                         }
                     })
+                } else {
+                    if (typeof cb2 === "function")
+                        cb2(data2, olddata2, false)
                 }
             })
         }
