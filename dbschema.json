@@ -73,13 +73,14 @@
             "cols": [
                 ["last_seen", "INTEGER"],
                 ["public_key", "TEXT"],
+                ["auth_address", "TEXT"],
                 ["avatar_file_name", "TEXT"],
                 ["avatar_file_url", "TEXT"],
                 ["avatar_type", "INTEGER"],
                 ["json_id", "INTEGER REFERENCES json (json_id)"]
             ],
             "indexes": ["CREATE UNIQUE INDEX extra_data_key ON extra_data(json_id)"],
-            "schema_changed": 6
+            "schema_changed": 7
         }
     }
 }
