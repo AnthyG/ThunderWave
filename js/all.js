@@ -6716,13 +6716,13 @@ class ThunderWave extends ZeroFrame {
             this.site_info = message.params // Save site info data to allow access it later
             this.setSiteInfo(message.params)
 
-            if (message.params.cert_user_id) {
+            if (this.site_info.cert_user_id) {
                 $('.hideifnotloggedin').removeClass("hide")
                 $("#select_user").html("Change user")
-                $('#current_user_name').html(message.params.cert_user_id)
+                $('#current_user_name').html(this.site_info.cert_user_id)
 
-                page.getAvatar(message.params.cert_user_id, (img) => {
-                    $('#current_user_avatar').html('<figure class="avatar" data-initial="' + message.params.cert_user_id.substr(0, 2) + '" onclick="">' + img + '</figure>')
+                page.getAvatar(this.site_info.cert_user_id, (img) => {
+                    $('#current_user_avatar').html('<figure class="avatar" data-initial="' + this.site_info.cert_user_id.substr(0, 2) + '" onclick="">' + img + '</figure>')
                 })
 
                 page.genContactsList()
@@ -7272,7 +7272,7 @@ class ThunderWave extends ZeroFrame {
 
                 if (!data.hasOwnProperty("extra_data") || !data.extra_data[0])
                     data.extra_data = [{}]
-                if (!data.extra_data[0].hasOwnProperty("last_seen") /*|| parseInt(moment().utc().format("x")) !== data.extra_data[0].last_seen*/ )
+                if (!data.extra_data[0].hasOwnProperty("last_seen") || parseInt(moment().utc().format("x")) !== data.extra_data[0].last_seen)
                     data.extra_data[0].last_seen = parseInt(moment().utc().format("x"))
                 if (!data.extra_data[0].hasOwnProperty("avatar_file_name"))
                     data.extra_data[0].avatar_file_name = ""
