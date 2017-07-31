@@ -4989,7 +4989,7 @@ function dropdownToggleOnFocus(dropdownElem) {
     }
 }
 
-function dropdownToggleClick(dropdownElem) {
+function dropdownToggleOnMouseDown(dropdownElem) {
     dropdownElem.toggleClass('active');
 }
 
