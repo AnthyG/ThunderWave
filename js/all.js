@@ -4995,6 +4995,22 @@ function hasClass(element, cls) {
     return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 }
 
+function dropdownToggleOnFocus(dropdownElem) {
+    if (!hasClass(dropdownElem, 'active')) {
+        toggleClass(dropdownElem, 'active');
+    }
+}
+
+function dropdownToggleClick(dropdownElem) {
+    toggleClass(dropdownElem, 'active');
+}
+
+function dropdownToggleOnBlur(dropdownElem) {
+    if (hasClass(dropdownElem, 'active')) {
+        toggleClass(dropdownElem, 'active');
+    }
+}
+
 
 
 class ThunderWave extends ZeroFrame {

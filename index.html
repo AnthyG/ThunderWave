@@ -62,7 +62,7 @@
                         <!--<a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
                             Menu <i class="icon icon-caret"></i>
                         </a>-->
-                        <button class="btn btn-primary btn-action btn-lg btn-link" tabindex="0" onclick="toggleClass(document.getElementById('menu-dropdown'), 'active');">
+                        <button class="btn btn-primary btn-action btn-lg btn-link" tabindex="0" onfocus="dropdownToggleOnFocus(this.parentNode);" onmousedown="dropdownToggleClick(this.parentNode);" onblur="dropdownToggleOnBlur(this.parentNode)">
                             <i class="icon icon-menu"></i>
                         </button>
                         <ul class="menu">
