@@ -286,17 +286,18 @@
         (function() {
             $("body").addClass("loaded")
 
-            $("#dropdown-toggle").on("focus", function() {
+            var dropdownToggle = $("#dropdown-toggle");
+            dropdownToggle.on("focus", function() {
                 if (!$(this).parent().hasClass('active')) {
                     $(this).parent().toggleClass('active');
                 }
             });
 
-            $("#dropdown-toggle").on("mousedown", function() {
+            dropdownToggle.on("mousedown", function() {
                 $(this).parent().toggleClass('active');
             });
 
-            $("#dropdown-toggle").on("blur", function() {
+            dropdownToggle.on("blur", function() {
                 if ($(this).parent().hasClass('active')) {
                     $(this).parent().toggleClass('active');
                 }
