@@ -122,22 +122,6 @@ markedR.image = function(href, title, text) {
     return '<div id="MEDIAFILEREPLACE_' + uh + '" class="icon icons loading"></div>'
 }
 
-function dropdownToggleOnFocus(dropdownElem) {
-    if (!dropdownElem.hasClass('active')) {
-        dropdownElem.toggleClass('active');
-    }
-}
-
-function dropdownToggleOnMouseDown(dropdownElem) {
-    dropdownElem.toggleClass('active');
-}
-
-function dropdownToggleOnBlur(dropdownElem) {
-    if (dropdownElem.hasClass('active')) {
-        dropdownElem.toggleClass('active');
-    }
-}
-
 
 
 class ThunderWave extends ZeroFrame {
