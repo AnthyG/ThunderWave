@@ -4983,31 +4983,19 @@ markedR.image = function(href, title, text) {
     return '<div id="MEDIAFILEREPLACE_' + uh + '" class="icon icons loading"></div>'
 }
 
-function toggleClass(element, className) {
-    if (hasClass(element, className)) {
-        element.className = element.className.replace(new RegExp('(?:^|\\s)' + className + '(?:\\s|$)'), '');
-    } else {
-        element.className += " " + className;
-    }
-}
-
-function hasClass(element, cls) {
-    return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
-}
-
 function dropdownToggleOnFocus(dropdownElem) {
-    if (!hasClass(dropdownElem, 'active')) {
-        toggleClass(dropdownElem, 'active');
+    if (!dropdownElem.hasClass('active')) {
+        dropdownElem.toggleClass('active');
     }
 }
 
 function dropdownToggleClick(dropdownElem) {
-    toggleClass(dropdownElem, 'active');
+    dropdownElem.toggleClass('active');
 }
 
 function dropdownToggleOnBlur(dropdownElem) {
-    if (hasClass(dropdownElem, 'active')) {
-        toggleClass(dropdownElem, 'active');
+    if (dropdownElem.hasClass('active')) {
+        dropdownElem.toggleClass('active');
     }
 }
 
