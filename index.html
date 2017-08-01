@@ -62,7 +62,7 @@
                         <!--<a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
                             Menu <i class="icon icon-caret"></i>
                         </a>-->
-                        <button id="dropdown-toggle" class="btn btn-primary btn-action btn-lg btn-link" tabindex="0">
+                        <button class="btn btn-primary btn-action btn-lg btn-link dropdown-btn" tabindex="0">
                             <i class="icon icon-menu"></i>
                         </button>
                         <ul class="menu">
@@ -286,7 +286,7 @@
         (function() {
             $("body").addClass("loaded")
 
-            var dropdownToggle = $("#dropdown-toggle");
+            var dropdownToggle = $(".dropdown-btn");
             dropdownToggle.on("focus", function() {
                 if (!$(this).parent().hasClass('active')) {
                     $(this).parent().toggleClass('active');
