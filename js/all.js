@@ -5963,7 +5963,9 @@ class ThunderWave extends ZeroFrame {
         return false
     }
 
-    uploadMedia(cb) {
+    uploadMedia(isp, cb) {
+        var isp = isp || '[is-private!="true"]'
+
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -5974,7 +5976,7 @@ class ThunderWave extends ZeroFrame {
             return false
         }
 
-        var files = $('#media_uploader')[0].files;
+        var files = $('.media_uploader' + isp)[0].files;
         if (!files)
             return false
 
@@ -5985,18 +5987,20 @@ class ThunderWave extends ZeroFrame {
 
         this.verifyUserFiles()
 
+        console.log("MUP >> 3.0 :: " + isp, files);
+
         for (var fX in files) {
             var fY = files[fX]
-                // console.log(fX, fY)
+            console.log("MUP >> 3.1 :: ", fX, fY)
 
             if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\/(png|jpg|jpeg|gif)|(audio)\/(mp3|ogg)|(video)\/(ogg)')) // |audio|video      || !fY.name.match(/\.IMAGETYPE$/gm)
                 continue
 
             var reader = new FileReader()
             reader.onload = (function(f2) {
-                // console.log("reading", f2)
+                console.log("MUP >> 3.2.0 :: reading", f2)
                 return function(event) {
-                    // console.log("with event", event)
+                    console.log("MUP >> 3.2.1 :: with event", event)
 
                     var f_data = btoa(event.target.result)
 
@@ -6043,7 +6047,7 @@ class ThunderWave extends ZeroFrame {
                                         f_data
                                     ], (res) => {
                                         if (res == "ok") {
-                                            var ctrl = $('#media_uploader')[0]
+                                            var ctrl = $('.media_uploader' + isp)[0]
                                             try {
                                                 ctrl.value = null;
                                             } catch (ex) {}
@@ -6058,14 +6062,14 @@ class ThunderWave extends ZeroFrame {
                                             ], (res) => {
                                                 if (res == "ok") {
                                                     var output_url = '/' + page.site_info.address + '/' + f_path
-                                                    console.log(output_url, f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
+                                                    console.log("MUP >> 3.2.2 :: ", output_url, f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                     if (f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                         var rtrn = ' ![ALTTEXT](' + output_url + ') '
                                                     else
                                                         var rtrn = ' [TITLE](' + output_url + ') '
 
                                                     // Publish the file to other users
-                                                    this.verifyUserFiles()
+                                                    page.verifyUserFiles()
 
                                                     if (typeof cb === "function")
                                                         cb(rtrn)

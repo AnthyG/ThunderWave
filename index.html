@@ -506,7 +506,7 @@
 
 
             function readMedia(e, isp) {
-                var isp = isp || ''
+                var isp = isp || '[is-private!="true"]'
 
                 // Check for the various File API support.
                 if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
@@ -516,20 +516,22 @@
 
                 var files = e.target.files
 
+                console.log("MUP >> 2.0 :: " + isp, files);
+
                 $('#media_list').html("")
                 var first = true
                 for (var fX in files) {
                     var fY = files[fX]
-                    console.log(fX, fY)
+                    console.log("MUP >> 2.1 :: ", fX, fY)
 
                     if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\.(png|jpg|jpeg|gif)*')) // !first ||      |audio|video
                         continue
 
                     var reader = new FileReader()
                     reader.onload = (function(f2) {
-                        console.log("reading", f2)
+                        console.log("MUP >> 2.2.0 :: reading", f2)
                         return function(event) {
-                            console.log("with event", event)
+                            console.log("MUP >> 2.2.1 :: with event", event)
 
                             // if (!page.hasOwnProperty("MediaFiles"))
                             //     page.MediaFiles = []
@@ -551,30 +553,32 @@
 
                             var el = $('<li><b>' + escape(f2.name) + '</b> (' + (f2.type || 'n/a') + ') - ' + f2.size + ' bytes, last modified: ' + (f2.lastModifiedDate ? f2.lastModifiedDate.toLocaleDateString() : 'n/a') + '<br>' + (media ? media : '<i>NO PREVIEW</i>') + '</li>')
                             el.appendTo('#media_list')
-                            console.log("and element", el, $('#media_list')[0])
+                            console.log("MUP >> 2.2.2 :: and element", el, $('#media_list')[0])
                         }
                     })(fY)
                     reader.readAsDataURL(fY)
                 }
             }
             $('.media_uploader').on('change', function(e) {
-                var isp = ($(this).attr("is-private") ? '[is-private]' : '')
-                console.log($('.media_uploader' + isp)[0].files)
+                var isp = ($(this).attr("is-private") ? '[is-private="true"]' : '[is-private!="true"]')
+                console.log("MUP >> 1.0 :: " + isp, $('.media_uploader' + isp)[0].files)
                 if ($('.media_uploader' + isp)[0].files[0]) {
+                    console.log("MUP >> 1.1.0 :: ", $('.media_uploader' + isp)[0].files[0])
                     $('.media_selector_btn' + isp).html('<i class="icon icon-upload"></i>')
                     $('.media_selector_cancel_btn' + isp).removeClass('hide')
                     readMedia(e, isp)
                 } else {
+                    console.log("MUP >> 1.1.1 :: ", $('.media_uploader' + isp)[0].files[0])
                     $('.media_preview' + isp).addClass("hide")
                     $('.media_selector_cancel_btn' + isp).addClass('hide')
                 }
             })
 
-            $('.media_upload_btn').on('click', function() {
-                var isp = ($(this).attr("is-private") ? '[is-private]' : '')
+            $('#media_upload_btn').on('click', function() {
+                var isp = ($(this).attr("is-private") ? '[is-private="true"]' : '[is-private!="true"]')
                 if ($('.media_uploader' + isp)[0].files[0]) {
-                    page.uploadMedia(function(rtrn) {
-                        if (isp)
+                    page.uploadMedia(isp, function(rtrn) {
+                        if (isp === '[is-private="true"]')
                             add2PMSGInput(rtrn)
                         else
                             add2MSGInput(rtrn)
@@ -588,10 +592,12 @@
             })
 
             $('.media_selector_btn').on('click', function() {
-                var isp = ($(this).attr("is-private") ? '[is-private]' : '')
+                var isp = ($(this).attr("is-private") ? '[is-private="true"]' : '[is-private!="true"]')
+                console.log("MUP >> 0.0 :: " + isp)
                 if ($('.media_uploader' + isp)[0].files[0]) {
-                    page.uploadMedia(function(rtrn) {
-                        if (isp)
+                    console.log("MUP >> 0.1.0 :: ", $('.media_uploader' + isp)[0].files[0])
+                    page.uploadMedia(isp, function(rtrn) {
+                        if (isp === '[is-private="true"]')
                             add2PMSGInput(rtrn)
                         else
                             add2MSGInput(rtrn)
@@ -600,11 +606,12 @@
                     $('.media_selector_cancel_btn' + isp).addClass('hide')
                     $('.media_selector_btn' + isp).html('<i class="icon icon-plus"></i>')
                 } else {
+                    console.log("MUP >> 0.1.1 :: ", $('.media_uploader' + isp)[0].files[0])
                     $('.media_uploader' + isp)[0].click();
                 }
             })
             $('.media_selector_cancel_btn').on('click', function() {
-                var isp = ($(this).attr("is-private") ? '[is-private]' : '')
+                var isp = ($(this).attr("is-private") ? '[is-private="true"]' : '[is-private!="true"]')
                 var ctrl = $('.media_uploader' + isp)[0]
                 try {
                     ctrl.value = null;
