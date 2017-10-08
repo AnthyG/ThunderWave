@@ -1905,7 +1905,7 @@ class ThunderWave extends ZeroFrame {
             var LS = (typeof LS === "object" ? (LS || {}) : {})
 
             // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
-            var curOptsV = 11
+            var curOptsV = 12
             var defaultOpts = {
                 // "parse_links": {
                 //     "label": "Parse Links", // The Label of this option
@@ -1927,6 +1927,37 @@ class ThunderWave extends ZeroFrame {
                 //         ).toString() + ')'
                 //     }
                 // },
+                "feed_notifications": {
+                    "label": "Notifications in ZeroHello-Feed",
+                    "desc": "Activate, to get notifications in the ZeroHello-Feed",
+                    "value": false,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                if (page.LS.opts.feed_notifications.value) {
+                                    page.cmd("feedFollow", [{
+                                        "Mentions": [
+                                            "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
+                                                ""
+                                            ]
+                                        ],
+                                        "Messages": [
+                                            "SELECT messages.message_id AS event_uri, 'comment' AS type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id)", [
+                                                ""
+                                            ]
+                                        ]
+                                    }])
+                                } else {
+                                    page.cmd("feedFollow", [
+                                        {}
+                                    ])
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "divider_3": "",
                 "parse_profile_links": {
                     "label": "Parse Profile Links",
                     "desc": "Activate to parse profile links in messages (@...)",
@@ -2182,6 +2213,46 @@ class ThunderWave extends ZeroFrame {
                         var oldOpts = LS.opts
 
                     LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+
+                    for (var optX in LS.opts) {
+                        var optY = LS.opts[optX]
+
+                        if (oldOpts.hasOwnProperty(optX) && typeof optY !== "string")
+                            var OoptY = oldOpts[optX]
+                        else
+                            continue
+
+                        if (typeof OoptY.value === typeof optY.value || OoptY.type === optY.type) {
+                            var hasvalue = false
+                            if (optY.hasOwnProperty("values") && OoptY.hasOwnProperty("values")) {
+                                for (var optYvalsX in optY.values) {
+                                    var optYvalsY = optY.values[optYvalsX]
+                                    if (optYvalsY[0] === OoptY.value) {
+                                        hasvalue = true
+
+                                        break
+                                    } else {
+                                        continue
+                                    }
+                                }
+                            } else if (optY.hasOwnProperty("values") || OoptY.hasOwnProperty("values")) {
+                                continue
+                            } else {
+                                hasvalue = true
+                            }
+
+                            if (hasvalue) {
+                                optY.value = OoptY.value
+
+                                if (optY.cb.hasOwnProperty("change") && typeof eval(optY.cb.change) === "function") {
+                                    eval(optY.cb.change + '()')
+                                }
+                            }
+                        }
+
+                        LS.opts[optX] = optY
+                    }
+
                     page.genSettingsHTML(LS)
                 })
             }
