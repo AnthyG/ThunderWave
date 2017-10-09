@@ -6766,7 +6766,7 @@ class ThunderWave extends ZeroFrame {
             var LS = (typeof LS === "object" ? (LS || {}) : {})
 
             // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
-            var curOptsV = 12
+            var curOptsV = 14
             var defaultOpts = {
                 // "parse_links": {
                 //     "label": "Parse Links", // The Label of this option
@@ -6791,12 +6791,27 @@ class ThunderWave extends ZeroFrame {
                 "feed_notifications": {
                     "label": "Notifications in ZeroHello-Feed",
                     "desc": "Activate, to get notifications in the ZeroHello-Feed",
-                    "value": false,
+                    "value": 0,
+                    "values": [
+                        [0, "Off"],
+                        [1, "Only mentions"],
+                        [2, "All messages"]
+                    ],
+                    "type": "select",
                     "r_ms": false,
                     "cb": {
                         "change": '(' + (
                             function() {
-                                if (page.LS.opts.feed_notifications.value) {
+                                var parsedVal = parseInt(page.LS.opts.feed_notifications.value)
+                                if (parsedVal === 1) {
+                                    page.cmd("feedFollow", [{
+                                        "Mentions": [
+                                            "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
+                                                ""
+                                            ]
+                                        ]
+                                    }])
+                                } else if (parsedVal === 2) {
                                     page.cmd("feedFollow", [{
                                         "Mentions": [
                                             "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
