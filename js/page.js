@@ -380,7 +380,11 @@ class ThunderWave extends ZeroFrame {
     genContactsList() {
         page.listPrivateContacts(function(data, cList) {
             var $pcl = $('#private_contacts_list')
+
             $pcl.html("")
+
+            // $pcl.append('<li class="tab-item">|</li>')
+
             for (var x in cList) {
                 var y = cList[x]
                 $pcl.append('<li class="tab-item"><a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');">' + y + '</a></li>')
@@ -399,18 +403,18 @@ class ThunderWave extends ZeroFrame {
             else
                 var data = {}
 
-            // console.log("lPC B", data)
+            console.log("lPC B", data)
 
             if (!data.hasOwnProperty("private_messages"))
                 data.private_messages = []
             if (!data.hasOwnProperty("private_messages_with"))
                 data.private_messages_with = []
 
-            // console.log("lPC A", data)
+            console.log("lPC A", data)
 
             var contacts = JSON.parse(JSON.stringify(data.private_messages_with))
 
-            // console.log("Listing contacts.. ", data.private_messages_with, data.private_messages_with.length, contacts, contacts.length)
+            console.log("Listing contacts.. ", data.private_messages_with, data.private_messages_with.length, contacts, contacts.length)
             if (contacts.length > 0) {
                 var addC = function(x) {
                     var x = x - 1
@@ -424,7 +428,7 @@ class ThunderWave extends ZeroFrame {
                         if (x === 0) {
                             contacts = contacts.reverse()
 
-                            // console.log("Listing private contacts", data, cList)
+                            console.log("Listing private contacts", data, cList)
                             if (typeof cb === "function")
                                 cb(data, cList)
                         } else {
@@ -486,7 +490,7 @@ class ThunderWave extends ZeroFrame {
         var curdate3 = (curdate === rcurdate ? "Today" : (moment(rcurdate, "MMMM Do, YYYY").subtract(1, "d").format("MMMM Do, YYYY") === curdate ? "Yesterday" : curdate));
         var CDalreadyexists = $("#private_messages").find('[P_timestamp-date="' + curdate2 + '"]')[0] || false
 
-        console.log("Adding PMSG", msgkey, username, message, date_added, addattop, curdate, curtime)
+        // console.log("Adding PMSG", msgkey, username, message, date_added, addattop, curdate, curtime)
 
         var users_own_message = (username === page.site_info.cert_user_id)
         var user_is_mentioned = (message_escaped.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
@@ -659,24 +663,31 @@ class ThunderWave extends ZeroFrame {
                             ], (res2) => {
                                 if (res2 == "ok") {
                                     page.addPrivateContact(recipient, function(data2, cList) {
+                                        console.log("DATA2 0", JSON.parse(JSON.stringify(data2)), cList);
                                         page.genContactsList()
+
+                                        console.log("DATA2 1", JSON.parse(JSON.stringify(data2)))
 
                                         // page.cmd("fileGet", {
                                         //     "inner_path": data2_inner_path,
                                         //     "required": false
                                         // }, (data2) => {
 
-                                        var data2 = data2 || {}
+                                        var data2 = data2 ? JSON.parse(JSON.stringify(data2)) : {}
 
                                         // if (data2)
-                                        //     var data2 = JSON.parse(data2)
+                                        //     var data2 = JSON.parse(JSON.stringify(data2))
                                         // else
                                         //     var data2 = {}
 
+                                        console.log("DATA2 2", JSON.parse(JSON.stringify(data2)))
+
                                         if (!data2.hasOwnProperty("private_messages"))
                                             data2.private_messages = []
-                                        if (!data.hasOwnProperty("private_messages_with"))
+                                        if (!data2.hasOwnProperty("private_messages_with"))
                                             data2.private_messages_with = []
+
+                                        console.log("DATA2 3", JSON.parse(JSON.stringify(data2)))
 
                                         page.cmd("eciesEncrypt", [
                                             JSON.stringify({
@@ -777,7 +788,7 @@ class ThunderWave extends ZeroFrame {
         page.cmd("dbQuery", [
             "SELECT * FROM private_messages LEFT JOIN json USING (json_id) WHERE cert_user_id = '" + sender + "'"
         ], (messages1) => {
-            console.log(messages1)
+            // console.log(messages1)
 
             var $m = $('#private_messages')
 
@@ -797,7 +808,7 @@ class ThunderWave extends ZeroFrame {
                 "data/users/" + page.site_info.auth_address + "/data_private.json",
                 "private_messages"
             ], (messages2) => {
-                console.log(messages2)
+                // console.log(messages2)
 
                 var first = true
 
@@ -805,10 +816,10 @@ class ThunderWave extends ZeroFrame {
 
                 var checkLoops = function(l, x) {
                     if (eval("messages" + l + ".length > x + 1")) {
-                        console.log("Continuing " + l + ".. ", eval("messages" + l + ".length"), x + 1)
+                        // console.log("Continuing " + l + ".. ", eval("messages" + l + ".length"), x + 1)
                         eval("loop" + l + "(x + 1)")
                     } else {
-                        console.log("Stopped " + l + ".")
+                        // console.log("Stopped " + l + ".")
                         if (l === 1 && sender !== page.site_info.cert_user_id) {
                             checkLoops(2, -1)
                         } else {
@@ -838,29 +849,6 @@ class ThunderWave extends ZeroFrame {
                             }
                         }
                     }
-
-                    // if (l === 1) {
-                    //     if (messages1.length > x + 1) {
-                    //         console.log("Continuing.. ", messages1.length, x + 1)
-                    //         loop1(x1 + 1)
-                    //     } else {
-                    //         console.log("Stopped.")
-
-                    //         if (sender !== page.site_info.cert_user_id && messages2.length > 0) {
-                    //             console.log("Starting Own...", messages2.length)
-                    //             loop2(0)
-                    //         } else {
-                    //             console.log(sender, page.site_info.cert_user_id, messages2.length)
-                    //         }
-                    //     }
-                    // } else if (l === 2) {
-                    //     if (messages2.length > x2 + 1) {
-                    //         console.log("Continuing Own.. ", messages2.length, x2 + 1)
-                    //         loop2(x2 + 1)
-                    //     } else {
-                    //         console.log("Stopped Own.")
-                    //     }
-                    // }
                 }
 
                 var loop2 = function(x2) {
@@ -878,22 +866,13 @@ class ThunderWave extends ZeroFrame {
                                 if (msg)
                                     var msg = JSON.parse(msg)
                                 if (msg !== null) {
-                                    console.log("own", x2, y2, msg)
+                                    // console.log("own", x2, y2, msg)
 
                                     messages.push({
                                         "y": x2,
                                         "msg": msg,
                                         "sender": page.site_info.cert_user_id
                                     })
-
-                                    // if (first) {
-                                    //     page.firstprivatemessagewas = {
-                                    //         "date_added": msg.date_added
-                                    //     }
-                                    //     first = false
-                                    // }
-
-                                    // page.addPrivateMessage(x2 /*y2.message_id*/ , page.site_info.cert_user_id, msg.body, msg.date_added, override ? false : true)
                                 }
 
                                 checkLoops(2, x2)
@@ -910,22 +889,13 @@ class ThunderWave extends ZeroFrame {
                         if (msg)
                             var msg = JSON.parse(msg)
                         if (msg !== null) {
-                            console.log(x1, y1, msg)
+                            // console.log(x1, y1, msg)
 
                             messages.push({
                                 "id": y1.message_id,
                                 "msg": msg,
                                 "sender": sender
                             })
-
-                            // if (first) {
-                            //     page.firstprivatemessagewas = {
-                            //         "date_added": msg.date_added
-                            //     }
-                            //     first = false
-                            // }
-
-                            // page.addPrivateMessage(y1.message_id, sender, msg.body, msg.date_added, override ? false : true)
                         }
 
                         checkLoops(1, x1)
@@ -933,83 +903,18 @@ class ThunderWave extends ZeroFrame {
                 }
 
                 if (messages1.length > 0) {
-                    console.log("Starting...")
+                    console.log("Starting private-chat load...")
                     checkLoops(1, -1)
                 }
-
-                // for (var x in messages1) {
-                //     var y = messages1[x]
-                //     page.cmd("eciesDecrypt", y.message, (msg) => {
-                //         if (msg)
-                //             var msg = JSON.parse(msg)
-                //         if (msg !== null) {
-                //             console.log(x, y, msg)
-
-                //             if (first) {
-                //                 page.firstprivatemessagewas = {
-                //                     "date_added": msg.date_added
-                //                 }
-                //                 first = false
-                //             }
-
-                //             (function(y_, sender_, msg_, override_) {
-                //                 page.addPrivateMessage(y_.message_id, sender_, msg_.body, msg_.date_added, override_ ? false : true)
-                //             })(y, sender, msg, override)
-                //         }
-                //     })
-                // }
-
-                // if (sender !== page.site_info.cert_user_id) {
-                //     for (var x2 in messages2) {
-                //         var y2 = messages2[x2]
-
-                //         // var msg2 = y.message
-                //         var randI = y2.randI
-                //         var bS = btoa(randI + sender)
-                //         page.cmd("aesDecrypt", [
-                //             bS,
-                //             y2.message,
-                //             bS
-                //         ], (msg2) => {
-                //             // console.log("AES-DECRYPTED OWN MESSAGE", msg2)
-                //             if (msg2) {
-                //                 page.cmd("eciesDecrypt", msg2, (msg) => {
-                //                     if (msg) {
-                //                         var msg = JSON.parse(msg)
-                //                         if (msg.recipient !== sender)
-                //                             return false
-                //                                 // console.log("ECIES-DECRYPTED OWN MESSAGE", msg)
-                //                         if (msg !== null) {
-                //                             console.log("own", x2, y2, msg)
-
-                //                             if (first) {
-                //                                 page.firstprivatemessagewas = {
-                //                                     "date_added": msg.date_added
-                //                                 }
-                //                                 first = false
-                //                             }
-
-                //                             (function(y2_, msg_, override_) {
-                //                                 page.addPrivateMessage(y2_.message_id, page.site_info.cert_user_id, msg_.body, msg_.date_added, override_ ? false : true)
-                //                             })(y2, msg, override)
-                //                         }
-                //                     }
-                //                 })
-                //             }
-                //         })
-                //     }
-                // }
-
-
-
-                $m.children('.loading').remove()
-
-                config$bH(loadcode === "load more" || goingback)
 
                 page.getAvatar(sender, (img) => {
                     // console.log("IMAGE FOR ", sender, img)
                     $('[avatarimg="' + sender + '"]').replaceWith(img)
                 })
+
+                $m.children('.loading').remove()
+
+                config$bH(loadcode === "load more" || goingback, true)
             })
         })
     }
@@ -1379,22 +1284,28 @@ class ThunderWave extends ZeroFrame {
             })
     }
 
-    lastSeenList() {
+    lastSeenList(usefilter) {
         var verified = this.verifyUser()
         if (!verified)
             return false
 
-        console.log("Loading last-seen-List")
+        var usefilter = usefilter || false;
+
+        console.log("Loading last-seen-List", usefilter);
+
+        var filterstr = $('#lastseen_filterer').val() || "";
+
         var count = 0
         this.cmd("dbQuery", [
-            "SELECT * FROM extra_data LEFT JOIN json USING (json_id) ORDER BY extra_data.last_seen DESC" // "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND keyvalue.value NOT NULL OR key = 'public_key' AND keyvalue.value NOT NULL ORDER BY keyvalue.json_id"
+            "SELECT * FROM extra_data LEFT JOIN json USING (json_id) " + (usefilter ? ("WHERE extra_data.public_key LIKE \"%" + filterstr + "%\" OR cert_user_id LIKE \"%" + filterstr + "%\" OR auth_address LIKE \"%" + filterstr + "%\"") : "") + " ORDER BY extra_data.last_seen DESC" // "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND keyvalue.value NOT NULL OR key = 'public_key' AND keyvalue.value NOT NULL ORDER BY keyvalue.json_id"
         ], (lsl) => {
             var lsl_HTML = ''
 
             for (var x in lsl) {
                 var y = lsl[x]
 
-                lsl_HTML += '<dt class="divider" data-content="' + y.cert_user_id + '"></dt>'
+                // lsl_HTML += '<dt class="divider" data-content="' + y.cert_user_id + '"></dt>'
+                lsl_HTML += '<dt>' + y.cert_user_id + '</dt>'
                 count++
 
                 if (y.last_seen)
@@ -1964,9 +1875,7 @@ class ThunderWave extends ZeroFrame {
                                         ]
                                     }])
                                 } else {
-                                    page.cmd("feedFollow", [
-                                        {}
-                                    ])
+                                    page.cmd("feedFollow", [{}])
                                 }
                             }
                         ).toString() + ')'
@@ -2419,6 +2328,21 @@ class ThunderWave extends ZeroFrame {
 
         var curpversion = 2
 
+
+        page.cmd("fileGet", {
+            "inner_path": data2_inner_path,
+            "required": false
+        }, (data) => {
+            // console.log("BEFORE 1", data)
+            if (data)
+                var data = JSON.parse(data)
+            else
+                var data = null
+
+            console.log("DATA_PRIVATE.JSON", data)
+        })
+        console.log("CALLBACKS", cb1, cb2)
+
         function verifyData2() {
             page.cmd("fileGet", {
                 "inner_path": data2_inner_path,
@@ -2465,6 +2389,7 @@ class ThunderWave extends ZeroFrame {
                     }
                 })
             })
+            verifyData(cb1, cb2)
         }
 
         function verifyData(cb1, cb2) {
@@ -2623,7 +2548,6 @@ class ThunderWave extends ZeroFrame {
                 }
             })
         }
-        verifyData(cb1, cb2)
 
         verifyData2()
     }
