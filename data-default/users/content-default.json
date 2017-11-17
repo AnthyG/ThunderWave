@@ -21,7 +21,7 @@
         "permission_rules": {
             ".*": {
                 "files_allowed": "data.json",
-                "files_allowed_optional": ".+\\.(png|jpg|jpeg|gif)",
+                "files_allowed_optional": ".+\\.(png|jpg|jpeg|gif)(.piecemap.msgpack)?",
                 "max_size": 100000
             },
             "bitmsg/.*@zeroid.bit": { "max_size": 125000 },

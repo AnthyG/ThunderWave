@@ -195,6 +195,10 @@
             <div tab="LastSeen" class="panel">
                 <div class="panel-body" style="overflow-x: hidden;">
                     <p>Total number of logged-in users: <b id="last_seen_list_c">0</b></p>
+                    <div class="input-group">
+                        <input class="form-input" type="text" id="lastseen_filterer" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.lastSeenList(true); return false; }" />
+                        <button class="btn btn-action input-group-btn" onclick="return page.lastSeenList(true);">Search</button>
+                    </div>
                     <dl id="last_seen_list">
 
                     </dl>
@@ -319,8 +323,10 @@
         });
     </script> -->
     <script>
-        function config$bH(goingback) {
-            console.log("configuring bodyHeight..")
+        function config$bH(goingback, is_private) {
+            var is_private = is_private ? 'private_' : ''
+
+            console.log("configuring bodyHeight..", is_private)
 
             function configIt(alert) {
                 var alert = alert || false
@@ -328,8 +334,9 @@
                 // $('body').height($('body>.container')[0].scrollHeight + 28) // Disabling this, is visually preferred, but the complete thing doesn't work without it >:|
                 // $('body').css('overflow-x', 'hidden')
 
-                var $mp = $('#messages').parent()
-                if ($('#main-tabs').attr('curtab') === "Lobby" && (!goingback || $mp[0].scrollHeight - 25 <= $mp.scrollTop())) {
+                var $mp = $('#' + is_private + 'messages').parent()
+                if (($('#main-tabs').attr('curtab') === "Lobby" || $('#main-tabs').attr('curtab') === "PrivateChat") &&
+                    (!goingback || $mp[0].scrollHeight - 25 <= $mp.scrollTop())) {
                     $mp.scrollTop($mp[0].scrollHeight)
                         //     $(document).scrollTop($('body>.container')[0].scrollHeight + 28)
                 }
@@ -338,7 +345,7 @@
                 }
 
                 if (alert)
-                    console.log("bodyHeight configured!")
+                    console.log("bodyHeight configured!", is_private)
             }
             $(document).ready(function() {
                 configIt(false)
