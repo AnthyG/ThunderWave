@@ -156,6 +156,16 @@ ul.unstyled {
     /*white-space: pre-line;*/
 }
 
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover {
+    left: -37px;
+    width: calc(100% + 37px * 2);
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover>.img-responsive {
+    margin: 0 auto;
+    border-radius: 0;
+}
+
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:first-child {
     margin-top: 0;
 }
