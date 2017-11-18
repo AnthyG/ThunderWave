@@ -116,7 +116,7 @@ ul.unstyled {
     left: 0px;
     border-style: solid;
     border-width: 15px 10px 0;
-    border-color: #f7f7f7 transparent;
+    border-color: #eeeeee transparent;
     display: block;
     width: 0px;
     z-index: 1;
@@ -359,7 +359,7 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
 }
 
 dl dd+dd {
-    margin-top: -1.5rem;
+    margin-top: -.75rem;
 }
 
 #private_contacts_list {
