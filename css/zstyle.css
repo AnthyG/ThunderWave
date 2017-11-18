@@ -357,3 +357,9 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
 dl dd+dd {
     margin-top: -1.5rem;
 }
+
+#private_contacts_list {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: calc(36px * 2);
+}
