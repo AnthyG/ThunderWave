@@ -12,7 +12,7 @@ html {
     padding: 0;
     min-height: 100%;
     /* For rem units support */
-    /* font-size: 62.5%; */
+    font-size: calc(62.5% * 2);
 }
 
 body {
@@ -137,7 +137,7 @@ ul.unstyled {
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card {
-    max-width: 50rem;
+    max-width: 25rem;
     padding-left: 1rem;
     padding-right: 1rem;
     /*width: 100%;*/
