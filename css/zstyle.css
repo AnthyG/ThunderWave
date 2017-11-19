@@ -215,15 +215,28 @@ ul.unstyled {
     float: right;
 }
 
-.card>.card-body>.quote>blockquote>by {
+.card>.card-body>.quote>blockquote {
+    margin: 0;
+    border-width: 0.2rem;
+    border-color: #1DE9B6;
+    border-radius: 0.1rem;
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+.card>.card-body>.quote>blockquote by {
     position: relative;
     display: block;
     margin: 10px 0 0;
+    margin-bottom: 20px;
     font-size: 85%;
+    padding-bottom: 0.2rem;
+    border-bottom: 2px solid #1DE9B6;
 }
 
-.card>.card-body>.quote>blockquote>by>on {
-    font-size: 85%;
+.card>.card-body>.quote>blockquote on {
+    font-size: 75%;
+    padding-top: 0.2rem;
+    border-top: 2px solid #1DE9B6;
 }
 
 .times-messages {
