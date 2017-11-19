@@ -356,7 +356,7 @@
         }
 
         function answer2MSG(msgkey) {
-            add2MSGInput('[' + msgkey + ']')
+            add2MSGInput('?![' + msgkey + ']')
 
             // if (typeof $('#tc_' + msgkey)[0] !== 'undefined') {
             //     var toMSG = $($('#tc_' + msgkey).children('div.card-body.text-break')[0]).text()
@@ -649,7 +649,7 @@
             $(window).on('hashchange', function() {
                 if (window.location.hash) {
                     var h = window.location.hash.substr(1)
-                    if (h.substr(0, 3) === "tc_" || h.substr(0, 2) === "d_") {
+                    if (h.substr(0, 3) === "tc_" || h.substr(0, 2) === "t_" || h.substr(0, 2) === "d_") {
                         var $el = $('#' + h),
                             el = $el[0]
 

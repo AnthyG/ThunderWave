@@ -45,10 +45,11 @@
                 ["message_id", "INTEGER PRIMARY KEY AUTOINCREMENT"],
                 ["body", "TEXT"],
                 ["date_added", "INTEGER"],
+                ["key", "TEXT UNIQUE"],
                 ["json_id", "INTEGER REFERENCES json (json_id)"]
             ],
             "indexes": ["CREATE UNIQUE INDEX message_key ON messages(json_id, date_added)"],
-            "schema_changed": 17
+            "schema_changed": 18
         },
         "private_messages": {
             "cols": [
