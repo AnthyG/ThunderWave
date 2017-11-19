@@ -6129,10 +6129,29 @@ class ThunderWave extends ZeroFrame {
                 var rcurdate = moment().format("MMMM Do, YYYY")
                 var curdate3 = (curdate === rcurdate ? "Today" : (moment(rcurdate, "MMMM Do, YYYY").subtract(1, "d").format("MMMM Do, YYYY") === curdate ? "Yesterday" : curdate));
 
+                var quote_parsed = marked(
+                        quote.body, {
+                            renderer: markedR
+                        }
+                    )
+                    .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+                        var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
+                        var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
+                        return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
+                    })
+                if (!page.LS.opts.disable_emojis.value)
+                    quote_parsed = emojione.toImage(quote_parsed)
+
                 $('#QUOTEREPLACE_' + _tc).replaceWith($('<div class="quote">' +
-                    '<blockquote cite="tc_' + _tc + '">' + quote.body +
-                    '<by> - ' + quote.cert_user_id + ' | <on onclick="javascript:window.location.hash=\'t_' + tc + '\'">' +
-                    curdate3 + ' ' + curtime + '</on></by>' +
+                    '<blockquote cite="tc_' + _tc + '">' +
+                    '<by>' + quote.cert_user_id
+                    .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+                        var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
+                        var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
+                        return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
+                    }) + '</by>' + quote_parsed +
+                    '- <on onclick="javascript:window.location.hash=\'t_' + tc + '\'">' +
+                    curdate3 + ' ' + curtime + '</on>' +
                     '</blockquote></div>'))
             })
         })(tc)
