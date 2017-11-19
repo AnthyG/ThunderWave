@@ -33,15 +33,15 @@
                 <section class="navbar-section">
                     <ul class="tab workin-tabber" tabs-target="#main-tabs" style="border-bottom-color: transparent;">
                         <li class="tab-item active">
-                            <a target-tab="Lobby" href="javascript:void(0)">Lobby</a>
+                            <a target-tab="Lobby" href="javascript:void(0)"><i class="icon icon-people"></i></a>
                         </li>
 
                         <li class="tab-item hideifnotloggedin hide">
-                            <a target-tab="PrivateChat" href="javascript:void(0)">Private Chats</a>
+                            <a target-tab="PrivateChat" href="javascript:void(0)"><i class="icon icon-mail"></i></a>
                         </li>
 
                         <li class="tab-item hideifnotloggedin hide">
-                            <a target-tab="LastSeen" href="javascript:void(0)">Last seen</a>
+                            <a target-tab="LastSeen" href="javascript:void(0)"><i class="icon icon-time"></i></a>
                         </li>
 
                         <!--<li class="tab-item hideifnotloggedin hide">
@@ -197,7 +197,7 @@
                     <p>Total number of logged-in users: <b id="last_seen_list_c">0</b></p>
                     <div class="input-group">
                         <input class="form-input" type="text" id="lastseen_filterer" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.lastSeenList(true); return false; }" />
-                        <button class="btn btn-action input-group-btn" onclick="return page.lastSeenList(true);">Search</button>
+                        <button class="btn btn-action input-group-btn" onclick="return page.lastSeenList(true);"><i class="icon icon-search"></i></button>
                     </div>
                     <dl id="last_seen_list">
 
