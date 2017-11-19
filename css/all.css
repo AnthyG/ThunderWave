@@ -1727,7 +1727,7 @@ ul.unstyled {
     float: right;
 }
 
-.card>.card-body>.quote>blockquote {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body .quote .quotechild {
     margin: 0;
     border-width: 0.2rem;
     border-color: #1DE9B6;
@@ -1735,7 +1735,7 @@ ul.unstyled {
     background-color: rgba(255, 255, 255, 0.35);
 }
 
-.card>.card-body>.quote>blockquote by {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body .quote .quotechild by {
     position: relative;
     display: block;
     margin: 10px 0 0;
@@ -1745,7 +1745,7 @@ ul.unstyled {
     border-bottom: 2px solid #1DE9B6;
 }
 
-.card>.card-body>.quote>blockquote on {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body .quote .quotechild on {
     font-size: 75%;
     padding-top: 0.2rem;
     border-top: 2px solid #1DE9B6;

@@ -5116,7 +5116,7 @@ class ThunderWave extends ZeroFrame {
         //         " :: " + moment(CDalreadyexistsC.children("li.message-container").first().attr("id").split("t_")[1], "x").format("MMMM Do, YYYY - HH:mm:ss"))
         // }
 
-        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="javascript:answer2MSG(\'tc_' + msgkey + '\');' + /*#tc_' + msgkey + '*/ '">' + curtime + '</a>')
+        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#" onclick="answer2MSG(\'tc_' + msgkey + '\');' + /*#tc_' + msgkey + '*/ '">' + curtime + '</a>')
             // var message_timestamp = ('<span class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '">' + curtime + '</span>')
         var message_parsed = marked(
                 message_escaped
@@ -5315,7 +5315,7 @@ class ThunderWave extends ZeroFrame {
 
             for (var x in cList) {
                 var y = cList[x]
-                $pcl.append('<li class="tab-item" tab="' + y + '"><a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');"><figure class="avatar avatar-sm" data-initial="' + y.substr(0, 2) + '"><div avatarimg="' + y + '"></div></figure> ' + y + '</a></li>');
+                $pcl.append('<li class="tab-item" tab="' + y + '"><a href="#" onclick="page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');"><figure class="avatar avatar-sm" data-initial="' + y.substr(0, 2) + '"><div avatarimg="' + y + '"></div></figure> ' + y + '</a></li>');
 
                 (function(_y) {
                     // console.log("Contacts list avatar", _y)
@@ -6139,11 +6139,16 @@ class ThunderWave extends ZeroFrame {
                         var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                         return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
                     })
+                    .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+                        page.quoteDisplayer(p1)
+
+                        return '<div id="QUOTEREPLACE_' + p1 + '" class="icon icons loading">QUOTE ' + p1 + '</div>'
+                    })
                 if (!page.LS.opts.disable_emojis.value)
                     quote_parsed = emojione.toImage(quote_parsed)
 
                 $('#QUOTEREPLACE_' + _tc).replaceWith($('<div class="quote">' +
-                    '<blockquote cite="tc_' + _tc + '">' +
+                    '<blockquote class="quotechild" cite="tc_' + _tc + '">' +
                     '<by>' + quote.cert_user_id
                     .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
                         var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
@@ -6317,7 +6322,7 @@ class ThunderWave extends ZeroFrame {
                 if (y.last_seen)
                     lsl_HTML += '<dd>last seen <i>' + moment(y.last_seen, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
                 if (y.public_key)
-                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y.cert_user_id + '\');"><i>' + y.public_key + '</i></a></dd>'
+                    lsl_HTML += '<dd>public key: <a href="#" onclick="page.addPrivateContact(\'' + y.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y.cert_user_id + '\');"><i>' + y.public_key + '</i></a></dd>'
             }
 
             $('#last_seen_list').html(lsl_HTML)
