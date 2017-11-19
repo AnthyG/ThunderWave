@@ -1727,6 +1727,17 @@ ul.unstyled {
     float: right;
 }
 
+.card>.card-body>.quote>blockquote>by {
+    position: relative;
+    display: block;
+    margin: 10px 0 0;
+    font-size: 85%;
+}
+
+.card>.card-body>.quote>blockquote>by>on {
+    font-size: 85%;
+}
+
 .times-messages {
     margin-left: 0px;
 }

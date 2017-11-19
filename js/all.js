@@ -4897,6 +4897,37 @@ function hexToString(tmp) {
 
 
 
+generateGUID = (typeof(window.crypto) != 'undefined' &&
+        typeof(window.crypto.getRandomValues) != 'undefined') ?
+    function() {
+        // If we have a cryptographically secure PRNG, use that
+        // https://stackoverflow.com/questions/6906916/collisions-when-generating-uuids-in-javascript
+        var buf = new Uint16Array(8);
+        window.crypto.getRandomValues(buf);
+        var S4 = function(num) {
+            var ret = num.toString(16);
+            while (ret.length < 4) {
+                ret = "0" + ret;
+            }
+            return ret;
+        };
+        return (S4(buf[0]) + S4(buf[1]) + "-" + S4(buf[2]) + "-" + S4(buf[3]) + "-" + S4(buf[4]) + "-" + S4(buf[5]) + S4(buf[6]) + S4(buf[7]));
+    }
+
+:
+
+function() {
+    // Otherwise, just use Math.random
+    // https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/2117523#2117523
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0,
+            v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+};
+
+
+
 marked.setOptions({
     "gfm": true,
     "breaks": true,
@@ -5085,7 +5116,7 @@ class ThunderWave extends ZeroFrame {
         //         " :: " + moment(CDalreadyexistsC.children("li.message-container").first().attr("id").split("t_")[1], "x").format("MMMM Do, YYYY - HH:mm:ss"))
         // }
 
-        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="javascript:answer2MSG(' + msgkey + ');' + /*#tc_' + msgkey + '*/ '">' + curtime + '</a>')
+        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="javascript:answer2MSG(\'tc_' + msgkey + '\');' + /*#tc_' + msgkey + '*/ '">' + curtime + '</a>')
             // var message_timestamp = ('<span class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '">' + curtime + '</span>')
         var message_parsed = marked(
                 message_escaped
@@ -5100,6 +5131,11 @@ class ThunderWave extends ZeroFrame {
                 var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
+            })
+            .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+                page.quoteDisplayer(p1)
+
+                return '<div id="QUOTEREPLACE_' + p1 + '" class="icon icons loading">QUOTE ' + p1 + '</div>'
             })
         if (!page.LS.opts.disable_emojis.value)
             message_parsed = emojione.toImage(message_parsed)
@@ -5205,7 +5241,7 @@ class ThunderWave extends ZeroFrame {
                 page.cmd("eciesEncrypt", [
                     username
                 ], (username2) => {
-                    console.log(username, "> ENCRYPTED USERNAME >", username2)
+                    // console.log(username, "> ENCRYPTED USERNAME >", username2)
 
                     // Add the new contact to data
                     var di = data.private_messages_with.unshift(username2)
@@ -5220,7 +5256,7 @@ class ThunderWave extends ZeroFrame {
                         json_rawA
                     ], (res) => {
                         if (res == "ok") {
-                            console.log("Added contact", username)
+                            // console.log("Added contact", username)
                         } else {
                             page.cmd("wrapperNotification", [
                                 "error", "File write error: " + JSON.stringify(res)
@@ -5236,7 +5272,7 @@ class ThunderWave extends ZeroFrame {
                 page.cmd("eciesEncrypt", [
                     username
                 ], (username2) => {
-                    console.log("Moving contact to index 0", cList.indexOf(username), username, cList, username2)
+                    // console.log("Moving contact to index 0", cList.indexOf(username), username, cList, username2)
 
                     data.private_messages_with.splice(cList.indexOf(username), 1)
                     data.private_messages_with.splice(0, 0, username2)
@@ -5253,7 +5289,7 @@ class ThunderWave extends ZeroFrame {
                         json_rawA
                     ], (res) => {
                         if (res == "ok") {
-                            console.log("Moved contact", username, cList.indexOf(username), cList)
+                            // console.log("Moved contact", username, cList.indexOf(username), cList)
                         } else {
                             page.cmd("wrapperNotification", [
                                 "error", "File write error: " + JSON.stringify(res)
@@ -5873,7 +5909,8 @@ class ThunderWave extends ZeroFrame {
                 // Add the new message to data
                 var di = data.messages.push({
                     "body": emojione.toShort(message),
-                    "date_added": parseInt(moment().utc().format("x"))
+                    "date_added": parseInt(moment().utc().format("x")),
+                    "key": generateGUID()
                 })
 
                 // Encode data array to utf8 json text
@@ -6068,6 +6105,37 @@ class ThunderWave extends ZeroFrame {
             })(fY)
             reader.readAsBinaryString(fY)
         }
+    }
+
+    quoteDisplayer(tc) {
+        if (!tc) return false
+
+        console.log("Getting quote", tc);
+
+        (function(_tc) {
+            page.cmd("dbQuery", [
+                "SELECT * FROM messages LEFT JOIN json USING (json_id) WHERE key = \"" + _tc + "\""
+            ], (quote) => {
+                if (quote && quote[0])
+                    quote = quote[0]
+                console.log("Got quote", _tc, quote)
+
+                var mmnt = moment(quote.date_added, "x")
+
+                var curdate = mmnt.format("MMMM Do, YYYY")
+                var curtime = mmnt.format("HH:mm:ss")
+
+                var curdate2 = moment(curdate, "MMMM Do, YYYY").format("x")
+                var rcurdate = moment().format("MMMM Do, YYYY")
+                var curdate3 = (curdate === rcurdate ? "Today" : (moment(rcurdate, "MMMM Do, YYYY").subtract(1, "d").format("MMMM Do, YYYY") === curdate ? "Yesterday" : curdate));
+
+                $('#QUOTEREPLACE_' + _tc).replaceWith($('<div class="quote">' +
+                    '<blockquote cite="tc_' + _tc + '">' + quote.body +
+                    '<by> - ' + quote.cert_user_id + ' | <on onclick="javascript:window.location.hash=\'t_' + tc + '\'">' +
+                    curdate3 + ' ' + curtime + '</on></by>' +
+                    '</blockquote></div>'))
+            })
+        })(tc)
     }
 
     imageDisplayer(uh, href, title, text) {
@@ -6487,7 +6555,7 @@ class ThunderWave extends ZeroFrame {
                     senders.push(msg.cert_user_id)
 
                 if (!this.messageCounterArr.hasOwnProperty(msg.message_id)) {
-                    this.addMessage(msg.message_id, msg.cert_user_id, msg.body, msg.date_added, override ? false : true)
+                    this.addMessage(msg.key, msg.cert_user_id, msg.body, msg.date_added, override ? false : true)
                     this.messageCounterArr[msg.message_id] = {
                         body: msg.body,
                         cert_user_id: msg.cert_user_id,
@@ -7168,6 +7236,12 @@ class ThunderWave extends ZeroFrame {
                     //     "body": emojione.toShort("## Joined ThunderWave :wave::blush:"),
                     //     "date_added": parseInt(moment().utc().format("x"))
                     // }]
+                for (var x = 0; x < data.messages.length; x++) {
+                    var y = data.messages[x]
+                    if (!y.hasOwnProperty("key")) {
+                        data.messages[x].key = generateGUID()
+                    }
+                }
                 if (!data.hasOwnProperty("images"))
                     data.images = []
 
