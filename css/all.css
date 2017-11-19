@@ -1628,10 +1628,10 @@ ul.unstyled {
     left: 0px;
     border-style: solid;
     border-width: 15px 10px 0;
-    border-color: #eeeeee transparent;
+    border-color: #EEEEEE transparent;
     display: block;
     width: 0px;
-    z-index: 1;
+    z-index: 0;
 }
 
 .message-list[design-type]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
@@ -1668,22 +1668,41 @@ ul.unstyled {
     /*white-space: pre-line;*/
 }
 
-.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover {
-    left: -37px;
-    width: calc(100% + 37px * 2);
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage {
+    left: -36px;
+    width: calc(100% + 36px * 2);
 }
 
-.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover>.img-responsive {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage>.img-responsive {
     margin: 0 auto;
-    -webkit-border-radius: 0; -moz-border-radius: 0; -o-border-radius: 0; -ms-border-radius: 0; border-radius: 0 ;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:empty+div.popover.hasimage {
+    margin-top: -.8rem;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:empty+div.popover.hasimage.isgif-true>button.img-responsive {
+    width: 100% !important;
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:first-child {
     margin-top: 0;
 }
 
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:first-child:empty {
+    margin: 0;
+}
+
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:last-child {
-    margin-bottom: 0px;
+    margin-bottom: .5rem;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage+p:empty:last-child {
+    margin-top: -1.6rem;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-header+.card-body>div.popover.hasimage+p:empty:last-child {
+    margin-bottom: calc(0.5rem + 3px);
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:only-child>img.emojione:only-child {
@@ -1694,8 +1713,18 @@ ul.unstyled {
     padding-bottom: 0;
 }
 
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle {
+    width: calc(100% + 1rem * 2);
+    position: relative;
+    left: 1rem;
+    /* background: -webkit-linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);background: -moz-linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);background: -o-linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);background: -ms-linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent); */
+}
+
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle>a.message-timestamp {
-    color: #1c2429;
+    color: #1C2429;
+    text-shadow: -1px -1px 0px #FFFFFF;
+    z-index: 1;
+    float: right;
 }
 
 .times-messages {
@@ -1725,7 +1754,7 @@ ul.unstyled {
     height: 0 !important;
     border-top: 10px solid transparent !important;
     border-bottom: 10px solid transparent !important;
-    border-left: 16px solid #eeeeee !important;
+    border-left: 16px solid #EEEEEE !important;
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
@@ -1828,10 +1857,10 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
 }
 
 .dropdown-menu-messageinput {
-    background: #eee;
+    background: #EEEEEE;
     -webkit-border-radius: .2rem; -moz-border-radius: .2rem; -o-border-radius: .2rem; -ms-border-radius: .2rem; border-radius: .2rem ;
     -webkit-box-shadow: 0 .1rem .4rem rgba(38, 50, 56, .3); -moz-box-shadow: 0 .1rem .4rem rgba(38, 50, 56, .3); -o-box-shadow: 0 .1rem .4rem rgba(38, 50, 56, .3); -ms-box-shadow: 0 .1rem .4rem rgba(38, 50, 56, .3); box-shadow: 0 .1rem .4rem rgba(38, 50, 56, .3) ;
-    color: #1c2429;
+    color: #1C2429;
     list-style: none;
     margin: 0;
     min-width: 18rem;

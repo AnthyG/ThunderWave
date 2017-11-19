@@ -102,7 +102,7 @@ function imageViewGen(res, href, title, text) {
             (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
             (markedR.options.xhtml ? '/>' : '>')
     }
-    return '<div class="popover #popover-bottom">' +
+    return '<div class="popover hasimage isgif-' + isgif + '">' +
         imgHTML +
         '<div class="popover-container">' +
         '<div class="card"><div class="card-header">' +
