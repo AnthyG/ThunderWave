@@ -12,7 +12,7 @@ html {
     padding: 0;
     min-height: 100%;
     /* For rem units support */
-    font-size: 62.5%;
+    font-size: calc(62.5% * 2);
 }
 
 body {
@@ -30,6 +30,10 @@ body.loaded {
     /*height: 100%;
     overflow-y: auto;
     overflow-x: hidden;*/
+}
+
+.hide {
+    display: none;
 }
 
 ul.unstyled {
@@ -73,15 +77,18 @@ ul.unstyled {
 }
 
 #main-tabs>[tab] {
-    padding-top: 4.4rem;
-}
-
-#main-tabs>div[tab="Home"] {
-    /*margin-top: 4.4rem;*/
+    border: none;
     height: 100vh;
+    padding-top: 2.4rem;
 }
 
-#messages {
+#main-tabs>div[tab="Lobby"],
+#main-tabs>div[tab="PrivateChat"] {
+    /*margin-top: 4.4rem;*/
+    /*height: 100vh;*/
+}
+
+.message-list {
     margin-left: 0px;
     /*height: 75vh;
     overflow-y: overlay;
@@ -98,82 +105,121 @@ ul.unstyled {
     position: absolute;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content {
+.message-list>li>ul.times-messages>li>.tile>.tile-content {
     position: relative;
 }
 
-#messages[design-type]>li>ul.times-messages>li>.tile>.tile-content:before {
+.message-list[design-type]>li>ul.times-messages>li>.tile>.tile-content:before {
     content: " ";
     position: absolute;
     top: 0px;
     left: 0px;
     border-style: solid;
     border-width: 15px 10px 0;
-    border-color: #eeeeee transparent;
+    border-color: #EEEEEE transparent;
     display: block;
     width: 0px;
-    z-index: 1;
+    z-index: 0;
 }
 
-#messages[design-type]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
+.message-list[design-type]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
     right: 0px;
     left: initial;
 }
 
-#messages[design-type="3"]>li>ul.times-messages>li>.tile>.tile-content:before {
+.message-list[design-type="3"]>li>ul.times-messages>li>.tile>.tile-content:before {
     top: 22px;
     left: 2px;
 }
 
-#messages[design-type="3"]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
+.message-list[design-type="3"]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
     right: 2px
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card {
-    max-width: 50rem;
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card {
+    max-width: 25rem;
     padding-left: 1rem;
     padding-right: 1rem;
     /*width: 100%;*/
     display: table;
 }
 
-#messages>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card {
+.message-list>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card {
     margin-right: auto;
 }
 
-#messages>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content>.card {
+.message-list>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content>.card {
     margin-left: auto;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body {
     /*white-space: pre-line;*/
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:first-child {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage {
+    left: -36px;
+    width: calc(100% + 36px * 2);
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage>.img-responsive {
+    margin: 0 auto;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:empty+div.popover.hasimage {
+    margin-top: -.8rem;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:empty+div.popover.hasimage.isgif-true>button.img-responsive {
+    width: 100% !important;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:first-child {
     margin-top: 0;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:last-child {
-    margin-bottom: 0px;
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:first-child:empty {
+    margin: 0;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:only-child>img.emojione:only-child {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>*:last-child {
+    margin-bottom: .5rem;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage+p:empty:last-child {
+    margin-top: -1.6rem;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-header+.card-body>div.popover.hasimage+p:empty:last-child {
+    margin-bottom: calc(0.5rem + 3px);
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:only-child>img.emojione:only-child {
     font-size: xx-large;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card>.card-footer:last-child {
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-footer:last-child {
     padding-bottom: 0;
 }
 
-#messages>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle>a.message-timestamp {
-    color: #1c2429;
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle {
+    width: calc(100% + 1rem * 2);
+    position: relative;
+    left: 1rem;
+    /* background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent); */
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle>a.message-timestamp {
+    color: #1C2429;
+    text-shadow: -1px -1px 0px #FFFFFF;
+    z-index: 1;
+    float: right;
 }
 
 .times-messages {
     margin-left: 0px;
 }
 
-#messagesAt {
+.message-listAt {
     top: 50px;
     left: 50%;
     z-index: 998;
@@ -196,7 +242,7 @@ ul.unstyled {
     height: 0 !important;
     border-top: 10px solid transparent !important;
     border-bottom: 10px solid transparent !important;
-    border-left: 16px solid #eeeeee !important;
+    border-left: 16px solid #EEEEEE !important;
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
@@ -262,7 +308,7 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
     background-color: pink !important;
 }
 
-#messages::-webkit-scrollbar-thumb {
+.message-list::-webkit-scrollbar-thumb {
     background: purple !important;
 }
 
@@ -299,10 +345,10 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
 }
 
 .dropdown-menu-messageinput {
-    background: #eee;
+    background: #EEEEEE;
     border-radius: .2rem;
     box-shadow: 0 .1rem .4rem rgba(38, 50, 56, .3);
-    color: #1c2429;
+    color: #1C2429;
     list-style: none;
     margin: 0;
     min-width: 18rem;
@@ -349,4 +395,14 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
 .dropdown-menu-messageinput .textcomplete-footer>a.active {
     background: #e5fcf7;
     color: #1de9b6;
+}
+
+dl dd+dd {
+    margin-top: -.75rem;
+}
+
+#private_contacts_list {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: calc(36px * 2);
 }
