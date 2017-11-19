@@ -5137,6 +5137,12 @@ class ThunderWave extends ZeroFrame {
 
                 return '<div id="QUOTEREPLACE_' + p1 + '" class="icon icons loading">QUOTE ' + p1 + '</div>'
             })
+            .replace(/(?:\[(.+)\]!a!\((.+)\))/gm, function(match, p1) {
+                return '<div id="AUDIOREPLACE_' + p1 + '" class="icon icons loading"></div>'
+            })
+            .replace(/(?:\[(.+)\]!v!\((.+)\))/gm, function(match, p1) {
+                return '<div id="VIDEOREPLACE_' + p1 + '" class="icon icons loading"></div>'
+            })
         if (!page.LS.opts.disable_emojis.value)
             message_parsed = emojione.toImage(message_parsed)
 

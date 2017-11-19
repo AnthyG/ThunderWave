@@ -276,6 +276,23 @@ class ThunderWave extends ZeroFrame {
 
                 return '<div id="QUOTEREPLACE_' + p1 + '" class="icon icons loading">QUOTE ' + p1 + '</div>'
             })
+            // Maybe rather just use the existing imageViewGen, and modify the stuff related with it
+            // That would be, I believe, much easier to achieve, and a lot cleaner,
+            // than copying all the stuff from it, and modifying that.!
+            .replace(/(?:\[(.+)\]!a!\((.+)\))/gm, function(match, p1) {
+                var uh = Math.random().toString(36).substring(7);
+
+                page.audioDisplayer(uh)
+
+                return '<div id="AUDIOREPLACE_' + uh + '" class="icon icons loading"></div>'
+            })
+            .replace(/(?:\[(.+)\]!v!\((.+)\))/gm, function(match, p1) {
+                var uh = Math.random().toString(36).substring(7);
+
+                page.videoDisplayer(uh)
+
+                return '<div id="VIDEOREPLACE_' + uh + '" class="icon icons loading"></div>'
+            })
         if (!page.LS.opts.disable_emojis.value)
             message_parsed = emojione.toImage(message_parsed)
 
