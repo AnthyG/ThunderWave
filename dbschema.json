@@ -1,6 +1,6 @@
 {
-    "db_name": "Da_Net",
-    "db_file": "data/da_net.db",
+    "db_name": "ThunderWave",
+    "db_file": "data/ThunderWave2.db",
     "version": 2,
     "maps": {
         "users/.+/data.json": {
@@ -11,10 +11,15 @@
                 {
                     "node": "images",
                     "table": "images"
+                },
+                {
+                    "node": "private_messages",
+                    "table": "private_messages"
+                },
+                {
+                    "node": "extra_data",
+                    "table": "extra_data"
                 }
-            ],
-            "to_keyvalue": [
-                "last_seen"
             ]
         },
         "users/.+/content.json": {
@@ -37,23 +42,45 @@
         },
         "messages": {
             "cols": [
-                ["message_id", "INTEGER PRIMARY KEY"],
+                ["message_id", "INTEGER PRIMARY KEY AUTOINCREMENT"],
                 ["body", "TEXT"],
                 ["date_added", "INTEGER"],
                 ["json_id", "INTEGER REFERENCES json (json_id)"]
             ],
             "indexes": ["CREATE UNIQUE INDEX message_key ON messages(json_id, date_added)"],
-            "schema_changed": 16
+            "schema_changed": 17
+        },
+        "private_messages": {
+            "cols": [
+                ["message_id", "INTEGER PRIMARY KEY AUTOINCREMENT"],
+                ["message", "TEXT"],
+                ["json_id", "INTEGER REFERENCES json (json_id)"]
+            ],
+            "indexes": ["CREATE UNIQUE INDEX private_message_key ON private_messages(json_id, message_id)"],
+            "schema_changed": 6
         },
         "images": {
             "cols": [
-                ["image_id", "INTEGER PRIMARY KEY"],
+                ["image_id", "INTEGER PRIMARY KEY AUTOINCREMENT"],
                 ["file_name", "TEXT"],
                 ["date_added", "INTEGER"],
                 ["json_id", "INTEGER REFERENCES json (json_id)"]
             ],
             "indexes": ["CREATE UNIQUE INDEX image_key ON images(json_id, date_added)"],
-            "schema_changed": 6
+            "schema_changed": 7
+        },
+        "extra_data": {
+            "cols": [
+                ["last_seen", "INTEGER"],
+                ["public_key", "TEXT"],
+                ["auth_address", "TEXT"],
+                ["avatar_file_name", "TEXT"],
+                ["avatar_file_url", "TEXT"],
+                ["avatar_type", "INTEGER"],
+                ["json_id", "INTEGER REFERENCES json (json_id)"]
+            ],
+            "indexes": ["CREATE UNIQUE INDEX extra_data_key ON extra_data(json_id)"],
+            "schema_changed": 7
         }
     }
 }

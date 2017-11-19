@@ -78,7 +78,12 @@ markedR.link = function(href, title, text) {
         }
     }
 
-    return '<a href="' + href + '" target="_blank" ' + (title ? ('title="' + title + '"') : '') + '>' + text + '</a>'
+    return '<a href="' + href + '" onclick="return openNewTab(\'' + href + '\');" ' + (title ? ('title="' + title + '"') : '') + '>' + text + '</a>'
+}
+
+function openNewTab(url) {
+    page.cmd("wrapperOpenWindow", [url, "_blank", ""])
+    return false
 }
 
 function imageViewGen(res, href, title, text) {
@@ -97,7 +102,7 @@ function imageViewGen(res, href, title, text) {
             (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
             (markedR.options.xhtml ? '/>' : '>')
     }
-    return '<div class="popover #popover-bottom">' +
+    return '<div class="popover hasimage isgif-' + isgif + '">' +
         imgHTML +
         '<div class="popover-container">' +
         '<div class="card"><div class="card-header">' +
@@ -131,23 +136,24 @@ class ThunderWave extends ZeroFrame {
 
         // var addattop = addattop || false
 
-        if (parseInt(page.LS.opts.avatar_size.value) !== 0) {
-            this.identicons = this.identicons || {}
-            var asv = parseInt(page.LS.opts.avatar_size.value) || 64
-            if (!this.identicons.hasOwnProperty(asv)) {
-                this.identicons[asv] = {}
-            }
-            if (!this.identicons.hasOwnProperty(username)) {
-                var uhash = stringToHex(username).split(' ').join('')
-                this.identicons[asv][username] = new Identicon(uhash, {
-                    margin: 0.2,
-                    size: asv,
-                    format: 'svg'
-                }).toString()
-            }
-            var idata = this.identicons[asv][username]
-        }
-        var message_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
+        var message_pic = '<div avatarimg="' + username + '"></div>'
+            // if (parseInt(page.LS.opts.avatar_size.value) !== 0) {
+            //     this.identicons = this.identicons || {}
+            //     var asv = parseInt(page.LS.opts.avatar_size.value) || 64
+            //     if (!this.identicons.hasOwnProperty(asv)) {
+            //         this.identicons[asv] = {}
+            //     }
+            //     if (!this.identicons.hasOwnProperty(username)) {
+            //         var uhash = stringToHex(username).split(' ').join('')
+            //         this.identicons[asv][username] = new Identicon(uhash, {
+            //             margin: 0.2,
+            //             size: asv,
+            //             format: 'svg'
+            //         }).toString()
+            //     }
+            //     var idata = this.identicons[asv][username]
+            // }
+            // var message_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
 
         var mmnt = moment(date_added, "x")
 
@@ -177,7 +183,7 @@ class ThunderWave extends ZeroFrame {
         if (typeof CDalreadyexists !== "undefined" && CDalreadyexists !== false) {
             CDalreadyexists = $(CDalreadyexists)
         } else {
-            CDalreadyexists = $("<li id='d_" + curdate2 + "' timestamp-date='" + curdate2 + "'><div class='divider text-center' data-content='" + (curdate3) + "' onclick='javascript:window.location.hash=\"#d_" + curdate2 + "\";'></div><ul class='times-messages unstyled'></ul></li>")
+            CDalreadyexists = $("<li id='d_" + curdate2 + "' timestamp-date='" + curdate2 + "'><div class='divider text-center' data-content='" + (curdate3) + "' onclick='window.location.hash=\"#d_" + curdate2 + "\";'></div><ul class='times-messages unstyled'></ul></li>")
                 // if (addattop && !thismessageis.after)
                 //     CDalreadyexists = CDalreadyexists.prependTo("#messages")
                 // else
@@ -218,7 +224,7 @@ class ThunderWave extends ZeroFrame {
         //         " :: " + moment(CDalreadyexistsC.children("li.message-container").first().attr("id").split("t_")[1], "x").format("MMMM Do, YYYY - HH:mm:ss"))
         // }
 
-        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#tc_' + msgkey + '">' + curtime + '</a>')
+        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="javascript:answer2MSG(' + msgkey + ');' + /*#tc_' + msgkey + '*/ '">' + curtime + '</a>')
             // var message_timestamp = ('<span class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '">' + curtime + '</span>')
         var message_parsed = marked(
                 message_escaped
@@ -331,6 +337,646 @@ class ThunderWave extends ZeroFrame {
         // ).prependTo(CDalreadyexistsC)
     }
 
+    addPrivateContact(username, cb) {
+        page.listPrivateContacts(function(data, cList) {
+            console.log("Encrypting username", username, data, cList, cList.indexOf(username))
+            if (cList.indexOf(username) === -1) {
+                page.cmd("eciesEncrypt", [
+                    username
+                ], (username2) => {
+                    console.log(username, "> ENCRYPTED USERNAME >", username2)
+
+                    // Add the new contact to data
+                    var di = data.private_messages_with.unshift(username2)
+
+                    // Encode data array to utf8 json text
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    // Write file to disk
+                    page.cmd("fileWrite", [
+                        "data/users/" + page.site_info.auth_address + "/data_private.json",
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            console.log("Added contact", username)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                        if (typeof cb === "function")
+                            cb(data, cList)
+                    })
+                })
+            } else {
+                console.log("Contact already added")
+
+                page.cmd("eciesEncrypt", [
+                    username
+                ], (username2) => {
+                    console.log("Moving contact to index 0", cList.indexOf(username), username, cList, username2)
+
+                    data.private_messages_with.splice(cList.indexOf(username), 1)
+                    data.private_messages_with.splice(0, 0, username2)
+                    cList.splice(cList.indexOf(username), 1)
+                    cList.splice(0, 0, username)
+
+                    // Encode data array to utf8 json text
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    // Write file to disk
+                    page.cmd("fileWrite", [
+                        "data/users/" + page.site_info.auth_address + "/data_private.json",
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            console.log("Moved contact", username, cList.indexOf(username), cList)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                        if (typeof cb === "function")
+                            cb(data, cList)
+                    })
+                })
+            }
+        })
+    }
+
+    genContactsList(cb) {
+        page.listPrivateContacts(function(data, cList) {
+            var $pcl = $('#private_contacts_list')
+
+            var oldactive = $($pcl.children('li.active')[0]).attr('tab')
+
+            $pcl.html("")
+
+            // $pcl.append('<li class="tab-item">|</li>')
+
+            for (var x in cList) {
+                var y = cList[x]
+                $pcl.append('<li class="tab-item" tab="' + y + '"><a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');"><figure class="avatar avatar-sm" data-initial="' + y.substr(0, 2) + '"><div avatarimg="' + y + '"></div></figure> ' + y + '</a></li>');
+
+                (function(_y) {
+                    // console.log("Contacts list avatar", _y)
+                    page.getAvatar(_y, (img) => {
+                        // console.log("Got contacts list avatar", _y, img)
+                        $('[avatarimg="' + _y + '"]').replaceWith(img)
+                    })
+                })(y)
+            }
+
+            $pcl.children('[tab="' + oldactive + '"]').addClass('active')
+
+            typeof cb === "function" && cb()
+        })
+    }
+
+    listPrivateContacts(cb) {
+        var cList = []
+        this.cmd("fileGet", {
+            "inner_path": "data/users/" + this.site_info.auth_address + "/data_private.json",
+            "required": false
+        }, (data) => {
+            if (data)
+                var data = JSON.parse(data)
+            else
+                var data = {}
+
+            // console.log("lPC B", data)
+
+            if (!data.hasOwnProperty("private_messages"))
+                data.private_messages = []
+            if (!data.hasOwnProperty("private_messages_with"))
+                data.private_messages_with = []
+
+            // console.log("lPC A", data)
+
+            var contacts = JSON.parse(JSON.stringify(data.private_messages_with))
+
+            // console.log("Listing contacts.. ", data.private_messages_with, data.private_messages_with.length, contacts, contacts.length)
+            if (contacts.length > 0) {
+                var addC = function(x) {
+                    var x = x - 1
+                    var y = contacts[x]
+                        // console.log(x, y)
+                    page.cmd("eciesDecrypt", y, (contact) => {
+                        // console.log(x, y, contact)
+                        if (contact)
+                            cList.push(contact)
+
+                        if (x === 0) {
+                            contacts = contacts.reverse()
+
+                            // console.log("Listing private contacts", data, cList)
+                            if (typeof cb === "function")
+                                cb(data, cList)
+                        } else {
+                            addC(x)
+                        }
+                    })
+                }
+                contacts = contacts.reverse()
+                addC(contacts.length)
+            } else {
+                if (typeof cb === "function")
+                    cb(data, [])
+            }
+
+            // for (var x in data.private_messages_with) {
+            //     var y = data.private_messages_with[x]
+            //     page.cmd("eciesDecrypt", y, (contact) => {
+            //         console.log(x, y, contact)
+            //         if (contact)
+            //             cList.push(contact)
+            //     })
+            // }
+
+            // console.log(data, cList)
+            // if (typeof cb === "function")
+            //     cb(data, cList)
+        })
+    }
+
+    addPrivateMessage(msgkey, username, message, date_added, addattop) {
+        var message_escaped = message
+
+        var message_pic = '<div avatarimg="' + username + '"></div>'
+            // if (parseInt(page.LS.opts.avatar_size.value) !== 0) {
+            //     this.identicons = this.identicons || {}
+            //     var asv = parseInt(page.LS.opts.avatar_size.value) || 64
+            //     if (!this.identicons.hasOwnProperty(asv)) {
+            //         this.identicons[asv] = {}
+            //     }
+            //     if (!this.identicons.hasOwnProperty(username)) {
+            //         var uhash = stringToHex(username).split(' ').join('')
+            //         this.identicons[asv][username] = new Identicon(uhash, {
+            //             margin: 0.2,
+            //             size: asv,
+            //             format: 'svg'
+            //         }).toString()
+            //     }
+            //     var idata = this.identicons[asv][username]
+            // }
+            // var message_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
+
+        var mmnt = moment(date_added, "x")
+
+        var curdate = mmnt.format("MMMM Do, YYYY")
+        var curtime = mmnt.format("HH:mm:ss")
+
+        var curdate2 = moment(curdate, "MMMM Do, YYYY").format("x")
+        var rcurdate = moment().format("MMMM Do, YYYY")
+        var curdate3 = (curdate === rcurdate ? "Today" : (moment(rcurdate, "MMMM Do, YYYY").subtract(1, "d").format("MMMM Do, YYYY") === curdate ? "Yesterday" : curdate));
+        var CDalreadyexists = $("#private_messages").find('[P_timestamp-date="' + curdate2 + '"]')[0] || false
+
+        // console.log("Adding PMSG", msgkey, username, message, date_added, addattop, curdate, curtime)
+
+        var users_own_message = (username === page.site_info.cert_user_id)
+        var user_is_mentioned = (message_escaped.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
+        var user_mention_badge = (page.LS.opts.user_mention_badge.value && user_is_mentioned) ? "badge" : ""
+
+        var thismessageis = {
+            "same_user": (page.lastprivatemessagewas.hasOwnProperty("username") && page.lastprivatemessagewas.username === username),
+            "same_date": (page.lastprivatemessagewas.hasOwnProperty("curdate2") && page.lastprivatemessagewas.curdate2 === curdate2),
+            "in_time_range": (page.lastprivatemessagewas.hasOwnProperty("date_added") && moment(page.lastprivatemessagewas.date_added, "x").add(15, "minutes").isSameOrAfter(date_added))
+        }
+
+        var dCDalreadyexists = CDalreadyexists === false ? false : true
+
+        if (typeof CDalreadyexists !== "undefined" && CDalreadyexists !== false) {
+            CDalreadyexists = $(CDalreadyexists)
+        } else {
+            CDalreadyexists = $("<li id='P_d_" + curdate2 + "' P_timestamp-date='" + curdate2 + "'><div class='divider text-center' data-content='" + (curdate3) + "' onclick='window.location.hash=\"#d_" + curdate2 + "\";'></div><ul class='times-messages unstyled'></ul></li>")
+            CDalreadyexists = CDalreadyexists.appendTo("#private_messages")
+
+            var items = $("#private_messages").children("[P_timestamp-date]").get()
+
+            items.sort(function(a, b) {
+                var A = parseInt($(a).attr('id').split("P_d_")[1])
+                var B = parseInt($(b).attr('id').split("P_d_")[1])
+
+                if (A < B) return -1
+                if (A > B) return 1
+                return 0
+            });
+            $("#private_messages").html("").append(items)
+        }
+        var CDalreadyexistsC = CDalreadyexists.children('.times-messages')
+
+        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#P_tc_' + msgkey + '">' + curtime + '</a>')
+
+        var message_parsed = marked(message_escaped, {
+                renderer: markedR
+            })
+            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+                var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2PMSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
+                var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
+                return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
+            })
+        if (!page.LS.opts.disable_emojis.value)
+            message_parsed = emojione.toImage(message_parsed)
+
+        var msg_part_2_1 = '<div id="P_tc_' + msgkey + '" P_tc="' + date_added + '" class="card mb-5">' +
+            ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
+                '') + '<div class="card-body text-break">' +
+            message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
+
+        if ( /*((users_own_message && thismessageis.same_user) || */ thismessageis.same_user /*)*/ && thismessageis.same_date && thismessageis.in_time_range) {
+            var el = page.lastprivatemessagewas.el
+            var el2 = $(msg_part_2_1).appendTo($(el).find('.tile-content'))
+
+            var items = $(el).find('.tile-content').children('.card').get()
+
+            items.sort(function(a, b) {
+                var A = parseInt($(a).attr('P_tc'))
+                var B = parseInt($(b).attr('P_tc'))
+
+                if (A < B) return -1
+                if (A > B) return 1
+                return 0
+            });
+            $(el).find('.tile-content').html("").append(items)
+        } else {
+            var msg_part_1 = '<div class="tile-icon"><figure class="avatar avatar-lg message-user-avatar ' + user_mention_badge + '" data-initial="' + username.substr(0, 2) + '">' + message_pic + '</figure></div>',
+                msg_part_2 = '<div class="tile-content">' + msg_part_2_1 + '</div>'
+
+            var el = $('<li id="P_t_' + msgkey + '" P_t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
+
+            el = el.appendTo(CDalreadyexistsC)
+
+            var items = CDalreadyexistsC.children("li.message-container").get()
+
+            items.sort(function(a, b) {
+                var A = parseInt($(a).attr('P_t'))
+                var B = parseInt($(b).attr('P_t'))
+
+                if (A < B) return -1
+                if (A > B) return 1
+                return 0
+            });
+            CDalreadyexistsC.html("").append(items)
+        }
+
+        page.lastprivatemessagewas = {
+            "username": username,
+            "curdate2": curdate2,
+            "date_added": date_added,
+            "el": el
+        }
+        if (page.firstprivatemessagewas.date_added > date_added)
+            page.firstprivatemessagewas.date_added = date_added
+    }
+
+    sendPrivateMessage(message3, recipient2) {
+        var verified = this.verifyUser()
+        if (!verified)
+            return false
+
+        this.verifyUserFiles()
+
+        var recipient2 = recipient2 || false
+        var recipient = recipient2 || $('#private_recipient').val()
+        if (!recipient)
+            recipient = this.site_info.cert_user_id
+
+        var randI = Math.random().toString(36).substr(2, 5) + Math.random().toString(36).substr(2, 5) + Math.random().toString(36).substr(2, 5)
+        var bR = btoa(randI + recipient)
+
+        var message3 = message3 || false
+        var message2 = message3 || $('#private_message').val()
+        var message = message2
+            .replace(/\n{3,}/gm, "\n\n")
+            .trim()
+
+        var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
+        var data2_inner_path = "data/users/" + this.site_info.auth_address + "/data_private.json"
+        var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
+
+        console.log("LOLO", message3, message2, message, recipient2, recipient);
+
+        this.cmd("dbQuery", [
+            // "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'public_key' AND value NOT NULL AND json.cert_user_id = '" + recipient + "'"
+            "SELECT * FROM extra_data LEFT JOIN json USING (json_id) WHERE json.cert_user_id = '" + recipient + "'"
+        ], (users) => {
+            var user = users[0]
+            console.log(user)
+            if (user && user.hasOwnProperty("public_key") && user.public_key) {
+                this.cmd("fileGet", {
+                    "inner_path": data_inner_path,
+                    "required": false
+                }, (data) => {
+                    if (data)
+                        var data = JSON.parse(data)
+                    else
+                        var data = {}
+
+                    if (!data.hasOwnProperty("private_messages"))
+                        data.private_messages = []
+
+                    var msg_date_added = parseInt(moment().utc().format("x"))
+
+                    if (message && /\S/.test(message)) {
+                        page.cmd("eciesEncrypt", [
+                            JSON.stringify({
+                                "recipient": recipient,
+                                "body": emojione.toShort(message),
+                                "date_added": msg_date_added
+                            }),
+                            user.public_key
+                        ], (res) => {
+                            // console.log("Res: ", res)
+
+                            // Add the new message to data
+                            var di = data.private_messages.push({
+                                "message": res
+                            })
+
+                            // Encode data array to utf8 json text
+                            var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                            var json_rawA = btoa(json_raw)
+
+                            // Write file to disk
+                            page.cmd("fileWrite", [
+                                data_inner_path,
+                                json_rawA
+                            ], (res2) => {
+                                if (res2 == "ok") {
+                                    page.addPrivateContact(recipient, function(data2, cList) {
+                                        console.log("DATA2 0", JSON.parse(JSON.stringify(data2)), cList);
+                                        page.genContactsList()
+
+                                        console.log("DATA2 1", JSON.parse(JSON.stringify(data2)))
+
+                                        // page.cmd("fileGet", {
+                                        //     "inner_path": data2_inner_path,
+                                        //     "required": false
+                                        // }, (data2) => {
+
+                                        var data2 = data2 ? JSON.parse(JSON.stringify(data2)) : {}
+
+                                        // if (data2)
+                                        //     var data2 = JSON.parse(JSON.stringify(data2))
+                                        // else
+                                        //     var data2 = {}
+
+                                        console.log("DATA2 2", JSON.parse(JSON.stringify(data2)))
+
+                                        if (!data2.hasOwnProperty("private_messages"))
+                                            data2.private_messages = []
+                                        if (!data2.hasOwnProperty("private_messages_with"))
+                                            data2.private_messages_with = []
+
+                                        console.log("DATA2 3", JSON.parse(JSON.stringify(data2)))
+
+                                        page.cmd("eciesEncrypt", [
+                                            JSON.stringify({
+                                                "recipient": recipient,
+                                                "body": emojione.toShort(message),
+                                                "date_added": msg_date_added
+                                            })
+                                        ], (res3) => {
+                                            // console.log("Res3: ", res3)
+                                            page.cmd("aesEncrypt", [
+                                                res3,
+                                                bR,
+                                                bR
+                                            ], (res4) => {
+                                                // console.log("Res4: ", res4)
+
+                                                // Add the new message to data
+                                                var di2 = data2.private_messages.push({
+                                                    "randI": randI,
+                                                    "message": res4[2] // res3
+                                                })
+
+                                                // Encode data array to utf8 json text
+                                                var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
+                                                var json_rawA2 = btoa(json_raw2)
+
+                                                // Write file to disk
+                                                page.cmd("fileWrite", [
+                                                    data2_inner_path,
+                                                    json_rawA2
+                                                ], (res5) => {
+                                                    if (res5 == "ok") {
+                                                        if (!message3)
+                                                            $('#private_message').val("")
+                                                        autosize.update($('#private_message'))
+
+                                                        page.loadPrivateMessages("sent private message", true)
+
+                                                        // Publish the file to other users
+                                                        page.verifyUserFiles(null, function() {
+                                                            console.log("Sent private message", {
+                                                                "recipient": recipient,
+                                                                "body": emojione.toShort(message),
+                                                                "SOMEWHAT-date_added": parseInt(moment().utc().format("x"))
+                                                            })
+                                                        })
+                                                    } else {
+                                                        page.cmd("wrapperNotification", [
+                                                            "error", "File write error: " + JSON.stringify(res5)
+                                                        ])
+                                                    }
+                                                })
+                                            })
+                                        })
+
+                                        // })
+                                    })
+                                } else {
+                                    page.cmd("wrapperNotification", [
+                                        "error", "File write error: " + JSON.stringify(res2)
+                                    ])
+                                }
+                            })
+                        })
+                    } else {
+                        // this.cmd("wrapperNotification", [
+                        //     "error", "Invalid message!", 5000
+                        // ])
+                    }
+                })
+            } else {
+                this.cmd("wrapperNotification", [
+                    "error", "Invalid recipient!", 5000
+                ])
+            }
+        })
+
+        return false
+    }
+
+    loadPrivateMessages(loadcode, override, sender2) {
+        var verified = this.verifyUser()
+        if (!verified)
+            return false
+
+        var sender2 = sender2 || false
+        var sender = sender2 || $('#private_recipient').val()
+        if (!sender)
+            sender = this.site_info.cert_user_id
+
+        var override = override || false
+        var goingback = goingback || false
+
+        console.log("Loading private messages with code >" + loadcode + "<..", sender, override, goingback)
+
+        changeWorkinTabber('#main-tabs', 'PrivateChat')
+
+        page.addPrivateContact(sender, function() {
+            page.genContactsList(function() {
+                var $pcl = $('#private_contacts_list')
+
+                $pcl.children('li.active').removeClass('active')
+                $pcl.children('[tab="' + sender + '"]').addClass('active')
+            })
+        })
+
+        page.cmd("dbQuery", [
+            "SELECT * FROM private_messages LEFT JOIN json USING (json_id) WHERE cert_user_id = '" + sender + "'"
+        ], (messages1) => {
+            // console.log(messages1)
+
+            var $m = $('#private_messages')
+
+            var message_design_type = parseInt(page.LS.opts.message_design_type.value)
+            if (message_design_type === 1) {
+                $('#private_messages').removeAttr("design-type")
+            } else {
+                $('#private_messages').attr("design-type", message_design_type)
+            }
+
+            if (override) {
+                page.lastprivatemessagewas = ""
+                $m.html('<div class="icon icons loading"></div>')
+            }
+
+            page.cmd("fileQuery", [
+                "data/users/" + page.site_info.auth_address + "/data_private.json",
+                "private_messages"
+            ], (messages2) => {
+                // console.log(messages2)
+
+                var first = true
+
+                var messages = []
+
+                var checkLoops = function(l, x) {
+                    if (eval("messages" + l + ".length > x + 1")) {
+                        // console.log("Continuing " + l + ".. ", eval("messages" + l + ".length"), x + 1)
+                        eval("loop" + l + "(x + 1)")
+                    } else {
+                        // console.log("Stopped " + l + ".")
+                        if (l === 1 && sender !== page.site_info.cert_user_id) {
+                            checkLoops(2, -1)
+                        } else {
+                            l = 2
+                        }
+                        if (l === 2) {
+                            messages.sort(function(a, b) {
+                                var A = a.msg.date_added
+                                var B = b.msg.date_added
+
+                                if (A < B) return -1
+                                if (A > B) return 1
+                                return 0
+                            })
+
+                            for (var x3 = 0; x3 < messages.length; x3++) {
+                                var y3 = messages[x3]
+
+                                if (first) {
+                                    page.firstprivatemessagewas = {
+                                        "date_added": y3.msg.date_added
+                                    }
+                                    first = false
+                                }
+
+                                page.addPrivateMessage(x3, y3.sender, y3.msg.body, y3.msg.date_added, override ? false : true)
+                            }
+                        }
+                    }
+                }
+
+                var loop2 = function(x2) {
+                    var y2 = messages2[x2]
+
+                    var randI = y2.randI
+                    var bS = btoa(randI + sender)
+                    page.cmd("aesDecrypt", [
+                        bS,
+                        y2.message,
+                        bS
+                    ], (msg2) => {
+                        if (msg2) {
+                            page.cmd("eciesDecrypt", msg2, (msg) => {
+                                if (msg)
+                                    var msg = JSON.parse(msg)
+                                if (msg !== null) {
+                                    // console.log("own", x2, y2, msg)
+
+                                    messages.push({
+                                        "y": x2,
+                                        "msg": msg,
+                                        "sender": page.site_info.cert_user_id
+                                    })
+                                }
+
+                                checkLoops(2, x2)
+                            })
+                        } else {
+                            checkLoops(2, x2)
+                        }
+                    })
+                }
+
+                var loop1 = function(x1) {
+                    var y1 = messages1[x1]
+                    page.cmd("eciesDecrypt", y1.message, (msg) => {
+                        if (msg)
+                            var msg = JSON.parse(msg)
+                        if (msg !== null) {
+                            // console.log(x1, y1, msg)
+
+                            messages.push({
+                                "id": y1.message_id,
+                                "msg": msg,
+                                "sender": sender
+                            })
+                        }
+
+                        checkLoops(1, x1)
+                    })
+                }
+
+                if (messages1.length > 0) {
+                    console.log("Starting private-chat load...")
+                    checkLoops(1, -1)
+                }
+
+                $m.children('.loading').remove()
+
+                config$bH(loadcode === "load more" || goingback, true)
+
+                setTimeout(function() {
+                    page.getAvatar(sender, (img) => {
+                        // console.log("IMAGE FOR", sender, img)
+                        $('[avatarimg="' + sender + '"]').replaceWith(img)
+                    })
+                    page.getAvatar(page.site_info.cert_user_id, (img) => {
+                        // console.log("IMAGE FOR", page.site_info.cert_user_id, img)
+                        $('[avatarimg="' + page.site_info.cert_user_id + '"]').replaceWith(img)
+                    })
+                }, 1000)
+            })
+        })
+    }
+
     sendMessage(message3) {
         var verified = this.verifyUser()
         if (!verified)
@@ -339,7 +985,10 @@ class ThunderWave extends ZeroFrame {
         this.verifyUserFiles()
 
         var message3 = message3 || false
-        var message2 = message3 || $("#message").val()
+        var message2 = message3 || $('#message').val()
+        var message = message2
+            .replace(/\n{3,}/gm, "\n\n")
+            .trim()
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
         var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
@@ -357,9 +1006,6 @@ class ThunderWave extends ZeroFrame {
                 data.messages = []
             if (!data.hasOwnProperty("images"))
                 data.images = []
-            var message = message2
-                .replace(/\n{3,}/gm, "\n\n")
-                .trim()
 
             // console.log(data, message)
             if (message && /\S/.test(message)) {
@@ -380,12 +1026,14 @@ class ThunderWave extends ZeroFrame {
                 ], (res) => {
                     if (res == "ok") {
                         if (!message3)
-                            $("#message").val("")
+                            $('#message').val("")
                         autosize.update($('#message'))
+
+                        page.loadMessages("sent message", false, data.messages.length === 1 ? false : true)
 
                         // Publish the file to other users
                         this.verifyUserFiles(null, function() {
-                            page.loadMessages("sent message", false, data.messages.length === 1 ? false : true)
+
                         })
 
                         // this.cmd("siteSign", {
@@ -417,7 +1065,9 @@ class ThunderWave extends ZeroFrame {
         return false
     }
 
-    uploadMedia() {
+    uploadMedia(isp, cb) {
+        var isp = isp || '[is-private!="true"]'
+
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -428,7 +1078,7 @@ class ThunderWave extends ZeroFrame {
             return false
         }
 
-        var files = $('#media_uploader')[0].files;
+        var files = $('.media_uploader' + isp)[0].files;
         if (!files)
             return false
 
@@ -439,18 +1089,20 @@ class ThunderWave extends ZeroFrame {
 
         this.verifyUserFiles()
 
+        console.log("MUP >> 3.0 :: " + isp, files);
+
         for (var fX in files) {
             var fY = files[fX]
-            console.log(fX, fY)
+            console.log("MUP >> 3.1 :: ", fX, fY)
 
             if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\/(png|jpg|jpeg|gif)|(audio)\/(mp3|ogg)|(video)\/(ogg)')) // |audio|video      || !fY.name.match(/\.IMAGETYPE$/gm)
                 continue
 
             var reader = new FileReader()
             reader.onload = (function(f2) {
-                console.log("reading", f2)
+                console.log("MUP >> 3.2.0 :: reading", f2)
                 return function(event) {
-                    console.log("with event", event)
+                    console.log("MUP >> 3.2.1 :: with event", event)
 
                     var f_data = btoa(event.target.result)
 
@@ -497,7 +1149,7 @@ class ThunderWave extends ZeroFrame {
                                         f_data
                                     ], (res) => {
                                         if (res == "ok") {
-                                            var ctrl = $('#media_uploader')[0]
+                                            var ctrl = $('.media_uploader' + isp)[0]
                                             try {
                                                 ctrl.value = null;
                                             } catch (ex) {}
@@ -512,14 +1164,17 @@ class ThunderWave extends ZeroFrame {
                                             ], (res) => {
                                                 if (res == "ok") {
                                                     var output_url = '/' + page.site_info.address + '/' + f_path
-                                                    console.log(output_url, f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
+                                                    console.log("MUP >> 3.2.2 :: ", output_url, f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                     if (f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
-                                                        add2MSGInput(' ![ALTTEXT](' + output_url + ') ')
+                                                        var rtrn = ' ![ALTTEXT](' + output_url + ') '
                                                     else
-                                                        add2MSGInput(' [TITLE](' + output_url + ') ')
+                                                        var rtrn = ' [TITLE](' + output_url + ') '
 
                                                     // Publish the file to other users
-                                                    this.verifyUserFiles()
+                                                    page.verifyUserFiles()
+
+                                                    if (typeof cb === "function")
+                                                        cb(rtrn)
 
                                                     // page.cmd("siteSign", {
                                                     //     "inner_path": content_inner_path
@@ -654,7 +1309,7 @@ class ThunderWave extends ZeroFrame {
 
             // console.log("Loading image..", image)
             page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
-                console.log("Image result: ", res)
+                // console.log("Image result: ", res)
                 var el2 = $(el).parent().replaceWith($(imageViewGen(res, href, unescape(title), unescape(text))))
                 if (res.inner_path.match('.+\\.(.*)')[1] === "gif")
                     Gifffer(el2.find('img'));
@@ -687,28 +1342,206 @@ class ThunderWave extends ZeroFrame {
             })
     }
 
-    lastSeenList() {
+    lastSeenList(usefilter) {
         var verified = this.verifyUser()
         if (!verified)
             return false
 
-        console.log("Loading last-seen-List")
+        var usefilter = usefilter || false;
+
+        console.log("Loading last-seen-List", usefilter);
+
+        var filterstr = $('#lastseen_filterer').val() || "";
+
         var count = 0
         this.cmd("dbQuery", [
-            "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND value NOT NULL ORDER BY value DESC"
+            "SELECT * FROM extra_data LEFT JOIN json USING (json_id) " + (usefilter ? ("WHERE extra_data.public_key LIKE \"%" + filterstr + "%\" OR cert_user_id LIKE \"%" + filterstr + "%\" OR auth_address LIKE \"%" + filterstr + "%\"") : "") + " ORDER BY extra_data.last_seen DESC" // "SELECT * FROM keyvalue LEFT JOIN json USING (json_id) WHERE key = 'last_seen' AND keyvalue.value NOT NULL OR key = 'public_key' AND keyvalue.value NOT NULL ORDER BY keyvalue.json_id"
         ], (lsl) => {
             var lsl_HTML = ''
+
             for (var x in lsl) {
                 var y = lsl[x]
-                if (y) {
-                    lsl_HTML += '<li><b>' + y.cert_user_id + '</b> was last seen <i>' + moment(y.value, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></li>'
-                    count++
-                }
+
+                // lsl_HTML += '<dt class="divider" data-content="' + y.cert_user_id + '"></dt>'
+                lsl_HTML += '<dt>' + y.cert_user_id + '</dt>'
+                count++
+
+                if (y.last_seen)
+                    lsl_HTML += '<dd>last seen <i>' + moment(y.last_seen, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
+                if (y.public_key)
+                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y.cert_user_id + '\');"><i>' + y.public_key + '</i></a></dd>'
             }
+
             $('#last_seen_list').html(lsl_HTML)
             $('#last_seen_list_c').html(count)
         })
     }
+
+    getAvatar(username, cb) {
+        var ov = parseInt(page.LS.opts.avatar_type.value),
+            ov_s = parseInt(page.LS.opts.avatar_size.value)
+
+        function avatarGen() {
+            page.identicons = page.identicons || {}
+            var asv = ov_s || 64
+            if (!page.identicons.hasOwnProperty(asv)) {
+                page.identicons[asv] = {}
+            }
+            if (!page.identicons[asv].hasOwnProperty(username)) {
+                var uhash = stringToHex(username).split(' ').join('')
+                page.identicons[asv][username] = new Identicon(uhash, {
+                    margin: 0.2,
+                    size: asv,
+                    format: 'svg'
+                }).toString()
+            }
+            var idata = page.identicons[asv][username]
+
+            var avatar_pic = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
+            return avatar_pic
+        }
+
+        if (ov >= 3 && ov_s !== 0) {
+            if (typeof cb === "function")
+                cb(avatarGen(), ov, ov_s, "", "", "", "")
+        } else if (ov >= 3) {
+            if (typeof cb === "function")
+                cb("", ov, ov_s, "", "", "", "")
+        } else {
+            page.cmd("dbQuery", [
+                "SELECT * FROM extra_data LEFT JOIN json USING (json_id) WHERE json.cert_user_id = '" + username + "'"
+            ], (lsl) => {
+                if (lsl[0])
+                    var data = lsl[0]
+                else
+                    var data = {
+                        "avatar_file_name": "",
+                        // "avatar_file_url": "",
+                        "avatar_type": 0
+                    }
+
+                // console.log("Got userdata for avatar of", username, data)
+
+                /*
+                ov:
+                0 TW
+                 & ZM -> use TW if TW || ZM if ZM || gen if gen #
+                1 TW  -> use TW if TW || gen if gen
+                2 ZM  -> use ZM if ZM || gen if gen
+                3 /   -> use gen if gen
+
+                av:
+                0 /   -> use gen if gen
+                1 TW  -> use name
+                2 ZM  -> use ~~url~~ ZeroMe
+                */
+
+                var av = parseInt(data.avatar_type),
+                    av_n = data.avatar_file_name || false,
+                    // av_u = data.avatar_file_url,
+                    av_u = false,
+                    path = false
+
+                var getPath_TW = function(callfrom) {
+                    // console.log("Setting " + username + "'s avatar-path to TW", callfrom)
+
+                    path = "data/" + data.directory + "/" + av_n
+
+                    finishGet(2.1)
+                }
+                var getPath_ZW = function(callfrom) {
+                    // console.log("Checking ZeroMe-Avatar-CORS.. ", callfrom, username, data.auth_address)
+
+                    if (page.site_info.settings.permissions.indexOf("Cors:1UDbADib99KE9d3qZ87NqJF2QLTHmMkoV") < 0) {
+                        page.cmd("corsPermission", "1UDbADib99KE9d3qZ87NqJF2QLTHmMkoV", () => {
+                            console.log("Got CORS-Permission for ZeroMe-User Registry (for avatar)")
+                            getPath_ZW2(3.1)
+                        })
+                    } else {
+                        // console.log("Already have CORS-Permission for ZeroMe-User Registry (for avatar)")
+                        getPath_ZW2(3.2)
+                    }
+                }
+                var getPath_ZW2 = function(callfrom) {
+                    // console.log("ZeroMe-Avatar path.. ", callfrom, username, data.auth_address)
+
+                    if (data.hasOwnProperty("auth_address") && data.auth_address) {
+                        page.cmd("fileGet", {
+                            "inner_path": "cors-1UDbADib99KE9d3qZ87NqJF2QLTHmMkoV/data/userdb/" + data.auth_address + "/content.json",
+                            "required": false
+                        }, (data2) => {
+                            if (data2)
+                                data2 = JSON.parse(data2)
+                            else
+                                data2 = false
+
+                            // console.log("Avatar Hub-Data", data2)
+
+                            if (data2 && data2.hasOwnProperty("user") && data2.user.length > 0 && data2.user[0].hasOwnProperty("hub") && data2.user[0].hub) {
+                                var u_hub = data2.user[0].hub
+                                var avatar_type = data2.user[0].avatar
+
+                                av_u = "/" + u_hub + "/data/users/" + data.auth_address + "/avatar." + avatar_type
+                                path = av_u + "?" + moment()
+
+                                finishGet(4.1)
+                            } else {
+                                if (ov === 0 && av > 0 && av_n) {
+                                    getPath_TW(4.2)
+                                } else {
+                                    finishGet(4.2)
+                                }
+                            }
+                        })
+                    } else {
+                        if (ov === 0 && av > 0 && av_n) {
+                            getPath_TW(4.2)
+                        } else {
+                            finishGet(4.2)
+                        }
+                    }
+                }
+                var finishGet = function(callfrom) {
+                    // console.log("Avatar path.. ", callfrom, username, data.auth_address, ov, ov_s, av, "av_n=" + av_n, "av_u=" + av_u, "path=" + path)
+
+                    if (path) {
+                        if (typeof cb === "function")
+                            cb("<img src='" + path + "' />", ov, ov_s, av, av_n, av_u, path)
+                    } else if (ov_s !== 0) {
+                        if (typeof cb === "function")
+                            cb(avatarGen(), ov, ov_s, av, av_n, av_u, path)
+                    } else {
+                        if (typeof cb === "function")
+                            cb("", ov, ov_s, av, av_n, av_u, path)
+                    }
+                }
+
+                // console.log("Checking for " + username + "'s avatar.. ", ov, av, "av_n=" + av_n)
+                if (ov === 0 && av > 0) {
+                    if (av === 1 && av_n) {
+                        // TW
+                        getPath_TW(1.1)
+                    } else if (av === 2 || !av_n) {
+                        // ZM
+                        getPath_ZW(1.2)
+                    } else {
+                        // GEN
+                        finishGet(1.3)
+                    }
+                } else if (ov === 1 && av > -1 && av_n) {
+                    // TW
+                    getPath_TW(1.4)
+                } else if (ov === 2 && av > 0) {
+                    // ZM
+                    getPath_ZW(1.5)
+                } else {
+                    // GEN
+                    finishGet(1.6)
+                }
+            })
+        }
+    }
+
 
     loadMessages(loadcode, override, to_now, ADESC, goingback, from_time, to_time) {
         var verified = this.verifyUser()
@@ -730,7 +1563,7 @@ class ThunderWave extends ZeroFrame {
         //         v = 1
         // } else 
         if (page.hasOwnProperty("firstmessagewas") && page.firstmessagewas.date_added && (!to_now || loadcode === "load more")) {
-            var from_time2 = moment(page.firstmessagewas.date_added, "x").subtract(12, "h").format("x"),
+            var from_time2 = 0, // moment(page.firstmessagewas.date_added, "x").subtract(12, "h").format("x"),
                 to_time2 = page.firstmessagewas.date_added,
                 v = 1
         } else if (to_now) {
@@ -764,7 +1597,7 @@ class ThunderWave extends ZeroFrame {
             //WHERE date_added > " + from_time + " AND date_added < " + to_time + " ORDER BY date_added " + ADESC + " LIMIT 5" // OFFSET " + offset
         ], (messages) => {
             messages.reverse()
-            console.log("Messages: ", messages)
+                // console.log("Messages: ", messages)
 
             var $m = $('#messages')
 
@@ -781,12 +1614,17 @@ class ThunderWave extends ZeroFrame {
             }
 
             page.firstmessagewas = {
-                "date_added": !messages[0] ? 0 : messages.length > 1 ? messages[0].date_added : 0
-            }
-            console.log(messages[0], page.firstmessagewas)
+                    "date_added": !messages[0] ? 0 : messages.length > 1 ? messages[0].date_added : 0
+                }
+                // console.log(messages[0], page.firstmessagewas)
 
+            var senders = []
             for (var i = 0; i < messages.length; i++) {
                 var msg = messages[i]
+
+                if (senders.indexOf(msg.cert_user_id) === -1)
+                    senders.push(msg.cert_user_id)
+
                 if (!this.messageCounterArr.hasOwnProperty(msg.message_id)) {
                     this.addMessage(msg.message_id, msg.cert_user_id, msg.body, msg.date_added, override ? false : true)
                     this.messageCounterArr[msg.message_id] = {
@@ -804,6 +1642,18 @@ class ThunderWave extends ZeroFrame {
 
             config$bH(loadcode === "load more" || goingback)
 
+            for (var x in senders) {
+                var sender2 = senders[x];
+
+                (function(sender) {
+                    // console.log("LOADING IMAGE FOR ", sender)
+                    page.getAvatar(sender, (img, ov, ov_s, av, av_n, av_u, path) => {
+                        // console.log("IMAGE FOR ", sender, img, ov, ov_s, av, av_n, av_u, path)
+                        $('[avatarimg="' + sender + '"]').replaceWith(img)
+                    })
+                })(sender2)
+            }
+
             // $m.addClass("bounce-bottom")
             // setTimeout(function() {
             //     $m.removeClass("bounce-bottom")
@@ -816,7 +1666,8 @@ class ThunderWave extends ZeroFrame {
             accepted_domains: [
                 "zeroid.bit",
                 "zeroverse.bit",
-                "kaffie.bit"
+                "kaffie.bit",
+                "cryptoid.bit"
             ]
         })
         return false
@@ -828,31 +1679,18 @@ class ThunderWave extends ZeroFrame {
             this.site_info = message.params // Save site info data to allow access it later
             this.setSiteInfo(message.params)
 
-            if (message.params.cert_user_id) {
-                this.identicons = this.identicons || {}
-                var asv = parseInt(page.LS.opts.avatar_size.value) || 64
-                if (!this.identicons.hasOwnProperty(asv)) {
-                    this.identicons[asv] = {}
-                }
-                if (!this.identicons.hasOwnProperty(message.params.cert_user_id)) {
-                    var uhash = stringToHex(message.params.cert_user_id).split(' ').join('')
-                    this.identicons[asv][message.params.cert_user_id] = new Identicon(uhash, {
-                        margin: 0.2,
-                        size: asv,
-                        format: 'svg'
-                    }).toString()
-                }
-                var idata = this.identicons[asv][message.params.cert_user_id]
-
-                var user_pic_1 = (typeof idata !== "undefined" ? "<img src='data:image/svg+xml;base64," + idata + "' />" : "")
-                var user_pic_2 = '<figure class="avatar" data-initial="' + message.params.cert_user_id.substr(0, 2) + '" onclick="">' + user_pic_1 + '</figure>'
-
+            if (this.site_info.cert_user_id) {
                 $('.hideifnotloggedin').removeClass("hide")
                 $("#select_user").html("Change user")
-                $('#current_user_name').html(message.params.cert_user_id)
-                $('#current_user_avatar').html(user_pic_2)
+                $('#current_user_name').html(this.site_info.cert_user_id)
 
-                if (message.params.event[0] === "cert_changed" && message.params.event[1]) {
+                page.getAvatar(this.site_info.cert_user_id, (img) => {
+                    $('#current_user_avatar').html('<figure class="avatar" data-initial="' + this.site_info.cert_user_id.substr(0, 2) + '" onclick="">' + img + '</figure>')
+                })
+
+                page.genContactsList()
+
+                if (message.params.hasOwnProperty("event") && message.params.event[0] === "cert_changed" && message.params.event[1]) {
                     // this.messageCounterArr = {}
                     this.loadMessages("cert changed")
                 }
@@ -863,7 +1701,7 @@ class ThunderWave extends ZeroFrame {
                 $('#current_user_avatar').html('<figure class="avatar" data-initial="TW"></figure>')
             }
 
-            if (message.params.event[0] == "file_done")
+            if (message.params.hasOwnProperty("event") && message.params.event[0] == "file_done")
                 this.loadMessages("file done", false, true)
         }
     }
@@ -880,253 +1718,375 @@ class ThunderWave extends ZeroFrame {
 
     setSettingsOptions() {
         console.log("Settings options..")
-        $('#sttngs_container').html('<div class="icon icons loading"></div>')
 
         var dis = this
         this.cmd("wrapperGetLocalStorage", [], (LS) => {
             var LS = (typeof LS === "object" ? (LS || {}) : {})
 
             // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
-            var curOptsV = 7
-            if (!LS.hasOwnProperty("opts") || LS.optsV !== curOptsV) {
+            var curOptsV = 14
+            var defaultOpts = {
+                // "parse_links": {
+                //     "label": "Parse Links", // The Label of this option
+                //     "desc": "Activate to parse links in messages", // The description of this option
+                //     "value": false, // The value of this option
+                //     "r_ms": false, // Reload messages
+                //     "cb": { // Callback ..
+                //         "change": '(' + ( // .. on change
+                //             function() {
+                //                 $('#messages').find('.message-link').each(function() {
+                //                     var elY = $(this);
+                //                     if (page.LS.opts.parse_links.value) {
+                //                         elY.replaceWith($('<a class="message-link" href="' + elY.text() + '" target="_blank">' + elY.text() + '</a>'));
+                //                     } else {
+                //                         elY.replaceWith($('<span class="message-link">' + elY.text() + '</span>'));
+                //                     }
+                //                 })
+                //             }
+                //         ).toString() + ')'
+                //     }
+                // },
+                "feed_notifications": {
+                    "label": "Notifications in ZeroHello-Feed",
+                    "desc": "Activate, to get notifications in the ZeroHello-Feed",
+                    "value": 0,
+                    "values": [
+                        [0, "Off"],
+                        [1, "Only mentions"],
+                        [2, "All messages"]
+                    ],
+                    "type": "select",
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                var parsedVal = parseInt(page.LS.opts.feed_notifications.value)
+                                if (parsedVal === 1) {
+                                    page.cmd("feedFollow", [{
+                                        "Mentions": [
+                                            "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
+                                                ""
+                                            ]
+                                        ]
+                                    }])
+                                } else if (parsedVal === 2) {
+                                    page.cmd("feedFollow", [{
+                                        "Mentions": [
+                                            "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
+                                                ""
+                                            ]
+                                        ],
+                                        "Messages": [
+                                            "SELECT messages.message_id AS event_uri, 'comment' AS type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id)", [
+                                                ""
+                                            ]
+                                        ]
+                                    }])
+                                } else {
+                                    page.cmd("feedFollow", [{}])
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "divider_3": "",
+                "parse_profile_links": {
+                    "label": "Parse Profile Links",
+                    "desc": "Activate to parse profile links in messages (@...)",
+                    "value": true,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                $('#messages').find('.message-profile-link').each(function() {
+                                    var elY = $(this);
+                                    if (page.LS.opts.parse_profile_links.value) {
+                                        elY.replaceWith($('<a class="message-profile-link" href="?u/' + elY.text() + '">' + elY.text() + '</a>'));
+                                    } else {
+                                        elY.replaceWith($('<span class="message-profile-link">' + elY.text() + '</span>'));
+                                    }
+                                })
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "user_mention_badge": {
+                    "label": "User mention badge",
+                    "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
+                    "value": true,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                if (page.LS.opts.user_mention_badge.value) {
+                                    $('#messages').find('.user-is-mentioned').find('.message-user-avatar').addClass("badge")
+                                        // $('#messages').find('.message-user-mention-badge').removeClass("hide")
+                                } else {
+                                    $('#messages').find('.user-is-mentioned').find('.message-user-avatar').removeClass("badge")
+                                        // $('#messages').find('.message-user-mention-badge').addClass("hide")
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "show_timestamps": {
+                    "label": "Toggle Timestamps",
+                    "desc": "Activate to show Timestamps in chat",
+                    "value": true,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                $('#messages').find('.message-timestamp').each(function() {
+                                    var elY = $(this);
+                                    if (page.LS.opts.show_timestamps.value) {
+                                        elY.parent().parent().removeClass("card-footer")
+                                        elY.removeClass("hide")
+                                    } else {
+                                        elY.parent().parent().addClass("card-footer")
+                                        elY.addClass("hide")
+                                    }
+                                })
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "avatar_type": {
+                    "label": "Allow specific avatar-types only",
+                    "desc": "Choose which avatar-locations are allowed (if a user has no location specified, the avatar-generator will be used)",
+                    "value": 1,
+                    "values": [
+                        [0, "TW & ZM"],
+                        [1, "ThunderWave"],
+                        [2, "ZeroMe"],
+                        [3, "none"]
+                    ],
+                    "type": "select",
+                    "r_ms": true,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                var parsedVal = parseInt(page.LS.opts.avatar_type.value)
+                                page.LS.opts.avatar_type.value = (parsedVal < 4 && parsedVal > -1 ? parsedVal : 1)
+                            }
+                        ).toString() + ')'
+                    }
+
+                },
+                "avatar_size": {
+                    "label": "Set avatar-size",
+                    "desc": "Sets the avatar-size to this dimensions",
+                    "value": 64,
+                    "values": [
+                        [0, "Off (2char-initial)"],
+                        [32, "32x32"],
+                        [64, "64x64 (default)"],
+                        [128, "128x128"],
+                        [256, "256x256"],
+                        [512, "512x512"]
+                    ],
+                    "type": "select",
+                    "r_ms": true,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                var parsedVal = parseInt(page.LS.opts.avatar_size.value)
+                                page.LS.opts.avatar_size.value = (parsedVal > 0 ? parsedVal : (parsedVal === 0 ? 0 : 64))
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "message_design_type": {
+                    "label": "Change design of messages",
+                    "desc": "Changes the design of the messages",
+                    "value": 2,
+                    "values": [
+                        [1, "Square"],
+                        [2, "Arrow at top (default)"],
+                        [3, "Arrow at middle of avatar"]
+                    ],
+                    "type": "select",
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                var parsedVal = parseInt(page.LS.opts.message_design_type.value)
+                                if (parsedVal === 1) {
+                                    $('#messages').removeAttr("design-type")
+                                } else {
+                                    $('#messages').attr("design-type", parsedVal)
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "divider_1": "",
+                "disable_emojis": {
+                    "label": "Disable loading of Emoji's",
+                    "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
+                    "value": false,
+                    "r_ms": true,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "seed_all_emojis": {
+                    "label": "Seed all Emoji's",
+                    "desc": "Downloads and seeds all Emoji's automatically!",
+                    "value": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                if (page.LS.opts.seed_all_emojis.value) {
+                                    page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
+                                        (res) => {
+                                            console.log(res)
+                                        })
+                                } else {
+                                    page.cmd("OptionalHelpRemove", ["css/png"],
+                                        (res) => {
+                                            console.log(res)
+                                            page.cmd("wrapperNotification", [
+                                                "done", "You are no longer Auto-Seeding Emoji's!", 5000
+                                            ])
+                                        })
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "delete_all_emojis": {
+                    "label": "Delete all Emoji's",
+                    "desc": "All Emoji's in your \"cache\" will be deleted",
+                    "value": "Delete",
+                    "type": "button",
+                    "r_ms": true,
+                    "cb": {
+                        "click": '(' + (
+                            function() {
+                                if (page.site_info.cert_user_id !== "glightstar@zeroid.bit") {
+                                    var count = 0
+                                    page.cmd("optionalFileList", [], (data) => {
+                                        for (var x in data) {
+                                            var y = data[x]
+                                            if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
+                                                page.cmd("optionalFileDelete", y.inner_path, (res) => {
+                                                    console.log("deleted emoji at path " + y.inner_path)
+                                                    count++
+                                                })
+                                        }
+                                        page.cmd("wrapperNotification", [
+                                            "done", "Removed " + count + " Emoji's!", 5000
+                                        ])
+                                    })
+                                } else {
+                                    page.cmd("wrapperNotification", [
+                                        "error", "You can't delete Emoji's!", 5000
+                                    ])
+                                    var count = 0
+                                    page.cmd("optionalFileList", [], (data) => {
+                                        console.log(data)
+                                        for (var x in data) {
+                                            var y = data[x]
+                                            if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/") {
+                                                console.log("would have removed emoji at path " + y.inner_path)
+                                                count++
+                                            }
+                                        }
+                                        page.cmd("wrapperNotification", [
+                                            "done", "Would have removed " + count + " Emoji's!", 5000
+                                        ])
+                                    })
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "divider_2": "",
+                "reset_options_to_default": {
+                    "label": "Reset to default",
+                    "desc": "Resets all options to their default values",
+                    "value": "Reset",
+                    "type": "button",
+                    "r_ms": true,
+                    "cb": {
+                        "click": '(' + (
+                            function() {
+                                delete page.LS.opts;
+                                page.cmd("wrapperSetLocalStorage", page.LS, function() {});
+                                page.setSettingsOptions();
+                            }
+                        ).toString() + ')'
+                    }
+                }
+            }
+
+            if (!LS.hasOwnProperty("opts")) {
                 LS.optsV = curOptsV
 
                 if (LS.hasOwnProperty("opts"))
                     var oldOpts = LS.opts
 
-                LS.opts = {
-                    // "parse_links": {
-                    //     "label": "Parse Links", // The Label of this option
-                    //     "desc": "Activate to parse links in messages", // The description of this option
-                    //     "value": false, // The value of this option
-                    //     "r_ms": false, // Reload messages
-                    //     "cb": { // Callback ..
-                    //         "change": '(' + ( // .. on change
-                    //             function() {
-                    //                 $('#messages').find('.message-link').each(function() {
-                    //                     var elY = $(this);
-                    //                     if (page.LS.opts.parse_links.value) {
-                    //                         elY.replaceWith($('<a class="message-link" href="' + elY.text() + '" target="_blank">' + elY.text() + '</a>'));
-                    //                     } else {
-                    //                         elY.replaceWith($('<span class="message-link">' + elY.text() + '</span>'));
-                    //                     }
-                    //                 })
-                    //             }
-                    //         ).toString() + ')'
-                    //     }
-                    // },
-                    "parse_profile_links": {
-                        "label": "Parse Profile Links",
-                        "desc": "Activate to parse profile links in messages (@...)",
-                        "value": true,
-                        "r_ms": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    $('#messages').find('.message-profile-link').each(function() {
-                                        var elY = $(this);
-                                        if (page.LS.opts.parse_profile_links.value) {
-                                            elY.replaceWith($('<a class="message-profile-link" href="?u/' + elY.text() + '">' + elY.text() + '</a>'));
-                                        } else {
-                                            elY.replaceWith($('<span class="message-profile-link">' + elY.text() + '</span>'));
-                                        }
-                                    })
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "user_mention_badge": {
-                        "label": "User mention badge",
-                        "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
-                        "value": true,
-                        "r_ms": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    if (page.LS.opts.user_mention_badge.value) {
-                                        $('#messages').find('.user-is-mentioned').find('.message-user-avatar').addClass("badge")
-                                            // $('#messages').find('.message-user-mention-badge').removeClass("hide")
-                                    } else {
-                                        $('#messages').find('.user-is-mentioned').find('.message-user-avatar').removeClass("badge")
-                                            // $('#messages').find('.message-user-mention-badge').addClass("hide")
-                                    }
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "show_timestamps": {
-                        "label": "Toggle Timestamps",
-                        "desc": "Activate to show Timestamps in chat",
-                        "value": true,
-                        "r_ms": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    $('#messages').find('.message-timestamp').each(function() {
-                                        var elY = $(this);
-                                        if (page.LS.opts.show_timestamps.value) {
-                                            elY.parent().parent().removeClass("card-footer")
-                                            elY.removeClass("hide")
-                                        } else {
-                                            elY.parent().parent().addClass("card-footer")
-                                            elY.addClass("hide")
-                                        }
-                                    })
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "avatar_size": {
-                        "label": "Set avatar-size",
-                        "desc": "Sets the avatar-size to this dimensions",
-                        "value": 64,
-                        "values": [
-                            [0, "Off (2char-initial)"],
-                            [32, "32x32"],
-                            [64, "64x64 (default)"],
-                            [128, "128x128"],
-                            [256, "256x256"],
-                            [512, "512x512"]
-                        ],
-                        "type": "select",
-                        "r_ms": true,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    var parsedVal = parseInt(page.LS.opts.avatar_size.value)
-                                    page.LS.opts.avatar_size.value = (parsedVal > 0 ? parsedVal : (parsedVal === 0 ? 0 : 64))
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "message_design_type": {
-                        "label": "Change design of messages",
-                        "desc": "Changes the design of the messages",
-                        "value": 2,
-                        "values": [
-                            [1, "Square"],
-                            [2, "Arrow at top (default)"],
-                            [3, "Arrow at middle of avatar"]
-                        ],
-                        "type": "select",
-                        "r_ms": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    var parsedVal = parseInt(page.LS.opts.message_design_type.value)
-                                    if (parsedVal === 1) {
-                                        $('#messages').removeAttr("design-type")
-                                    } else {
-                                        $('#messages').attr("design-type", parsedVal)
-                                    }
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "divider_1": "",
-                    "disable_emojis": {
-                        "label": "Disable loading of Emoji's",
-                        "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
-                        "value": false,
-                        "r_ms": true,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
+                LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+            }
 
-                                }
-                            ).toString() + ')'
-                        }
-                    },
-                    "seed_all_emojis": {
-                        "label": "Seed all Emoji's",
-                        "desc": "Downloads and seeds all Emoji's automatically!",
-                        "value": false,
-                        "cb": {
-                            "change": '(' + (
-                                function() {
-                                    if (page.LS.opts.seed_all_emojis.value) {
-                                        page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
-                                            (res) => {
-                                                console.log(res)
-                                            })
+            if (LS.optsV !== curOptsV) {
+                page.cmd("wrapperConfirm", [
+                    "There are some new Options available, do you want to update?",
+                    "Update"
+                ], (confirmed) => {
+                    LS.optsV = curOptsV
+
+                    if (LS.hasOwnProperty("opts"))
+                        var oldOpts = LS.opts
+
+                    LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+
+                    for (var optX in LS.opts) {
+                        var optY = LS.opts[optX]
+
+                        if (oldOpts.hasOwnProperty(optX) && typeof optY !== "string")
+                            var OoptY = oldOpts[optX]
+                        else
+                            continue
+
+                        if (typeof OoptY.value === typeof optY.value || OoptY.type === optY.type) {
+                            var hasvalue = false
+                            if (optY.hasOwnProperty("values") && OoptY.hasOwnProperty("values")) {
+                                for (var optYvalsX in optY.values) {
+                                    var optYvalsY = optY.values[optYvalsX]
+                                    if (optYvalsY[0] === OoptY.value) {
+                                        hasvalue = true
+
+                                        break
                                     } else {
-                                        page.cmd("OptionalHelpRemove", ["css/png"],
-                                            (res) => {
-                                                console.log(res)
-                                                page.cmd("wrapperNotification", [
-                                                    "done", "You are no longer Auto-Seeding Emoji's!", 5000
-                                                ])
-                                            })
+                                        continue
                                     }
                                 }
-                            ).toString() + ')'
-                        }
-                    },
-                    "delete_all_emojis": {
-                        "label": "Delete all Emoji's",
-                        "desc": "All Emoji's in your \"cache\" will be deleted",
-                        "value": "Delete",
-                        "type": "button",
-                        "r_ms": true,
-                        "cb": {
-                            "click": '(' + (
-                                function() {
-                                    if (page.site_info.cert_user_id !== "glightstar@zeroid.bit") {
-                                        var count = 0
-                                        page.cmd("optionalFileList", [], (data) => {
-                                            for (var x in data) {
-                                                var y = data[x]
-                                                if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
-                                                    page.cmd("optionalFileDelete", y.inner_path, (res) => {
-                                                        console.log("deleted emoji at path " + y.inner_path)
-                                                        count++
-                                                    })
-                                            }
-                                            page.cmd("wrapperNotification", [
-                                                "done", "Removed " + count + " Emoji's!", 5000
-                                            ])
-                                        })
-                                    } else {
-                                        page.cmd("wrapperNotification", [
-                                            "error", "You can't delete Emoji's!", 5000
-                                        ])
-                                        var count = 0
-                                        page.cmd("optionalFileList", [], (data) => {
-                                            console.log(data)
-                                            for (var x in data) {
-                                                var y = data[x]
-                                                if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/") {
-                                                    console.log("would have removed emoji at path " + y.inner_path)
-                                                    count++
-                                                }
-                                            }
-                                            page.cmd("wrapperNotification", [
-                                                "done", "Would have removed " + count + " Emoji's!", 5000
-                                            ])
-                                        })
-                                    }
+                            } else if (optY.hasOwnProperty("values") || OoptY.hasOwnProperty("values")) {
+                                continue
+                            } else {
+                                hasvalue = true
+                            }
+
+                            if (hasvalue) {
+                                optY.value = OoptY.value
+
+                                if (optY.cb.hasOwnProperty("change") && typeof eval(optY.cb.change) === "function") {
+                                    eval(optY.cb.change + '()')
                                 }
-                            ).toString() + ')'
+                            }
                         }
-                    },
-                    "divider_2": "",
-                    "reset_options_to_default": {
-                        "label": "Reset to default",
-                        "desc": "Resets all options to their default values",
-                        "value": "Reset",
-                        "type": "button",
-                        "r_ms": true,
-                        "cb": {
-                            "click": '(' + (
-                                function() {
-                                    delete page.LS.opts;
-                                    page.cmd("wrapperSetLocalStorage", page.LS, function() {});
-                                    page.setSettingsOptions();
-                                }
-                            ).toString() + ')'
-                        }
+
+                        LS.opts[optX] = optY
                     }
-                }
+
+                    page.genSettingsHTML(LS)
+                })
             }
 
             // if (oldOpts) {
@@ -1140,133 +2100,190 @@ class ThunderWave extends ZeroFrame {
             //             y2.value = y2.value
             //     }
             // }
-
             dis.LS = LS
-            var opts = LS.opts
-
-            // console.log(LS, dis.LS, opts)
+                // console.log(LS, dis.LS)
             dis.cmd("wrapperSetLocalStorage", LS, function() {})
-
-            var cntrls = {
-                "button": '<div class="col-3"><label class="form-label">Y_LABEL</label></div><div class="col-3"><button class="btn" type="button" name="sttngs-button-X" id="sttngs-button-X">Y_VALUE</button></div><div class="col-6">Y_DESC</div>',
-                "input": '<div class="col-3><label class="form-label" for="sttngs-input-X">Y_LABEL</label></div><div class="col-3"><input class="form-input" type="text" name="sttngs-input-X" id="sttngs-input-X" placeholder="X" value="Y_VALUE" /></div><div class="col-6">Y_DESC</div>',
-                "checkbox": '<div class="col-3"></div><div class="col-3"><label class="form-switch"><input type="checkbox" name="sttngs-checkbox-X" id="sttngs-checkbox-X" /><i class="form-icon"></i>Y_LABEL</label></div><div class="col-6">Y_DESC</div>',
-                "select": '<div class="col-3"><label class="form-label" for="sttngs-select-X">Y_LABEL</label></div><div class="col-3"><select class="form-select" name="sttngs-select-X" id="sttngs-select-X">Y_VALUE</select></div><div class="col-6">Y_DESC</div>'
-            }
-
-            var sHTML = $('<form class="form-horizontal"></form>');
-
-            for (var x in opts) {
-                var y = opts[x]
-
-                if (y === "") {
-                    $('<hr>').appendTo(sHTML)
-                    continue
-                }
-
-                y.type = y.type || "";
-
-                (function(x, y, cntrls) {
-                    // console.log(x, y)
-                    if (y.type === "input" || (typeof y.value === "string" && y.type === "")) {
-                        var el = $('<div class="form-group">' + (cntrls.input
-                            .replace(/X/gm, x)
-                            .replace(/Y_LABEL/gm, y.label)
-                            .replace(/Y_DESC/gm, y.desc)
-                            .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
-                        var el2 = el.find('#sttngs-input-' + x)[0]
-                        var $el2 = $(el2)
-
-                        $el2.on('change', function() {
-                            page.LS.opts[x].value = this.value
-
-                            page.LS = LS
-                            page.cmd("wrapperSetLocalStorage", page.LS, function() {})
-
-                            var r_ms = page.LS.opts[x].r_ms
-                            if (typeof eval(page.LS.opts[x].cb.change) === "function")
-                                eval(page.LS.opts[x].cb.change + '()')
-                            if (r_ms)
-                                page.loadMessages("r_ms")
-                        })
-                    } else if (y.type === "checkbox" || y.type === "switch" || (typeof y.value === "boolean" && y.type === "")) {
-                        var el = $('<div class="form-group">' + (cntrls.checkbox
-                            .replace(/X/gm, x)
-                            .replace(/Y_LABEL/gm, y.label)
-                            .replace(/Y_DESC/gm, y.desc)
-                            .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
-                        var el2 = el.find('#sttngs-checkbox-' + x)[0]
-                        var $el2 = $(el2)
-
-                        el2.checked = y.value
-
-                        $el2.on('change', function() {
-                            page.LS.opts[x].value = this.checked
-
-                            page.LS = LS
-                            page.cmd("wrapperSetLocalStorage", page.LS, function() {})
-
-                            var r_ms = page.LS.opts[x].r_ms
-                            if (typeof eval(page.LS.opts[x].cb.change) === "function")
-                                eval(page.LS.opts[x].cb.change + '()')
-                            if (r_ms)
-                                page.loadMessages("r_ms")
-                        })
-                    } else if (y.type === "select" || (y.values && y.values.constructor === Array && y.type === "")) {
-                        var valuesHTML = ''
-                        for (var vX in y.values) {
-                            var vY = y.values[vX]
-                            valuesHTML += '<option value="' + vY[0] + '">' + vY[1] + '</option>'
-                        }
-                        var el = $('<div class="form-group">' + (cntrls.select
-                            .replace(/X/gm, x)
-                            .replace(/Y_LABEL/gm, y.label)
-                            .replace(/Y_DESC/gm, y.desc)
-                            .replace(/Y_VALUE/gm, valuesHTML)) + '</div>').appendTo(sHTML)
-                        var el2 = el.find('#sttngs-select-' + x)[0]
-                        var $el2 = $(el2)
-                        $el2.val(y.value)
-
-                        $el2.on('change', function() {
-                            page.LS.opts[x].value = this.value
-
-                            page.LS = LS
-                            page.cmd("wrapperSetLocalStorage", page.LS, function() {})
-
-                            var r_ms = page.LS.opts[x].r_ms
-                            if (typeof eval(page.LS.opts[x].cb.change) === "function")
-                                eval(page.LS.opts[x].cb.change + '()')
-                            if (r_ms)
-                                page.loadMessages("r_ms")
-                        })
-                    } else if (y.type === "button") {
-                        var el = $('<div class="form-group">' + (cntrls.button
-                            .replace(/X/gm, x)
-                            .replace(/Y_LABEL/gm, y.label)
-                            .replace(/Y_DESC/gm, y.desc)
-                            .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
-                        var el2 = el.find('#sttngs-button-' + x)[0]
-                        var $el2 = $(el2)
-
-                        $el2.on('click', function() {
-                            var r_ms = page.LS.opts[x].r_ms
-                            if (typeof eval(page.LS.opts[x].cb.click) === "function")
-                                eval(page.LS.opts[x].cb.click + '()')
-                            if (r_ms)
-                                page.loadMessages("r_ms")
-                        })
-                    }
-                    // console.log(el, el2)
-                })(x, y, cntrls)
-            }
-            sHTML.appendTo('#sttngs_container')
-            $('#sttngs_container').children('.loading').remove()
+            page.genSettingsHTML(LS)
         })
     }
 
+    genSettingsHTML(LS) {
+        $('#sttngs_container').html('<div class="icon icons loading"></div>')
+        var opts = LS.opts
+
+        var cntrls = {
+            "button": '<div class="col-3"><label class="form-label">Y_LABEL</label></div><div class="col-3"><button class="btn" type="button" name="sttngs-button-X" id="sttngs-button-X">Y_VALUE</button></div><div class="col-6">Y_DESC</div>',
+            "input": '<div class="col-3><label class="form-label" for="sttngs-input-X">Y_LABEL</label></div><div class="col-3"><input class="form-input" type="text" name="sttngs-input-X" id="sttngs-input-X" placeholder="X" value="Y_VALUE" /></div><div class="col-6">Y_DESC</div>',
+            "checkbox": '<div class="col-3"></div><div class="col-3"><label class="form-switch"><input type="checkbox" name="sttngs-checkbox-X" id="sttngs-checkbox-X" /><i class="form-icon"></i>Y_LABEL</label></div><div class="col-6">Y_DESC</div>',
+            "select": '<div class="col-3"><label class="form-label" for="sttngs-select-X">Y_LABEL</label></div><div class="col-3"><select class="form-select" name="sttngs-select-X" id="sttngs-select-X">Y_VALUE</select></div><div class="col-6">Y_DESC</div>'
+        }
+
+        var sHTML = $('<form class="form-horizontal"></form>');
+
+        for (var x in opts) {
+            var y = opts[x]
+
+            if (y === "") {
+                $('<hr>').appendTo(sHTML)
+                continue
+            }
+
+            y.type = y.type || "";
+
+            (function(x, y, cntrls) {
+                // console.log(x, y)
+                if (y.type === "input" || (typeof y.value === "string" && y.type === "")) {
+                    var el = $('<div class="form-group">' + (cntrls.input
+                        .replace(/X/gm, x)
+                        .replace(/Y_LABEL/gm, y.label)
+                        .replace(/Y_DESC/gm, y.desc)
+                        .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
+                    var el2 = el.find('#sttngs-input-' + x)[0]
+                    var $el2 = $(el2)
+
+                    $el2.on('change', function() {
+                        page.LS.opts[x].value = this.value
+
+                        page.LS = LS
+                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        var r_ms = page.LS.opts[x].r_ms
+                        if (typeof eval(page.LS.opts[x].cb.change) === "function")
+                            eval(page.LS.opts[x].cb.change + '()')
+                        if (r_ms)
+                            page.loadMessages("r_ms", true)
+                    })
+                } else if (y.type === "checkbox" || y.type === "switch" || (typeof y.value === "boolean" && y.type === "")) {
+                    var el = $('<div class="form-group">' + (cntrls.checkbox
+                        .replace(/X/gm, x)
+                        .replace(/Y_LABEL/gm, y.label)
+                        .replace(/Y_DESC/gm, y.desc)
+                        .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
+                    var el2 = el.find('#sttngs-checkbox-' + x)[0]
+                    var $el2 = $(el2)
+
+                    el2.checked = y.value
+
+                    $el2.on('change', function() {
+                        page.LS.opts[x].value = this.checked
+
+                        page.LS = LS
+                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        var r_ms = page.LS.opts[x].r_ms
+                        if (typeof eval(page.LS.opts[x].cb.change) === "function")
+                            eval(page.LS.opts[x].cb.change + '()')
+                        if (r_ms)
+                            page.loadMessages("r_ms", true)
+                    })
+                } else if (y.type === "select" || (y.values && y.values.constructor === Array && y.type === "")) {
+                    var valuesHTML = ''
+                    for (var vX in y.values) {
+                        var vY = y.values[vX]
+                        valuesHTML += '<option value="' + vY[0] + '">' + vY[1] + '</option>'
+                    }
+                    var el = $('<div class="form-group">' + (cntrls.select
+                        .replace(/X/gm, x)
+                        .replace(/Y_LABEL/gm, y.label)
+                        .replace(/Y_DESC/gm, y.desc)
+                        .replace(/Y_VALUE/gm, valuesHTML)) + '</div>').appendTo(sHTML)
+                    var el2 = el.find('#sttngs-select-' + x)[0]
+                    var $el2 = $(el2)
+                    $el2.val(y.value)
+
+                    $el2.on('change', function() {
+                        page.LS.opts[x].value = this.value
+
+                        page.LS = LS
+                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        var r_ms = page.LS.opts[x].r_ms
+                        if (typeof eval(page.LS.opts[x].cb.change) === "function")
+                            eval(page.LS.opts[x].cb.change + '()')
+                        if (r_ms)
+                            page.loadMessages("r_ms", true)
+                    })
+                } else if (y.type === "button") {
+                    var el = $('<div class="form-group">' + (cntrls.button
+                        .replace(/X/gm, x)
+                        .replace(/Y_LABEL/gm, y.label)
+                        .replace(/Y_DESC/gm, y.desc)
+                        .replace(/Y_VALUE/gm, y.value)) + '</div>').appendTo(sHTML)
+                    var el2 = el.find('#sttngs-button-' + x)[0]
+                    var $el2 = $(el2)
+
+                    $el2.on('click', function() {
+                        var r_ms = page.LS.opts[x].r_ms
+                        if (typeof eval(page.LS.opts[x].cb.click) === "function")
+                            eval(page.LS.opts[x].cb.click + '()')
+                        if (r_ms)
+                            page.loadMessages("r_ms", true)
+                    })
+                }
+                // console.log(el, el2)
+            })(x, y, cntrls)
+        }
+        sHTML.appendTo('#sttngs_container')
+        $('#sttngs_container').children('.loading').remove()
+    }
+
     verifyUserFiles(cb1, cb2) {
+        console.log("Verifying User Files...")
+
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
+        var data2_inner_path = "data/users/" + this.site_info.auth_address + "/data_private.json"
         var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
+
+        var curpversion = 2
+
+        function verifyData2() {
+            page.cmd("fileGet", {
+                "inner_path": data2_inner_path,
+                "required": false
+            }, (data) => {
+                // console.log("BEFORE 1", data)
+                if (data)
+                    var data = JSON.parse(data)
+                else
+                    var data = {}
+                var olddata = JSON.parse(JSON.stringify(data))
+                console.log("BEFORE 2", olddata)
+
+                if (data.pversion !== curpversion)
+                    data = {
+                        "pversion": curpversion
+                    }
+
+                if (!data.hasOwnProperty("private_messages"))
+                    data.private_messages = []
+                if (!data.hasOwnProperty("private_messages_with"))
+                    data.private_messages_with = []
+
+                console.log("VERIFIED data_private.json", olddata, data)
+
+                page.addPrivateContact(page.site_info.cert_user_id, function(data2, cList) {
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    if (JSON.stringify(data2) !== JSON.stringify(olddata)) {
+                        console.log("data_private.json HAS RECEIVED A UPDATE!")
+                        page.cmd("fileWrite", [
+                            data2_inner_path,
+                            json_rawA
+                        ], (res) => {
+                            if (res == "ok") {
+                                console.log("data_private.json HAS BEEN UPDATED!")
+                            } else {
+                                page.cmd("wrapperNotification", [
+                                    "error", "File write error: " + JSON.stringify(res)
+                                ])
+                            }
+                        })
+                    }
+                })
+            })
+            verifyData(cb1, cb2)
+        }
 
         function verifyData(cb1, cb2) {
             page.cmd("fileGet", {
@@ -1279,6 +2296,11 @@ class ThunderWave extends ZeroFrame {
                     var data = {}
                 var olddata = JSON.parse(JSON.stringify(data))
 
+                if (data.pversion !== curpversion) {
+                    data.pversion = curpversion
+                    data.private_messages = []
+                }
+
                 if (!data.hasOwnProperty("messages"))
                     data.messages = []
                     // data.messages = [{
@@ -1287,33 +2309,76 @@ class ThunderWave extends ZeroFrame {
                     // }]
                 if (!data.hasOwnProperty("images"))
                     data.images = []
-                if (!data.hasOwnProperty("last_seen") || parseInt(moment().utc().format("x")) !== data.last_seen)
-                    data.last_seen = parseInt(moment().utc().format("x"))
-                console.log("VERIFIED data.json", olddata, data)
+
+                if (!data.hasOwnProperty("private_messages"))
+                    data.private_messages = []
+
+                if (data.hasOwnProperty("last_seen"))
+                    delete data.last_seen
+                if (data.hasOwnProperty("public_key"))
+                    delete data.public_key
+
+                if (!data.hasOwnProperty("extra_data") || !data.extra_data[0])
+                    data.extra_data = [{}]
+                if (!data.extra_data[0].hasOwnProperty("last_seen") || parseInt(moment().utc().format("x")) !== data.extra_data[0].last_seen)
+                    data.extra_data[0].last_seen = parseInt(moment().utc().format("x"))
+                if (!data.extra_data[0].hasOwnProperty("avatar_file_name"))
+                    data.extra_data[0].avatar_file_name = ""
+
+                // if (!data.extra_data[0].hasOwnProperty("avatar_file_url"))
+                //     data.extra_data[0].avatar_file_url = ""
+                // if (data.extra_data[0].hasOwnProperty("avatar_file_url"))
+                //     delete data.extra_data[0]["avatar_file_url"]
+
+                if (!data.extra_data[0].hasOwnProperty("auth_address"))
+                    data.extra_data[0].auth_address = page.site_info.auth_address
+
+                if (!data.extra_data[0].hasOwnProperty("avatar_type"))
+                    data.extra_data[0].avatar_type = 0
+                if (!data.extra_data[0].hasOwnProperty("public_key") || !data.extra_data[0].public_key) {
+                    page.cmd("userPublickey", [], (public_key) => {
+                        data.extra_data[0].public_key = public_key
+                        verifyData_2(data, olddata, cb1, cb2)
+                    })
+                } else {
+                    verifyData_2(data, olddata, cb1, cb2)
+                }
+            })
+        }
+
+        function verifyData_2(data, olddata, cb1, cb2) {
+            console.log("VERIFIED data.json", olddata, data)
+
+            if (JSON.stringify(data) !== JSON.stringify(olddata)) {
+                console.log("data.json HAS RECEIVED A UPDATE!")
+
+                if (parseInt(moment().utc().format("x")) !== data.extra_data[0].last_seen)
+                    data.extra_data[0].last_seen = parseInt(moment().utc().format("x"))
 
                 var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
                 var json_rawA = btoa(json_raw)
 
-                if (data !== olddata) {
-                    console.log("data.json HAS RECEIVED A UPDATE!")
-                    page.cmd("fileWrite", [
-                        data_inner_path,
-                        json_rawA
-                    ], (res) => {
-                        if (res == "ok") {
-                            console.log("data.json HAS BEEN UPDATED!")
-                            if (typeof cb1 === "function")
-                                cb1()
-                            verifyContent(data, olddata, cb2)
-                        } else {
-                            page.cmd("wrapperNotification", [
-                                "error", "File write error: " + JSON.stringify(res)
-                            ])
-                        }
-                    })
-                } else
-                    verifyContent(data, olddata, cb2)
-            })
+                page.cmd("fileWrite", [
+                    data_inner_path,
+                    json_rawA
+                ], (res) => {
+                    if (res == "ok") {
+                        console.log("data.json HAS BEEN UPDATED!")
+
+                        if (typeof cb1 === "function")
+                            cb1(data, olddata, true)
+                        verifyContent(data, olddata, cb2)
+                    } else {
+                        page.cmd("wrapperNotification", [
+                            "error", "File write error: " + JSON.stringify(res)
+                        ])
+                    }
+                })
+            } else {
+                if (typeof cb1 === "function")
+                    cb1(data, olddata, false)
+                verifyContent(data, olddata, cb2)
+            }
         }
 
         function verifyContent(data, olddata, cb2) {
@@ -1328,15 +2393,19 @@ class ThunderWave extends ZeroFrame {
                 var olddata2 = JSON.parse(JSON.stringify(data2))
 
                 var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg)"
+                var curignore = "(?!(.+\\.(png|jpg|jpeg|gif|mp3|ogg)|data.json))"
                 if (!data2.hasOwnProperty("optional") || data2.optional !== curoptional)
                     data2.optional = curoptional
+                if (!data2.hasOwnProperty("ignore") || data2.ignore !== curignore)
+                    data2.ignore = curignore
                 console.log("VERIFIED content.json", olddata2, data2)
 
-                var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
-                var json_rawA2 = btoa(json_raw2)
-
-                if (data2 !== olddata2 || data !== olddata) {
+                if (JSON.stringify(data2) !== JSON.stringify(olddata2) || JSON.stringify(data) !== JSON.stringify(olddata)) {
                     console.log("content.json HAS RECEIVED A UPDATE!")
+
+                    var json_raw2 = unescape(encodeURIComponent(JSON.stringify(data2, undefined, '\t')))
+                    var json_rawA2 = btoa(json_raw2)
+
                     page.cmd("fileWrite", [
                         content_inner_path,
                         json_rawA2
@@ -1344,7 +2413,7 @@ class ThunderWave extends ZeroFrame {
                         if (res == "ok") {
                             console.log("content.json HAS BEEN UPDATED!")
                             if (typeof cb2 === "function")
-                                cb2()
+                                cb2(data2, olddata2, true)
                             page.cmd("siteSign", {
                                 "inner_path": content_inner_path
                             }, (res) => {
@@ -1356,6 +2425,7 @@ class ThunderWave extends ZeroFrame {
                                     if (data.messages.length === 1)
                                         page.cmd("wrapperNotification", [
                                             "done", "Your first message was sent successfully! :)"
+                                            // "done", "Everything is set up! You are ready to go. :)"
                                         ])
                                 })
                             })
@@ -1365,10 +2435,14 @@ class ThunderWave extends ZeroFrame {
                             ])
                         }
                     })
+                } else {
+                    if (typeof cb2 === "function")
+                        cb2(data2, olddata2, false)
                 }
             })
         }
-        verifyData(cb1, cb2)
+
+        verifyData2()
     }
 
     verifyUser() {
@@ -1404,7 +2478,7 @@ class ThunderWave extends ZeroFrame {
             this.site_info = site_info
             this.setSiteInfo(site_info)
             if (site_info.cert_user_id) {
-                $("#select_user").text(site_info.cert_user_id)
+                // $("#select_user").text(site_info.cert_user_id)
 
                 this.verifyUserFiles()
                 this.messageCounterArr = {}
