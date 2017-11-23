@@ -2484,7 +2484,7 @@ class ThunderWave extends ZeroFrame {
             var y = opts[x]
 
             if (typeof y === "string") {
-                $('<div class="divider" data-content="' + (y ? y : '') + '"></div>').appendTo(sHTML)
+                $('<div class="divider text-center" data-content="' + (y ? y : '') + '"></div>').appendTo(sHTML)
                 continue
             }
 
