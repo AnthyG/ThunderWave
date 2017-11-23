@@ -272,9 +272,10 @@ class ThunderWave extends ZeroFrame {
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
             .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
-                page.quoteDisplayer(p1)
+                if (page.LS.opts.parse_quotes.value)
+                    page.quoteDisplayer(p1)
 
-                return '<div id="QUOTEREPLACE_' + p1 + '" class="icon icons loading">QUOTE ' + p1 + '</div>'
+                return '<div id="QUOTEREPLACE_' + p1 + '" class="' + (page.LS.opts.parse_quotes.value ? 'icon icons loading' : '') + '"><cite><q>?![tc_' + p1 + '</q> (Quote)</cite></div>'
             })
         if (!page.LS.opts.disable_emojis.value)
             message_parsed = emojione.toImage(message_parsed)
@@ -612,6 +613,12 @@ class ThunderWave extends ZeroFrame {
                 var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2PMSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
+            })
+            .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+                if (page.LS.opts.parse_quotes.value)
+                    page.quoteDisplayer(p1)
+
+                return '<div id="QUOTEREPLACE_' + p1 + '" class="' + (page.LS.opts.parse_quotes.value ? 'icon icons loading' : '') + '"><cite><q>?![tc_' + p1 + '</q> (Quote)</cite></div>'
             })
         if (!page.LS.opts.disable_emojis.value)
             message_parsed = emojione.toImage(message_parsed)
@@ -1279,9 +1286,10 @@ class ThunderWave extends ZeroFrame {
                         return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
                     })
                     .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
-                        page.quoteDisplayer(p1)
+                        if (page.LS.opts.parse_quotes.value)
+                            page.quoteDisplayer(p1)
 
-                        return '<div id="QUOTEREPLACE_' + p1 + '" class="icon icons loading">QUOTE ' + p1 + '</div>'
+                        return '<div id="QUOTEREPLACE_' + p1 + '" class="' + (page.LS.opts.parse_quotes.value ? 'icon icons loading' : '') + '"><cite><q>?![tc_' + p1 + '</q> (Quote)</cite></div>'
                     })
                 if (!page.LS.opts.disable_emojis.value)
                     quote_parsed = emojione.toImage(quote_parsed)
@@ -1809,7 +1817,7 @@ class ThunderWave extends ZeroFrame {
     }
 
     returnDefaultsOpts(cb) {
-        var curOptsV = 22
+        var curOptsV = 23
         var defaultOpts = {
             // "parse_links": {
             //     "label": "Parse Links", // The Label of this option
@@ -1898,6 +1906,20 @@ class ThunderWave extends ZeroFrame {
                     ).toString() + ')'
                 }
             },
+            "parse_quotes": {
+                "label": "Parse Quotes",
+                "desc": "Activate to parse quotes in messages (?![tc_xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx])",
+                "value": true,
+                "r_ms": true,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_5": "",
             "user_mention_badge": {
                 "label": "User mention badge",
                 "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
