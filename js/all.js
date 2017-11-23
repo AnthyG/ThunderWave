@@ -5142,7 +5142,7 @@ class ThunderWave extends ZeroFrame {
 
         // console.log(CDalreadyexists, CDalreadyexistsC)
 
-        var msg_part_2_1 = '<div id="tc_' + msgkey + '" tc="' + date_added + '" class="card mb-5">' +
+        var msg_part_2_1 = '<div id="tc_' + msgkey + '" tc="' + date_added + '" class="card mb-5 ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' +
             ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
                 '<div class="card-header"><small class="tile-title"><a onclick="add2MSGInput(\'' + username + ' \'); return false;" href="?u/' + encodeURI(username) + '">' + username + '</a></small></div>') + '<div class="card-body text-break">' +
             message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
@@ -5170,7 +5170,7 @@ class ThunderWave extends ZeroFrame {
             var msg_part_1 = '<div class="tile-icon"><figure class="avatar avatar-lg message-user-avatar ' + user_mention_badge + '" data-initial="' + username.substr(0, 2) + '">' + message_pic + '</figure></div>',
                 msg_part_2 = '<div class="tile-content">' + msg_part_2_1 + '</div>'
 
-            var el = $('<li id="t_' + msgkey + '" t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
+            var el = $('<li id="t_' + msgkey + '" t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
 
             // if (addattop && !thismessageis.after && dCDalreadyexists) // && isafter2)
             //     el = el.prependTo(CDalreadyexistsC)
@@ -5477,7 +5477,7 @@ class ThunderWave extends ZeroFrame {
         if (!page.LS.opts.disable_emojis.value)
             message_parsed = emojione.toImage(message_parsed)
 
-        var msg_part_2_1 = '<div id="P_tc_' + msgkey + '" P_tc="' + date_added + '" class="card mb-5">' +
+        var msg_part_2_1 = '<div id="P_tc_' + msgkey + '" P_tc="' + date_added + '" class="card mb-5 ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' +
             ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
                 '') + '<div class="card-body text-break">' +
             message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
@@ -5501,7 +5501,7 @@ class ThunderWave extends ZeroFrame {
             var msg_part_1 = '<div class="tile-icon"><figure class="avatar avatar-lg message-user-avatar ' + user_mention_badge + '" data-initial="' + username.substr(0, 2) + '">' + message_pic + '</figure></div>',
                 msg_part_2 = '<div class="tile-content">' + msg_part_2_1 + '</div>'
 
-            var el = $('<li id="P_t_' + msgkey + '" P_t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
+            var el = $('<li id="P_t_' + msgkey + '" P_t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
 
             el = el.appendTo(CDalreadyexistsC)
 
@@ -6677,7 +6677,7 @@ class ThunderWave extends ZeroFrame {
             var LS = (typeof LS === "object" ? (LS || {}) : {})
 
             // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
-            var curOptsV = 14
+            var curOptsV = 21
             var defaultOpts = {
                 // "parse_links": {
                 //     "label": "Parse Links", // The Label of this option
@@ -6828,7 +6828,7 @@ class ThunderWave extends ZeroFrame {
                 },
                 "avatar_size": {
                     "label": "Set avatar-size",
-                    "desc": "Sets the avatar-size to this dimensions",
+                    "desc": "Sets the resolution of generated avatars",
                     "value": 64,
                     "values": [
                         [0, "Off (2char-initial)"],
@@ -6868,6 +6868,60 @@ class ThunderWave extends ZeroFrame {
                                     $('#messages').removeAttr("design-type")
                                 } else {
                                     $('#messages').attr("design-type", parsedVal)
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "divider_4": "",
+                "theme_body_light": {
+                    "label": "Toggle light themed body",
+                    "desc": "If activated, the body will have a light theme",
+                    "value": false,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                if (page.LS.opts.theme_body_light.value) {
+                                    $('body').addClass('light')
+                                } else {
+                                    $('body').removeClass('light')
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "theme_message_dark": {
+                    "label": "Toggle dark themed message-bubbles",
+                    "desc": "If activated, the message-bubbles will have a dark theme (works good with dark body!)",
+                    "value": false,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                if (page.LS.opts.theme_message_dark.value) {
+                                    $('#messages').find('.tile').removeClass('light')
+                                    $('#messages').find('.tile').find('.card').removeClass('light')
+                                } else {
+                                    $('#messages').find('.tile').addClass('light')
+                                    $('#messages').find('.tile').find('.card').addClass('light')
+                                }
+                            }
+                        ).toString() + ')'
+                    }
+                },
+                "theme_navbar_light": {
+                    "label": "Toggle light themed navbar",
+                    "desc": "If activated, the navbar will have a light theme",
+                    "value": false,
+                    "r_ms": false,
+                    "cb": {
+                        "change": '(' + (
+                            function() {
+                                if (page.LS.opts.theme_navbar_light.value) {
+                                    $('header.navbar.fixed').addClass('light')
+                                } else {
+                                    $('header.navbar.fixed').removeClass('light')
                                 }
                             }
                         ).toString() + ')'
@@ -6921,7 +6975,8 @@ class ThunderWave extends ZeroFrame {
                     "cb": {
                         "click": '(' + (
                             function() {
-                                if (page.site_info.cert_user_id !== "glightstar@zeroid.bit") {
+                                if (page.site_info.cert_user_id !== "glightstar@zeroid.bit" &&
+                                    page.site_info.cert_user_id !== "glightstar@kaffie.bit") {
                                     var count = 0
                                     page.cmd("optionalFileList", [], (data) => {
                                         for (var x in data) {
@@ -6981,9 +7036,6 @@ class ThunderWave extends ZeroFrame {
             if (!LS.hasOwnProperty("opts")) {
                 LS.optsV = curOptsV
 
-                if (LS.hasOwnProperty("opts"))
-                    var oldOpts = LS.opts
-
                 LS.opts = JSON.parse(JSON.stringify(defaultOpts))
             }
 
@@ -7020,7 +7072,7 @@ class ThunderWave extends ZeroFrame {
                                         continue
                                     }
                                 }
-                            } else if (optY.hasOwnProperty("values") || OoptY.hasOwnProperty("values")) {
+                            } else if (!optY.hasOwnProperty("values") || !OoptY.hasOwnProperty("values")) {
                                 continue
                             } else {
                                 hasvalue = true
@@ -7057,6 +7109,15 @@ class ThunderWave extends ZeroFrame {
                 // console.log(LS, dis.LS)
             dis.cmd("wrapperSetLocalStorage", LS, function() {})
             page.genSettingsHTML(LS)
+
+            for (var optX in LS.opts) {
+                var optY = LS.opts[optX]
+
+                if (optY.hasOwnProperty("cb") && optY.cb.hasOwnProperty("change") && typeof eval(optY.cb.change) === "function") {
+                    // console.log("executing option", optX, optY)
+                    eval(optY.cb.change + '()')
+                }
+            }
         })
     }
 
@@ -7431,8 +7492,6 @@ class ThunderWave extends ZeroFrame {
     }
 
     onOpenWebsocket() {
-        this.setSettingsOptions()
-
         this.cmd("siteInfo", {}, (site_info) => {
             this.site_info = site_info
             this.setSiteInfo(site_info)
@@ -7440,8 +7499,13 @@ class ThunderWave extends ZeroFrame {
                 // $("#select_user").text(site_info.cert_user_id)
 
                 this.verifyUserFiles()
-                this.messageCounterArr = {}
-                this.loadMessages("first time")
+
+                $(document).ready(function() {
+                    page.setSettingsOptions()
+
+                    page.messageCounterArr = {}
+                    page.loadMessages("first time")
+                })
             }
         })
 
