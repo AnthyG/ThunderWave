@@ -6669,6 +6669,114 @@ class ThunderWave extends ZeroFrame {
         )
     }
 
+    settingsOptions(gos, cb) {
+        this.returnDefaultsOpts(function(curOptsV, defaultOpts) {
+            var data_inner_path = "data/users/" + page.site_info.auth_address + "/data.json"
+
+            if (gos === "get") {
+                page.cmd("fileQuery", {
+                    "dir_inner_path": data_inner_path,
+                    "query": "settings"
+                }, (settings) => {
+                    typeof cb === "function" && cb({
+                        opts: settings[0],
+                        optsV: curOptsV
+                    }, defaultOpts)
+                })
+            } else if (gos === "reset") {
+                page.cmd("fileGet", {
+                    "inner_path": data_inner_path,
+                    "required": false
+                }, (data) => {
+                    if (data)
+                        var data = JSON.parse(data)
+                    else {
+                        page.verifyUserFiles()
+                        return false
+                    }
+
+                    for (var optX in defaultOpts) {
+                        var optY = defaultOpts[optX]
+
+                        data.settings[0][optY.short] = optY.value
+                    }
+
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    page.cmd("fileWrite", [
+                        data_inner_path,
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            typeof cb === "function" && cb({
+                                opts: data.settings[0],
+                                optsV: curOptsV
+                            }, defaultOpts)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                    })
+                })
+            } else if (typeof gos === "object" &&
+                gos[0] === "set" && typeof gos[1] === "object" && Object.keys(gos[1]).length > 0) {
+                page.cmd("fileGet", {
+                    "inner_path": data_inner_path,
+                    "required": false
+                }, (data) => {
+                    if (data)
+                        var data = JSON.parse(data)
+                    else {
+                        page.verifyUserFiles()
+                        return false
+                    }
+                    for (var optX in gos[1]) {
+                        var hasvalue = false
+                        if (defaultOpts.hasOwnProperty(optX) &&
+                            typeof gos[1][optX][1] === typeof defaultOpts.value) {
+                            if (!defaultOpts.hasOwnProperty("values")) {
+                                hasvalue = true
+                            } else if (defaultOpts.hasOwnProperty("values")) {
+                                var opt_arrS = defaultOpts.values.filter(function(a, b) {
+                                    console.log(a, b)
+                                    if (a[0] === arrS)
+                                        return true
+                                    else
+                                        return false
+                                })
+                                if (opt_arrS.length > 0 && typeof opt_arrS[0] === "object" && opt_arrS[0].length === 2) {
+                                    hasvalue = true
+                                }
+                            }
+                        }
+                        data.settings[0][defaultOpts[optX].short] = gos[1][optX]
+                    }
+
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    page.cmd("fileWrite", [
+                        data_inner_path,
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            typeof cb === "function" && cb({
+                                opts: data.settings[0],
+                                optsV: curOptsV
+                            }, defaultOpts)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                    })
+                })
+            }
+        })
+    }
+
     setSettingsOptions() {
         console.log("Settings options..")
 
