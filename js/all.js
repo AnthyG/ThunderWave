@@ -6678,7 +6678,7 @@ class ThunderWave extends ZeroFrame {
     }
 
     returnDefaultsOpts(cb) {
-        var curOptsV = 23
+        var curOptsV = 27
         var defaultOpts = {
             // "parse_links": {
             //     "label": "Parse Links", // The Label of this option
@@ -6700,6 +6700,7 @@ class ThunderWave extends ZeroFrame {
             //         ).toString() + ')'
             //     }
             // },
+            "divider_7": "Notifications",
             "feed_notifications": {
                 "label": "Notifications in ZeroHello-Feed",
                 "desc": "Activate, to get notifications in the ZeroHello-Feed",
@@ -6746,7 +6747,7 @@ class ThunderWave extends ZeroFrame {
                     ).toString() + ')'
                 }
             },
-            "divider_3": "",
+            "divider_3": "Parsing",
             "parse_profile_links": {
                 "label": "Parse Profile Links",
                 "desc": "Activate to parse profile links in messages (@...)",
@@ -6780,7 +6781,7 @@ class ThunderWave extends ZeroFrame {
                     ).toString() + ')'
                 }
             },
-            "divider_5": "",
+            "divider_5": "Extra infos",
             "user_mention_badge": {
                 "label": "User mention badge",
                 "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
@@ -6822,6 +6823,7 @@ class ThunderWave extends ZeroFrame {
                     ).toString() + ')'
                 }
             },
+            "divider_6": "Design",
             "avatar_type": {
                 "label": "Allow specific avatar-types only",
                 "desc": "Choose which avatar-locations are allowed (if a user has no location specified, the avatar-generator will be used)",
@@ -6893,7 +6895,7 @@ class ThunderWave extends ZeroFrame {
                     ).toString() + ')'
                 }
             },
-            "divider_4": "",
+            "divider_4": "Theming",
             "theme_body_light": {
                 "label": "Toggle light themed body",
                 "desc": "If activated, the body will have a light theme",
@@ -6947,7 +6949,7 @@ class ThunderWave extends ZeroFrame {
                     ).toString() + ')'
                 }
             },
-            "divider_1": "",
+            "divider_1": "Emoji's",
             "disable_emojis": {
                 "label": "Disable loading of Emoji's",
                 "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
@@ -6968,6 +6970,10 @@ class ThunderWave extends ZeroFrame {
                 "cb": {
                     "change": '(' + (
                         function() {
+                            if (page.site_info.cert_user_id === "glightstar@zeroid.bit" ||
+                                page.site_info.cert_user_id === "glightstar@kaffie.bit") {
+                                page.LS.opts.seed_all_emojis.value = true
+                            }
                             if (page.LS.opts.seed_all_emojis.value) {
                                 page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
                                     (res) => {
@@ -7034,7 +7040,7 @@ class ThunderWave extends ZeroFrame {
                     ).toString() + ')'
                 }
             },
-            "divider_2": "",
+            "divider_2": "Other",
             "reset_options_to_default": {
                 "label": "Reset to default",
                 "desc": "Resets all options to their default values",
@@ -7338,8 +7344,8 @@ class ThunderWave extends ZeroFrame {
         for (var x in opts) {
             var y = opts[x]
 
-            if (y === "") {
-                $('<hr>').appendTo(sHTML)
+            if (typeof y === "string") {
+                $('<div class="divider" data-content="' + (y ? y : '') + '"></div>').appendTo(sHTML)
                 continue
             }
 
