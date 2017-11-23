@@ -1808,369 +1808,480 @@ class ThunderWave extends ZeroFrame {
         )
     }
 
+    returnDefaultsOpts() {
+        var curOptsV = 21
+        var defaultOpts = {
+            // "parse_links": {
+            //     "label": "Parse Links", // The Label of this option
+            //     "desc": "Activate to parse links in messages", // The description of this option
+            //     "value": false, // The value of this option
+            //     "r_ms": false, // Reload messages
+            //     "cb": { // Callback ..
+            //         "change": '(' + ( // .. on change
+            //             function() {
+            //                 $('#messages').find('.message-link').each(function() {
+            //                     var elY = $(this);
+            //                     if (page.LS.opts.parse_links.value) {
+            //                         elY.replaceWith($('<a class="message-link" href="' + elY.text() + '" target="_blank">' + elY.text() + '</a>'));
+            //                     } else {
+            //                         elY.replaceWith($('<span class="message-link">' + elY.text() + '</span>'));
+            //                     }
+            //                 })
+            //             }
+            //         ).toString() + ')'
+            //     }
+            // },
+            "feed_notifications": {
+                "label": "Notifications in ZeroHello-Feed",
+                "desc": "Activate, to get notifications in the ZeroHello-Feed",
+                "value": 0,
+                "values": [
+                    [0, "Off"],
+                    [1, "Only mentions"],
+                    [2, "All messages"]
+                ],
+                "type": "select",
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            var parsedVal = parseInt(page.LS.opts.feed_notifications.value)
+                            if (parsedVal === 1) {
+                                page.cmd("feedFollow", [{
+                                    "Mentions": [
+                                        "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
+                                            ""
+                                        ]
+                                    ]
+                                }])
+                            } else if (parsedVal === 2) {
+                                page.cmd("feedFollow", [{
+                                    "Mentions": [
+                                        "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
+                                            ""
+                                        ]
+                                    ],
+                                    "Messages": [
+                                        "SELECT messages.message_id AS event_uri, 'comment' AS type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id)", [
+                                            ""
+                                        ]
+                                    ]
+                                }])
+                            } else {
+                                page.cmd("feedFollow", [{}])
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_3": "",
+            "parse_profile_links": {
+                "label": "Parse Profile Links",
+                "desc": "Activate to parse profile links in messages (@...)",
+                "value": true,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            $('#messages').find('.message-profile-link').each(function() {
+                                var elY = $(this);
+                                if (page.LS.opts.parse_profile_links.value) {
+                                    elY.replaceWith($('<a class="message-profile-link" href="?u/' + elY.text() + '">' + elY.text() + '</a>'));
+                                } else {
+                                    elY.replaceWith($('<span class="message-profile-link">' + elY.text() + '</span>'));
+                                }
+                            })
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "user_mention_badge": {
+                "label": "User mention badge",
+                "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
+                "value": true,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.LS.opts.user_mention_badge.value) {
+                                $('#messages').find('.user-is-mentioned').find('.message-user-avatar').addClass("badge")
+                                    // $('#messages').find('.message-user-mention-badge').removeClass("hide")
+                            } else {
+                                $('#messages').find('.user-is-mentioned').find('.message-user-avatar').removeClass("badge")
+                                    // $('#messages').find('.message-user-mention-badge').addClass("hide")
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "show_timestamps": {
+                "label": "Toggle Timestamps",
+                "desc": "Activate to show Timestamps in chat",
+                "value": true,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            $('#messages').find('.message-timestamp').each(function() {
+                                var elY = $(this);
+                                if (page.LS.opts.show_timestamps.value) {
+                                    elY.parent().parent().removeClass("card-footer")
+                                    elY.removeClass("hide")
+                                } else {
+                                    elY.parent().parent().addClass("card-footer")
+                                    elY.addClass("hide")
+                                }
+                            })
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "avatar_type": {
+                "label": "Allow specific avatar-types only",
+                "desc": "Choose which avatar-locations are allowed (if a user has no location specified, the avatar-generator will be used)",
+                "value": 1,
+                "values": [
+                    [0, "TW & ZM"],
+                    [1, "ThunderWave"],
+                    [2, "ZeroMe"],
+                    [3, "none"]
+                ],
+                "type": "select",
+                "r_ms": true,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            var parsedVal = parseInt(page.LS.opts.avatar_type.value)
+                            page.LS.opts.avatar_type.value = (parsedVal < 4 && parsedVal > -1 ? parsedVal : 1)
+                        }
+                    ).toString() + ')'
+                }
+
+            },
+            "avatar_size": {
+                "label": "Set avatar-size",
+                "desc": "Sets the resolution of generated avatars",
+                "value": 64,
+                "values": [
+                    [0, "Off (2char-initial)"],
+                    [32, "32x32"],
+                    [64, "64x64 (default)"],
+                    [128, "128x128"],
+                    [256, "256x256"],
+                    [512, "512x512"]
+                ],
+                "type": "select",
+                "r_ms": true,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            var parsedVal = parseInt(page.LS.opts.avatar_size.value)
+                            page.LS.opts.avatar_size.value = (parsedVal > 0 ? parsedVal : (parsedVal === 0 ? 0 : 64))
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "message_design_type": {
+                "label": "Change design of messages",
+                "desc": "Changes the design of the messages",
+                "value": 2,
+                "values": [
+                    [1, "Square"],
+                    [2, "Arrow at top (default)"],
+                    [3, "Arrow at middle of avatar"]
+                ],
+                "type": "select",
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            var parsedVal = parseInt(page.LS.opts.message_design_type.value)
+                            if (parsedVal === 1) {
+                                $('#messages').removeAttr("design-type")
+                            } else {
+                                $('#messages').attr("design-type", parsedVal)
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_4": "",
+            "theme_body_light": {
+                "label": "Toggle light themed body",
+                "desc": "If activated, the body will have a light theme",
+                "value": false,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.LS.opts.theme_body_light.value) {
+                                $('body').addClass('light')
+                            } else {
+                                $('body').removeClass('light')
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "theme_message_dark": {
+                "label": "Toggle dark themed message-bubbles",
+                "desc": "If activated, the message-bubbles will have a dark theme (works good with dark body!)",
+                "value": false,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.LS.opts.theme_message_dark.value) {
+                                $('#messages').find('.tile').removeClass('light')
+                                $('#messages').find('.tile').find('.card').removeClass('light')
+                            } else {
+                                $('#messages').find('.tile').addClass('light')
+                                $('#messages').find('.tile').find('.card').addClass('light')
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "theme_navbar_light": {
+                "label": "Toggle light themed navbar",
+                "desc": "If activated, the navbar will have a light theme",
+                "value": false,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.LS.opts.theme_navbar_light.value) {
+                                $('header.navbar.fixed').addClass('light')
+                            } else {
+                                $('header.navbar.fixed').removeClass('light')
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_1": "",
+            "disable_emojis": {
+                "label": "Disable loading of Emoji's",
+                "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
+                "value": false,
+                "r_ms": true,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "seed_all_emojis": {
+                "label": "Seed all Emoji's",
+                "desc": "Downloads and seeds all Emoji's automatically!",
+                "value": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.LS.opts.seed_all_emojis.value) {
+                                page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
+                                    (res) => {
+                                        console.log(res)
+                                    })
+                            } else {
+                                page.cmd("OptionalHelpRemove", ["css/png"],
+                                    (res) => {
+                                        console.log(res)
+                                        page.cmd("wrapperNotification", [
+                                            "done", "You are no longer Auto-Seeding Emoji's!", 5000
+                                        ])
+                                    })
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "delete_all_emojis": {
+                "label": "Delete all Emoji's",
+                "desc": "All Emoji's in your \"cache\" will be deleted",
+                "value": "Delete",
+                "type": "button",
+                "r_ms": true,
+                "cb": {
+                    "click": '(' + (
+                        function() {
+                            if (page.site_info.cert_user_id !== "glightstar@zeroid.bit" &&
+                                page.site_info.cert_user_id !== "glightstar@kaffie.bit") {
+                                var count = 0
+                                page.cmd("optionalFileList", [], (data) => {
+                                    for (var x in data) {
+                                        var y = data[x]
+                                        if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
+                                            page.cmd("optionalFileDelete", y.inner_path, (res) => {
+                                                console.log("deleted emoji at path " + y.inner_path)
+                                                count++
+                                            })
+                                    }
+                                    page.cmd("wrapperNotification", [
+                                        "done", "Removed " + count + " Emoji's!", 5000
+                                    ])
+                                })
+                            } else {
+                                page.cmd("wrapperNotification", [
+                                    "error", "You can't delete Emoji's!", 5000
+                                ])
+                                var count = 0
+                                page.cmd("optionalFileList", [], (data) => {
+                                    console.log(data)
+                                    for (var x in data) {
+                                        var y = data[x]
+                                        if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/") {
+                                            console.log("would have removed emoji at path " + y.inner_path)
+                                            count++
+                                        }
+                                    }
+                                    page.cmd("wrapperNotification", [
+                                        "done", "Would have removed " + count + " Emoji's!", 5000
+                                    ])
+                                })
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_2": "",
+            "reset_options_to_default": {
+                "label": "Reset to default",
+                "desc": "Resets all options to their default values",
+                "value": "Reset",
+                "type": "button",
+                "r_ms": true,
+                "cb": {
+                    "click": '(' + (
+                        function() {
+                            delete page.LS.opts;
+                            page.cmd("wrapperSetLocalStorage", page.LS, function() {});
+                            page.setSettingsOptions();
+                        }
+                    ).toString() + ')'
+                }
+            }
+        }
+    }
+
+    settingsOptions(gos, cb) {
+        this.returnDefaultsOpts(function(curOptsV, defaultOpts) {
+            var data_inner_path = "data/users/" + page.site_info.auth_address + "/data.json"
+
+            if (gos === "get") {
+                page.cmd("fileQuery", {
+                    "dir_inner_path": data_inner_path,
+                    "query": "settings"
+                }, (settings) => {
+                    typeof cb === "function" && cb({
+                        opts: settings[0],
+                        optsV: curOptsV
+                    }, defaultOpts)
+                })
+            } else if (gos === "reset") {
+                page.cmd("fileGet", {
+                    "inner_path": data_inner_path,
+                    "required": false
+                }, (data) => {
+                    if (data)
+                        var data = JSON.parse(data)
+                    else {
+                        page.verifyUserFiles()
+                        return false
+                    }
+
+                    for (var optX in defaultOpts) {
+                        var optY = defaultOpts[optX]
+
+                        data.settings[0][optX] = optY.value
+                    }
+
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    page.cmd("fileWrite", [
+                        data_inner_path,
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            typeof cb === "function" && cb({
+                                opts: data.settings[0],
+                                optsV: curOptsV
+                            }, defaultOpts)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                    })
+                })
+            } else if (typeof gos === "object" &&
+                gos[0] === "set" && typeof gos[1] === "object" && Object.keys(gos[1]).length > 0) {
+                page.cmd("fileGet", {
+                    "inner_path": data_inner_path,
+                    "required": false
+                }, (data) => {
+                    if (data)
+                        var data = JSON.parse(data)
+                    else {
+                        page.verifyUserFiles()
+                        return false
+                    }
+                    for (var optX in gos[1]) {
+                        var hasvalue = false
+                        if (defaultOpts.hasOwnProperty(optX) &&
+                            typeof gos[1][optX][1] === typeof defaultOpts.value) {
+                            if (!defaultOpts.hasOwnProperty("values")) {
+                                hasvalue = true
+                            } else if (defaultOpts.hasOwnProperty("values")) {
+                                var opt_arrS = defaultOpts.values.filter(function(a, b) {
+                                    console.log(a, b)
+                                    if (a[0] === arrS)
+                                        return true
+                                    else
+                                        return false
+                                })
+                                if (opt_arrS.length > 0 && typeof opt_arrS[0] === "object" && opt_arrS[0].length === 2) {
+                                    hasvalue = true
+                                }
+                            }
+                        }
+                        data.settings[0][optX] = gos[1][optX]
+                    }
+
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    page.cmd("fileWrite", [
+                        data_inner_path,
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            typeof cb === "function" && cb({
+                                opts: data.settings[0],
+                                optsV: curOptsV
+                            }, defaultOpts)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                    })
+                })
+            }
+        })
+    }
+
     setSettingsOptions() {
         console.log("Settings options..")
 
-        var dis = this
-        this.cmd("wrapperGetLocalStorage", [], (LS) => {
+        // page.cmd("wrapperGetLocalStorage", [], (LS) => {
+        page.settingsOptions("get", (LS, defaultOpts) => {
             var LS = (typeof LS === "object" ? (LS || {}) : {})
 
             // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
-            var curOptsV = 21
-            var defaultOpts = {
-                // "parse_links": {
-                //     "label": "Parse Links", // The Label of this option
-                //     "desc": "Activate to parse links in messages", // The description of this option
-                //     "value": false, // The value of this option
-                //     "r_ms": false, // Reload messages
-                //     "cb": { // Callback ..
-                //         "change": '(' + ( // .. on change
-                //             function() {
-                //                 $('#messages').find('.message-link').each(function() {
-                //                     var elY = $(this);
-                //                     if (page.LS.opts.parse_links.value) {
-                //                         elY.replaceWith($('<a class="message-link" href="' + elY.text() + '" target="_blank">' + elY.text() + '</a>'));
-                //                     } else {
-                //                         elY.replaceWith($('<span class="message-link">' + elY.text() + '</span>'));
-                //                     }
-                //                 })
-                //             }
-                //         ).toString() + ')'
-                //     }
-                // },
-                "feed_notifications": {
-                    "label": "Notifications in ZeroHello-Feed",
-                    "desc": "Activate, to get notifications in the ZeroHello-Feed",
-                    "value": 0,
-                    "values": [
-                        [0, "Off"],
-                        [1, "Only mentions"],
-                        [2, "All messages"]
-                    ],
-                    "type": "select",
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                var parsedVal = parseInt(page.LS.opts.feed_notifications.value)
-                                if (parsedVal === 1) {
-                                    page.cmd("feedFollow", [{
-                                        "Mentions": [
-                                            "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
-                                                ""
-                                            ]
-                                        ]
-                                    }])
-                                } else if (parsedVal === 2) {
-                                    page.cmd("feedFollow", [{
-                                        "Mentions": [
-                                            "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
-                                                ""
-                                            ]
-                                        ],
-                                        "Messages": [
-                                            "SELECT messages.message_id AS event_uri, 'comment' AS type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id)", [
-                                                ""
-                                            ]
-                                        ]
-                                    }])
-                                } else {
-                                    page.cmd("feedFollow", [{}])
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "divider_3": "",
-                "parse_profile_links": {
-                    "label": "Parse Profile Links",
-                    "desc": "Activate to parse profile links in messages (@...)",
-                    "value": true,
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                $('#messages').find('.message-profile-link').each(function() {
-                                    var elY = $(this);
-                                    if (page.LS.opts.parse_profile_links.value) {
-                                        elY.replaceWith($('<a class="message-profile-link" href="?u/' + elY.text() + '">' + elY.text() + '</a>'));
-                                    } else {
-                                        elY.replaceWith($('<span class="message-profile-link">' + elY.text() + '</span>'));
-                                    }
-                                })
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "user_mention_badge": {
-                    "label": "User mention badge",
-                    "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
-                    "value": true,
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                if (page.LS.opts.user_mention_badge.value) {
-                                    $('#messages').find('.user-is-mentioned').find('.message-user-avatar').addClass("badge")
-                                        // $('#messages').find('.message-user-mention-badge').removeClass("hide")
-                                } else {
-                                    $('#messages').find('.user-is-mentioned').find('.message-user-avatar').removeClass("badge")
-                                        // $('#messages').find('.message-user-mention-badge').addClass("hide")
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "show_timestamps": {
-                    "label": "Toggle Timestamps",
-                    "desc": "Activate to show Timestamps in chat",
-                    "value": true,
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                $('#messages').find('.message-timestamp').each(function() {
-                                    var elY = $(this);
-                                    if (page.LS.opts.show_timestamps.value) {
-                                        elY.parent().parent().removeClass("card-footer")
-                                        elY.removeClass("hide")
-                                    } else {
-                                        elY.parent().parent().addClass("card-footer")
-                                        elY.addClass("hide")
-                                    }
-                                })
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "avatar_type": {
-                    "label": "Allow specific avatar-types only",
-                    "desc": "Choose which avatar-locations are allowed (if a user has no location specified, the avatar-generator will be used)",
-                    "value": 1,
-                    "values": [
-                        [0, "TW & ZM"],
-                        [1, "ThunderWave"],
-                        [2, "ZeroMe"],
-                        [3, "none"]
-                    ],
-                    "type": "select",
-                    "r_ms": true,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                var parsedVal = parseInt(page.LS.opts.avatar_type.value)
-                                page.LS.opts.avatar_type.value = (parsedVal < 4 && parsedVal > -1 ? parsedVal : 1)
-                            }
-                        ).toString() + ')'
-                    }
-
-                },
-                "avatar_size": {
-                    "label": "Set avatar-size",
-                    "desc": "Sets the resolution of generated avatars",
-                    "value": 64,
-                    "values": [
-                        [0, "Off (2char-initial)"],
-                        [32, "32x32"],
-                        [64, "64x64 (default)"],
-                        [128, "128x128"],
-                        [256, "256x256"],
-                        [512, "512x512"]
-                    ],
-                    "type": "select",
-                    "r_ms": true,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                var parsedVal = parseInt(page.LS.opts.avatar_size.value)
-                                page.LS.opts.avatar_size.value = (parsedVal > 0 ? parsedVal : (parsedVal === 0 ? 0 : 64))
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "message_design_type": {
-                    "label": "Change design of messages",
-                    "desc": "Changes the design of the messages",
-                    "value": 2,
-                    "values": [
-                        [1, "Square"],
-                        [2, "Arrow at top (default)"],
-                        [3, "Arrow at middle of avatar"]
-                    ],
-                    "type": "select",
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                var parsedVal = parseInt(page.LS.opts.message_design_type.value)
-                                if (parsedVal === 1) {
-                                    $('#messages').removeAttr("design-type")
-                                } else {
-                                    $('#messages').attr("design-type", parsedVal)
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "divider_4": "",
-                "theme_body_light": {
-                    "label": "Toggle light themed body",
-                    "desc": "If activated, the body will have a light theme",
-                    "value": false,
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                if (page.LS.opts.theme_body_light.value) {
-                                    $('body').addClass('light')
-                                } else {
-                                    $('body').removeClass('light')
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "theme_message_dark": {
-                    "label": "Toggle dark themed message-bubbles",
-                    "desc": "If activated, the message-bubbles will have a dark theme (works good with dark body!)",
-                    "value": false,
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                if (page.LS.opts.theme_message_dark.value) {
-                                    $('#messages').find('.tile').removeClass('light')
-                                    $('#messages').find('.tile').find('.card').removeClass('light')
-                                } else {
-                                    $('#messages').find('.tile').addClass('light')
-                                    $('#messages').find('.tile').find('.card').addClass('light')
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "theme_navbar_light": {
-                    "label": "Toggle light themed navbar",
-                    "desc": "If activated, the navbar will have a light theme",
-                    "value": false,
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                if (page.LS.opts.theme_navbar_light.value) {
-                                    $('header.navbar.fixed').addClass('light')
-                                } else {
-                                    $('header.navbar.fixed').removeClass('light')
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "divider_1": "",
-                "disable_emojis": {
-                    "label": "Disable loading of Emoji's",
-                    "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
-                    "value": false,
-                    "r_ms": true,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "seed_all_emojis": {
-                    "label": "Seed all Emoji's",
-                    "desc": "Downloads and seeds all Emoji's automatically!",
-                    "value": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                if (page.LS.opts.seed_all_emojis.value) {
-                                    page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
-                                        (res) => {
-                                            console.log(res)
-                                        })
-                                } else {
-                                    page.cmd("OptionalHelpRemove", ["css/png"],
-                                        (res) => {
-                                            console.log(res)
-                                            page.cmd("wrapperNotification", [
-                                                "done", "You are no longer Auto-Seeding Emoji's!", 5000
-                                            ])
-                                        })
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "delete_all_emojis": {
-                    "label": "Delete all Emoji's",
-                    "desc": "All Emoji's in your \"cache\" will be deleted",
-                    "value": "Delete",
-                    "type": "button",
-                    "r_ms": true,
-                    "cb": {
-                        "click": '(' + (
-                            function() {
-                                if (page.site_info.cert_user_id !== "glightstar@zeroid.bit" &&
-                                    page.site_info.cert_user_id !== "glightstar@kaffie.bit") {
-                                    var count = 0
-                                    page.cmd("optionalFileList", [], (data) => {
-                                        for (var x in data) {
-                                            var y = data[x]
-                                            if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
-                                                page.cmd("optionalFileDelete", y.inner_path, (res) => {
-                                                    console.log("deleted emoji at path " + y.inner_path)
-                                                    count++
-                                                })
-                                        }
-                                        page.cmd("wrapperNotification", [
-                                            "done", "Removed " + count + " Emoji's!", 5000
-                                        ])
-                                    })
-                                } else {
-                                    page.cmd("wrapperNotification", [
-                                        "error", "You can't delete Emoji's!", 5000
-                                    ])
-                                    var count = 0
-                                    page.cmd("optionalFileList", [], (data) => {
-                                        console.log(data)
-                                        for (var x in data) {
-                                            var y = data[x]
-                                            if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/") {
-                                                console.log("would have removed emoji at path " + y.inner_path)
-                                                count++
-                                            }
-                                        }
-                                        page.cmd("wrapperNotification", [
-                                            "done", "Would have removed " + count + " Emoji's!", 5000
-                                        ])
-                                    })
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "divider_2": "",
-                "reset_options_to_default": {
-                    "label": "Reset to default",
-                    "desc": "Resets all options to their default values",
-                    "value": "Reset",
-                    "type": "button",
-                    "r_ms": true,
-                    "cb": {
-                        "click": '(' + (
-                            function() {
-                                delete page.LS.opts;
-                                page.cmd("wrapperSetLocalStorage", page.LS, function() {});
-                                page.setSettingsOptions();
-                            }
-                        ).toString() + ')'
-                    }
-                }
-            }
 
             if (!LS.hasOwnProperty("opts")) {
                 LS.optsV = curOptsV
@@ -2244,9 +2355,16 @@ class ThunderWave extends ZeroFrame {
             //             y2.value = y2.value
             //     }
             // }
-            dis.LS = LS
-                // console.log(LS, dis.LS)
-            dis.cmd("wrapperSetLocalStorage", LS, function() {})
+            page.LS = LS
+                // console.log(LS, page.LS)
+
+            page.settingsOptions([
+                "set",
+                LS
+            ])
+
+            // page.cmd("wrapperSetLocalStorage", LS, function() {})
+
             page.genSettingsHTML(LS)
 
             for (var optX in LS.opts) {
