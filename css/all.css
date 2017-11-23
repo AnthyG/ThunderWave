@@ -1566,8 +1566,24 @@ ul.unstyled {
     z-index: 1;
 }
 
+.inputsC2 .media_preview {
+    /* max-height: calc(500px + 0.4rem * 3); */
+    width: 100%;
+    /* height: calc(100vh - 72px * 2 + 0.6rem * 2); */
+    /* display: table-caption; */
+    top: 48px;
+    bottom: 72px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+    background-color: #2c3a41;
+}
+
 #message {
     max-height: 120px;
+    resize: vertical !important;
 }
 
 #send {
