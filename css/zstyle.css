@@ -50,6 +50,10 @@ ul.unstyled {
     z-index: 999;
 }
 
+.inputsC2 {
+    z-index: 1;
+}
+
 #message {
     max-height: 120px;
 }
@@ -116,10 +120,14 @@ ul.unstyled {
     left: 0px;
     border-style: solid;
     border-width: 15px 10px 0;
-    border-color: #EEEEEE transparent;
+    border-color: #32424a transparent;
     display: block;
     width: 0px;
     z-index: 0;
+}
+
+.message-list[design-type]>li>ul.times-messages>li>.tile.light>.tile-content:before {
+    border-color: #f7f7f7 transparent;
 }
 
 .message-list[design-type]>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content:before {
@@ -140,8 +148,8 @@ ul.unstyled {
     max-width: 25rem;
     padding-left: 1rem;
     padding-right: 1rem;
-    /*width: 100%;*/
     display: table;
+    border: 0;
 }
 
 .message-list>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card {
@@ -209,10 +217,16 @@ ul.unstyled {
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle>a.message-timestamp {
-    color: #1C2429;
-    text-shadow: -1px -1px 0px #FFFFFF;
+    color: #FFFFFF;
+    text-shadow: -1px -1px 0px #1C2429;
     z-index: 1;
     float: right;
+    padding: 0 0.2rem;
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card.light .tile-subtitle>a.message-timestamp {
+    color: #1C2429;
+    text-shadow: -1px -1px 0px #FFFFFF;
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body .quote .quotechild {
@@ -220,7 +234,7 @@ ul.unstyled {
     border-width: 0.2rem;
     border-color: #1DE9B6;
     border-radius: 0.1rem;
-    background-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(127, 127, 127, 0.125);
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body .quote .quotechild by {
@@ -266,23 +280,11 @@ ul.unstyled {
     height: 0 !important;
     border-top: 10px solid transparent !important;
     border-bottom: 10px solid transparent !important;
-    border-left: 16px solid #EEEEEE !important;
+    border-left: 16px solid #FFFFFF !important;
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
     transform: translate(-40%, -50%) !important;
-}
-
-.navbar.fixed {
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    z-index: 1000;
-    background-color: #263238;
-}
-
-.navbar.fixed>.navbar {
-    background-color: #263238;
 }
 
 html {
@@ -312,7 +314,8 @@ html {
     background: #13c095;
 }
 
-body::-webkit-scrollbar-thumb {
+
+/* body::-webkit-scrollbar-thumb {
     background: orange !important;
 }
 
@@ -334,7 +337,7 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
 
 .message-list::-webkit-scrollbar-thumb {
     background: purple !important;
-}
+} */
 
 
 /* AutoComplete styles for Emoji One */
@@ -369,10 +372,8 @@ body>*>*>*>*::-webkit-scrollbar-thumb {
 }
 
 .dropdown-menu-messageinput {
-    background: #EEEEEE;
     border-radius: .2rem;
     box-shadow: 0 .1rem .4rem rgba(38, 50, 56, .3);
-    color: #1C2429;
     list-style: none;
     margin: 0;
     min-width: 18rem;
