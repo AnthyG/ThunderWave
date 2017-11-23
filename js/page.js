@@ -1808,8 +1808,8 @@ class ThunderWave extends ZeroFrame {
         )
     }
 
-    returnDefaultsOpts() {
-        var curOptsV = 21
+    returnDefaultsOpts(cb) {
+        var curOptsV = 22
         var defaultOpts = {
             // "parse_links": {
             //     "label": "Parse Links", // The Label of this option
@@ -1854,6 +1854,7 @@ class ThunderWave extends ZeroFrame {
                                         ]
                                     ]
                                 }])
+                                page.LS.opts.feed_notifications.value = 1
                             } else if (parsedVal === 2) {
                                 page.cmd("feedFollow", [{
                                     "Mentions": [
@@ -1867,8 +1868,10 @@ class ThunderWave extends ZeroFrame {
                                         ]
                                     ]
                                 }])
+                                page.LS.opts.feed_notifications.value = 2
                             } else {
                                 page.cmd("feedFollow", [{}])
+                                page.LS.opts.feed_notifications.value = 0
                             }
                         }
                     ).toString() + ')'
@@ -1998,8 +2001,10 @@ class ThunderWave extends ZeroFrame {
                             var parsedVal = parseInt(page.LS.opts.message_design_type.value)
                             if (parsedVal === 1) {
                                 $('#messages').removeAttr("design-type")
+                                page.LS.opts.message_design_type.value = 1
                             } else {
                                 $('#messages').attr("design-type", parsedVal)
+                                page.LS.opts.message_design_type.value = parsedVal
                             }
                         }
                     ).toString() + ')'
@@ -2164,9 +2169,11 @@ class ThunderWave extends ZeroFrame {
                 }
             }
         }
+        typeof cb === "function" && cb(curOptsV, defaultOpts)
     }
 
     settingsOptions(gos, cb) {
+        console.log(gos, cb)
         this.returnDefaultsOpts(function(curOptsV, defaultOpts) {
             var data_inner_path = "data/users/" + page.site_info.auth_address + "/data.json"
 
@@ -2175,10 +2182,25 @@ class ThunderWave extends ZeroFrame {
                     "dir_inner_path": data_inner_path,
                     "query": "settings"
                 }, (settings) => {
-                    typeof cb === "function" && cb({
-                        opts: settings[0],
-                        optsV: curOptsV
-                    }, defaultOpts)
+                    console.log(settings)
+                    if (settings[0] && settings[1]) {
+                        var rOpts = JSON.parse(JSON.stringify(defaultOpts))
+                        console.log(rOpts, settings[0], settings[1])
+                        for (var optX in rOpts) {
+                            // console.log(optX)
+                            if (typeof rOpts[optX] !== "string")
+                                rOpts[optX].value = settings[0][optX]
+                        }
+
+                        typeof cb === "function" && cb({
+                            opts: rOpts,
+                            optsV: settings[1].optsV
+                        }, curOptsV, defaultOpts)
+                    } else {
+                        typeof cb === "function" && cb(
+                            undefined,
+                            curOptsV, defaultOpts)
+                    }
                 })
             } else if (gos === "reset") {
                 page.cmd("fileGet", {
@@ -2192,11 +2214,15 @@ class ThunderWave extends ZeroFrame {
                         return false
                     }
 
+                    data.settings = [{}, {}]
+
                     for (var optX in defaultOpts) {
                         var optY = defaultOpts[optX]
 
                         data.settings[0][optX] = optY.value
                     }
+
+                    data.settings[1].optsV = curOptsV
 
                     var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
                     var json_rawA = btoa(json_raw)
@@ -2206,10 +2232,12 @@ class ThunderWave extends ZeroFrame {
                         json_rawA
                     ], (res) => {
                         if (res == "ok") {
+                            var rOpts = JSON.parse(JSON.stringify(defaultOpts))
+
                             typeof cb === "function" && cb({
-                                opts: data.settings[0],
+                                opts: rOpts,
                                 optsV: curOptsV
-                            }, defaultOpts)
+                            }, curOptsV, defaultOpts)
                         } else {
                             page.cmd("wrapperNotification", [
                                 "error", "File write error: " + JSON.stringify(res)
@@ -2232,7 +2260,7 @@ class ThunderWave extends ZeroFrame {
                     for (var optX in gos[1]) {
                         var hasvalue = false
                         if (defaultOpts.hasOwnProperty(optX) &&
-                            typeof gos[1][optX][1] === typeof defaultOpts.value) {
+                            typeof gos[1][optX] === typeof defaultOpts.value) {
                             if (!defaultOpts.hasOwnProperty("values")) {
                                 hasvalue = true
                             } else if (defaultOpts.hasOwnProperty("values")) {
@@ -2248,8 +2276,12 @@ class ThunderWave extends ZeroFrame {
                                 }
                             }
                         }
-                        data.settings[0][optX] = gos[1][optX]
+
+                        // if (hasvalue)
+                        data.settings[0][optX] = gos[1][optX].value
                     }
+
+                    data.settings[1].optsV = (typeof gos[2] === "number" ? gos[2] : data.settings[1].optsV)
 
                     var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
                     var json_rawA = btoa(json_raw)
@@ -2259,10 +2291,18 @@ class ThunderWave extends ZeroFrame {
                         json_rawA
                     ], (res) => {
                         if (res == "ok") {
+                            var rOpts = JSON.parse(JSON.stringify(defaultOpts))
+                            for (var optX in rOpts) {
+                                if (typeof rOpts[optX] !== "string")
+                                    rOpts[optX].value = data.settings[0][optX]
+                            }
+
+                            console.log(gos, rOpts, data.settings, curOptsV)
+
                             typeof cb === "function" && cb({
-                                opts: data.settings[0],
-                                optsV: curOptsV
-                            }, defaultOpts)
+                                opts: rOpts,
+                                optsV: data.settings[1].optsV
+                            }, curOptsV, defaultOpts)
                         } else {
                             page.cmd("wrapperNotification", [
                                 "error", "File write error: " + JSON.stringify(res)
@@ -2278,10 +2318,14 @@ class ThunderWave extends ZeroFrame {
         console.log("Settings options..")
 
         // page.cmd("wrapperGetLocalStorage", [], (LS) => {
-        page.settingsOptions("get", (LS, defaultOpts) => {
-            var LS = (typeof LS === "object" ? (LS || {}) : {})
+        page.settingsOptions("get", (LS, curOptsV, defaultOpts) => {
+            var LS = (typeof LS === "object" ? (Object.keys(LS).length > 0 ? LS : {}) : {})
 
-            // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
+            console.log(JSON.parse(JSON.stringify(LS)),
+                LS.hasOwnProperty("opts"), LS.hasOwnProperty("optsV"),
+                JSON.parse(JSON.stringify(LS.opts)),
+                JSON.parse(JSON.stringify(LS.optsV)),
+                curOptsV, defaultOpts)
 
             if (!LS.hasOwnProperty("opts")) {
                 LS.optsV = curOptsV
@@ -2290,16 +2334,21 @@ class ThunderWave extends ZeroFrame {
             }
 
             if (LS.optsV !== curOptsV) {
+                console.log("New options available!")
                 page.cmd("wrapperConfirm", [
                     "There are some new Options available, do you want to update?",
                     "Update"
                 ], (confirmed) => {
+                    console.log("Updating options..", confirmed)
+
                     LS.optsV = curOptsV
 
                     if (LS.hasOwnProperty("opts"))
-                        var oldOpts = LS.opts
+                        var oldOpts = JSON.parse(JSON.stringify(LS.opts))
 
                     LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+
+                    console.log(oldOpts, JSON.parse(JSON.stringify(LS.opts)))
 
                     for (var optX in LS.opts) {
                         var optY = LS.opts[optX]
@@ -2322,7 +2371,7 @@ class ThunderWave extends ZeroFrame {
                                         continue
                                     }
                                 }
-                            } else if (!optY.hasOwnProperty("values") || !OoptY.hasOwnProperty("values")) {
+                            } else if (optY.hasOwnProperty("values") || OoptY.hasOwnProperty("values")) {
                                 continue
                             } else {
                                 hasvalue = true
@@ -2330,17 +2379,29 @@ class ThunderWave extends ZeroFrame {
 
                             if (hasvalue) {
                                 optY.value = OoptY.value
-
-                                if (optY.cb.hasOwnProperty("change") && typeof eval(optY.cb.change) === "function") {
-                                    eval(optY.cb.change + '()')
-                                }
                             }
                         }
 
                         LS.opts[optX] = optY
                     }
+                    page.LS = LS
+
+                    page.settingsOptions([
+                        "set",
+                        LS.opts,
+                        LS.optsV
+                    ])
 
                     page.genSettingsHTML(LS)
+
+                    for (var optX in LS.opts) {
+                        var optY = LS.opts[optX]
+
+                        if (optY.hasOwnProperty("cb") && optY.cb.hasOwnProperty("change") && typeof eval(optY.cb.change) === "function") {
+                            // console.log("executing option", optX, optY)
+                            eval(optY.cb.change + '()')
+                        }
+                    }
                 })
             }
 
@@ -2360,7 +2421,7 @@ class ThunderWave extends ZeroFrame {
 
             page.settingsOptions([
                 "set",
-                LS
+                LS.opts
             ])
 
             // page.cmd("wrapperSetLocalStorage", LS, function() {})
@@ -2380,7 +2441,7 @@ class ThunderWave extends ZeroFrame {
 
     genSettingsHTML(LS) {
         $('#sttngs_container').html('<div class="icon icons loading"></div>')
-        var opts = LS.opts
+        var opts = LS.opts || page.LS.opts
 
         var cntrls = {
             "button": '<div class="col-3"><label class="form-label">Y_LABEL</label></div><div class="col-3"><button class="btn" type="button" name="sttngs-button-X" id="sttngs-button-X">Y_VALUE</button></div><div class="col-6">Y_DESC</div>',
@@ -2416,7 +2477,13 @@ class ThunderWave extends ZeroFrame {
                         page.LS.opts[x].value = this.value
 
                         page.LS = LS
-                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        page.settingsOptions([
+                            "set",
+                            LS.opts
+                        ])
+
+                        // page.cmd("wrapperSetLocalStorage", page.LS, function() {})
 
                         var r_ms = page.LS.opts[x].r_ms
                         if (typeof eval(page.LS.opts[x].cb.change) === "function")
@@ -2439,7 +2506,13 @@ class ThunderWave extends ZeroFrame {
                         page.LS.opts[x].value = this.checked
 
                         page.LS = LS
-                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        page.settingsOptions([
+                            "set",
+                            LS.opts
+                        ])
+
+                        // page.cmd("wrapperSetLocalStorage", page.LS, function() {})
 
                         var r_ms = page.LS.opts[x].r_ms
                         if (typeof eval(page.LS.opts[x].cb.change) === "function")
@@ -2466,7 +2539,13 @@ class ThunderWave extends ZeroFrame {
                         page.LS.opts[x].value = this.value
 
                         page.LS = LS
-                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        page.settingsOptions([
+                            "set",
+                            LS.opts
+                        ])
+
+                        // page.cmd("wrapperSetLocalStorage", page.LS, function() {})
 
                         var r_ms = page.LS.opts[x].r_ms
                         if (typeof eval(page.LS.opts[x].cb.change) === "function")
@@ -2594,6 +2673,21 @@ class ThunderWave extends ZeroFrame {
                     delete data.last_seen
                 if (data.hasOwnProperty("public_key"))
                     delete data.public_key
+
+
+                if (!data.hasOwnProperty("settings") || !data.settings[0] || !data.settings[1]) {
+                    page.returnDefaultsOpts(function(curOptsV, defaultOpts) {
+                        data.settings = [{}, {}]
+
+                        for (var optX in defaultOpts) {
+                            var optY = defaultOpts[optX]
+
+                            data.settings[0][optX] = optY.value
+                        }
+
+                        data.settings[1].optsV = curOptsV
+                    })
+                }
 
                 if (!data.hasOwnProperty("extra_data") || !data.extra_data[0])
                     data.extra_data = [{}]
