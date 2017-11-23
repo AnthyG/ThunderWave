@@ -4997,7 +4997,7 @@ function imageViewGen(res, href, title, text) {
     return '<div class="popover hasimage isgif-' + isgif + '">' +
         imgHTML +
         '<div class="popover-container">' +
-        '<div class="card"><div class="card-header">' +
+        '<div class="card ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '"><div class="card-header">' +
         (title ? ('<div class="card-title">' + title + '</div>') :
             (text ? ('<div class="card-title">' + text + '</div>') : '')) +
         (title && text ? ('<div class="card-subtitle">' + text + '</div>') : '') +
@@ -6224,7 +6224,7 @@ class ThunderWave extends ZeroFrame {
                         href + '\', \'' + escape(title) + '\', \'' + escape(text) +
                         '\')">Download ' + (title ? title : (text ? text : '')) +
                         '</button><div class="popover-container">' +
-                        '<div class="card"><div class="card-header">' +
+                        '<div class="card ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '"><div class="card-header">' +
                         (title ? ('<div class="card-title">' + title + '</div>') :
                             (text ? ('<div class="card-title">' + text + '</div>') : '')) +
                         (title && text ? ('<div class="card-subtitle">' + text + '</div>') : '') +
