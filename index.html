@@ -44,16 +44,9 @@
                             <a target-tab="LastSeen" href="javascript:void(0)"><i class="icon icon-time"></i></a>
                         </li>
 
-                        <!--<li class="tab-item hideifnotloggedin hide">
-                            <a target-tab="Media" href="javascript:void(0)">Media</a>
-                        </li>
-
                         <li class="tab-item hideifnotloggedin hide">
-                            <a target-tab="Settings" href="javascript:void(0)">Settings</a>
+                            <a target-tab="Search" href="javascript:void(0)"><i class="icon icon-search"></i></a>
                         </li>
-                        <li class="tab-item">
-                            <a target-tab="About" href="javascript:void(0)">About</a>
-                        </li>-->
                     </ul>
                 </section>
                 <section class="navbar-center">
@@ -196,12 +189,24 @@
                 <div class="panel-body" style="overflow-x: hidden;">
                     <p>Total number of logged-in users: <b id="last_seen_list_c">0</b></p>
                     <div class="input-group">
-                        <input class="form-input" type="text" id="lastseen_filterer" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.lastSeenList(true); return false; }" />
+                        <input class="form-input" placeholder="Search" type="search" id="lastseen_filterer" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.lastSeenList(true); return false; }" />
                         <button class="btn btn-action input-group-btn" onclick="return page.lastSeenList(true);"><i class="icon icon-search"></i></button>
                     </div>
                     <dl id="last_seen_list">
 
                     </dl>
+                </div>
+            </div>
+
+            <div tab="Search" class="panel">
+                <div class="panel-body" style="overflow-x: hidden;">
+                    <div class="input-group">
+                        <input class="form-input" placeholder="Search" type="search" id="filrch_input" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.filrchGui(); return false; }" />
+                        <!-- A filter-input should be included somewhere here -->
+                        <button class="btn btn-action input-group-btn" onclick="return page.filrchGui();"><i class="icon icon-search"></i></button>
+                    </div>
+
+                    <ul id="found_messages" class="unstyled message-list"></ul>
                 </div>
             </div>
 
