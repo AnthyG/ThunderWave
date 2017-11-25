@@ -1479,18 +1479,8 @@ class ThunderWave extends ZeroFrame {
         })
     }
 
-    filrch(s, f, cb) { // "Filter/ Search" => "Filrch"
-        var s = s || ''
-        var f = (typeof f === "object" && Object.keys(f).length > 0 ? f : {})
-
-        var m_schemes = {
-            "links": "[%](%)",
-            "images": "![%](%)",
-            // "audio": "[%](%)",
-            // "videos": "[%](%)"
-        }
-
-        var nF = {
+    filrchDefaultFilters() {
+        return {
             "media": {
                 "links": false,
                 "images": false,
@@ -1502,6 +1492,20 @@ class ThunderWave extends ZeroFrame {
             "from_time": 0,
             "to_time": moment().format("x")
         }
+    }
+
+    filrch(s, f, cb) { // "Filter/ Search" => "Filrch"
+        var s = s || ''
+        var f = (typeof f === "object" && Object.keys(f).length > 0 ? f : {})
+
+        var m_schemes = {
+            "links": "[%](%)",
+            "images": "![%](%)",
+            // "audio": "[%](%)",
+            // "videos": "[%](%)"
+        }
+
+        var nF = page.nF || page.filrchDefaultFilters()
 
         for (var fx in nF) {
             if (f.hasOwnProperty(fx) &&
@@ -1562,7 +1566,9 @@ class ThunderWave extends ZeroFrame {
 
     filrchGui(s, nF, cb) {
         var s = s || $('#filrch_input').val()
-        var nF = nF // Filter-input hasn't yet been added!!s
+        var nF = nF || page.nF
+
+        console.log("Filrch-GUI", s, nF, page.nF)
 
         page.filrch(s, nF, function(results, s, nF) {
             var $m = $('#found_messages')
@@ -1596,6 +1602,33 @@ class ThunderWave extends ZeroFrame {
 
             typeof cb === "function" && cb(results, s, nF)
         })
+    }
+
+    filrchGuiInit() {
+        var nF = page.filrchDefaultFilters()
+        page.nF = JSON.parse(JSON.stringify(nF))
+
+        $('#filrch_media_filters').html('')
+
+        for (var mx in nF.media) {
+            var my = nF.media[mx];
+
+            (function(_mx, _my) {
+                var $el = $('<label class="form-checkbox"><i class="form-icon"></i> ' + _mx + '</label>').appendTo('#filrch_media_filters')
+                var $elInput = $('<input type="checkbox" ' + (_my ? ' checked' : '') + ' />').prependTo($el)
+
+                $elInput.on('click', function() {
+                    console.log($elInput, JSON.parse(JSON.stringify(page.nF)))
+
+                    page.nF.media[_mx] = !page.nF.media[_mx]
+
+                    if (page.nF.media[_mx])
+                        $elInput.attr('checked')
+                    else
+                        $elInput.removeAttr('checked')
+                })
+            })(mx, my)
+        }
     }
 
     getAvatar(username, cb) {
@@ -3002,6 +3035,8 @@ class ThunderWave extends ZeroFrame {
 
                 $(document).ready(function() {
                     page.setSettingsOptions()
+
+                    page.filrchGuiInit()
 
                     page.messageCounterArr = {}
                     page.loadMessages("first time")
