@@ -6349,15 +6349,16 @@ class ThunderWave extends ZeroFrame {
                 // "videos": false
             },
             "order_dir": "DESC",
-            "user_names": [],
             "from_time": 0,
             "to_time": moment().format("x")
         }
     }
 
-    filrch(s, f, cb) { // "Filter/ Search" => "Filrch"
+    filrch(s, f, fu, fu_ei, cb) { // "Filter/ Search" => "Filrch"
         var s = s || ''
         var f = (typeof f === "object" && Object.keys(f).length > 0 ? f : {})
+        var fu = (typeof fu === "object" && fu.length > 0 ? fu : [])
+        var fu_ei = fu_ei || false
 
         var m_schemes = {
             "links": "[%](%)",
@@ -6366,7 +6367,7 @@ class ThunderWave extends ZeroFrame {
             // "videos": "[%](%)"
         }
 
-        var nF = page.nF || page.filrchDefaultFilters()
+        var nF = page.filrch_nF || page.filrchDefaultFilters()
 
         for (var fx in nF) {
             if (f.hasOwnProperty(fx) &&
@@ -6375,19 +6376,19 @@ class ThunderWave extends ZeroFrame {
             }
         }
 
-        console.log("Searching for ", s, nF)
+        console.log("Searching for ", s, nF, fu, fu_ei)
 
         var user_names_filter = ""
         var first_user_names_filter = true
-        for (var ux in nF.user_names) {
-            var uy = nF.user_names[ux]
+        for (var ux in fu) {
+            var uy = fu[ux]
 
             if (uy) {
-                if (first_user_names_filter) {
+                if (first_user_names_filter || fu_ei === false) {
                     first_user_names_filter = false
-                    user_names_filter += " AND cert_user_id = \"%" + uy + "%\""
+                    user_names_filter += " AND cert_user_id " + (fu_ei ? "" : "NOT") + " LIKE(\"%" + uy + "%\")"
                 } else {
-                    user_names_filter += " OR cert_user_id = \"%" + uy + "%\""
+                    user_names_filter += " OR cert_user_id LIKE(\"%" + uy + "%\")"
                 }
             }
         }
@@ -6419,24 +6420,33 @@ class ThunderWave extends ZeroFrame {
         this.cmd("dbQuery", [
             SELECT_STR
         ], (results) => {
-            console.log("Search-results for ", s, nF, SELECT_STR, results)
+            console.log("Search-results for ", s, nF, fu, fu_ei, SELECT_STR, results)
 
-            typeof cb === "function" && cb(results, s, nF)
+            typeof cb === "function" && cb(results, s, nF, fu, fu_ei)
         })
     }
 
-    filrchGui(s, nF, cb) {
-        var s = s || $('#filrch_input').val()
-        var nF = nF || page.nF
+    filrchGui(s, nF, fu, fu_ei, cb) {
+        var s = s || $('#filrch_input_search').val()
+        var nF = nF || page.filrch_nF
+        var fu = fu || $('#filrch_input_users').val()
+        var fu_ei = fu_ei || page.fu_ei
 
-        console.log("Filrch-GUI", s, nF, page.nF)
+        console.log("Filrch-GUI user-list", fu, fu_ei)
 
-        page.filrch(s, nF, function(results, s, nF) {
+        if (typeof fu === "string")
+            fu = fu.replace(/\s/gm, '').split(',')
+
+        console.log("Filrch-GUI", s, nF, fu, fu_ei, page.filrch_nF)
+
+        page.filrch(s, nF, fu, fu_ei, function(results, s, nF, fu, fu_ei) {
             var $m = $('#found_messages')
 
             $m.html('<div class="icon icons loading"></div>')
 
             if (results) {
+                results.reverse()
+
                 var senders = []
                 for (var i = 0; i < results.length; i++) {
                     var msg = results[i]
@@ -6467,7 +6477,9 @@ class ThunderWave extends ZeroFrame {
 
     filrchGuiInit() {
         var nF = page.filrchDefaultFilters()
-        page.nF = JSON.parse(JSON.stringify(nF))
+        page.filrch_nF = JSON.parse(JSON.stringify(nF))
+
+        page.fu_ei = true
 
         $('#filrch_media_filters').html('')
 
@@ -6479,11 +6491,11 @@ class ThunderWave extends ZeroFrame {
                 var $elInput = $('<input type="checkbox" ' + (_my ? ' checked' : '') + ' />').prependTo($el)
 
                 $elInput.on('click', function() {
-                    console.log($elInput, JSON.parse(JSON.stringify(page.nF)))
+                    console.log($elInput, JSON.parse(JSON.stringify(page.filrch_nF)))
 
-                    page.nF.media[_mx] = !page.nF.media[_mx]
+                    page.filrch_nF.media[_mx] = !page.filrch_nF.media[_mx]
 
-                    if (page.nF.media[_mx])
+                    if (page.filrch_nF.media[_mx])
                         $elInput.attr('checked')
                     else
                         $elInput.removeAttr('checked')

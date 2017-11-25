@@ -199,15 +199,26 @@
             </div>
 
             <div tab="Search" class="panel">
-                <div class="panel-body" style="overflow-x: hidden;">
+                <div class="panel-nav">
                     <div class="form-horizontal">
-                        <div class="form-group" id="filrch_media_filters"></div>
-                        <div class="input-group">
-                            <input class="form-input" placeholder="Search" type="search" id="filrch_input" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.filrchGui(); return false; }" />
+                        <div class="form-group input-group">
+                            <input class="form-input" placeholder="Comma-seperated list of users" type="text" id="filrch_input_users" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.filrchGui(); return false; }" />
+                            <label class="form-switch">
+                                <input id="filrch_excinc_users" type="checkbox" checked onchange="page.fu_ei = !page.fu_ei; page.filrchGui();">
+                                <i class="form-icon"></i> exclude/ only
+                            </label>
+                        </div>
+                        <div class="form-group input-group">
+                            <input class="form-input" placeholder="Search" type="search" id="filrch_input_search" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.filrchGui(); return false; }" />
                             <button class="btn btn-action input-group-btn" onclick="return page.filrchGui();"><i class="icon icon-search"></i></button>
                         </div>
+                        <div class="form-group input-group">
+                            <div class="input-group-addon">Only: </div>
+                            <div class="form-group" id="filrch_media_filters"></div>
+                        </div>
                     </div>
-
+                </div>
+                <div class="panel-body" style="overflow-x: hidden;">
                     <ul id="found_messages" class="unstyled message-list"></ul>
                 </div>
             </div>
