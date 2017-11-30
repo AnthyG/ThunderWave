@@ -161,7 +161,9 @@ markedR.image = function(href, title, text) {
 
 
 class ThunderWave extends ZeroFrame {
-    addMessage(msgkey, username, message, date_added, addattop) {
+    addMessage(msgkey, username, message, date_added, addattop, toListEl) {
+        var toListEl = toListEl || "#messages"
+
         // var message_escaped = message.replace(/</g, "&lt;").replace(/>/g, "&gt;") // Escape html tags in the message
         var message_escaped = message
 
@@ -194,7 +196,7 @@ class ThunderWave extends ZeroFrame {
         var curdate2 = moment(curdate, "MMMM Do, YYYY").format("x")
         var rcurdate = moment().format("MMMM Do, YYYY")
         var curdate3 = (curdate === rcurdate ? "Today" : (moment(rcurdate, "MMMM Do, YYYY").subtract(1, "d").format("MMMM Do, YYYY") === curdate ? "Yesterday" : curdate));
-        var CDalreadyexists = $("#messages").find('[timestamp-date="' + curdate2 + '"]')[0] || false
+        var CDalreadyexists = $(toListEl).find('[timestamp-date="' + curdate2 + '"]')[0] || false
 
         var users_own_message = (username === page.site_info.cert_user_id)
         var user_is_mentioned = (message_escaped.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
@@ -216,11 +218,11 @@ class ThunderWave extends ZeroFrame {
         } else {
             CDalreadyexists = $("<li id='d_" + curdate2 + "' timestamp-date='" + curdate2 + "'><div class='divider text-center' data-content='" + (curdate3) + "' onclick='window.location.hash=\"#d_" + curdate2 + "\";'></div><ul class='times-messages unstyled'></ul></li>")
                 // if (addattop && !thismessageis.after)
-                //     CDalreadyexists = CDalreadyexists.prependTo("#messages")
+                //     CDalreadyexists = CDalreadyexists.prependTo(toListEl)
                 // else
-            CDalreadyexists = CDalreadyexists.appendTo("#messages")
+            CDalreadyexists = CDalreadyexists.appendTo(toListEl)
 
-            var items = $("#messages").children("[timestamp-date]").get()
+            var items = $(toListEl).children("[timestamp-date]").get()
 
             // console.log("ITEMS: ", items)
             items.sort(function(a, b) {
@@ -232,7 +234,7 @@ class ThunderWave extends ZeroFrame {
                 if (A > B) return 1
                 return 0
             });
-            $("#messages").html("").append(items)
+            $(toListEl).html("").append(items)
 
             // console.log("CD", CDalreadyexists[0], addattop && !thismessageis.after)
         }
@@ -1492,6 +1494,170 @@ class ThunderWave extends ZeroFrame {
             $('#last_seen_list').html(lsl_HTML)
             $('#last_seen_list_c').html(count)
         })
+    }
+
+    filrchDefaultFilters() {
+        return {
+            "media": {
+                "links": false,
+                "images": false,
+                // "audios": false,
+                // "videos": false
+            },
+            "order_dir": "DESC",
+            "from_time": 0,
+            "to_time": moment().format("x")
+        }
+    }
+
+    filrch(s, f, fu, fu_ei, cb) { // "Filter/ Search" => "Filrch"
+        var s = s || ''
+        var f = (typeof f === "object" && Object.keys(f).length > 0 ? f : {})
+        var fu = (typeof fu === "object" && fu.length > 0 ? fu : [])
+        var fu_ei = fu_ei || false
+
+        var m_schemes = {
+            "links": "[%](%)",
+            "images": "![%](%)",
+            // "audio": "[%](%)",
+            // "videos": "[%](%)"
+        }
+
+        var nF = page.filrch_nF || page.filrchDefaultFilters()
+
+        for (var fx in nF) {
+            if (f.hasOwnProperty(fx) &&
+                typeof f[fx] === typeof nF[fx]) {
+                nF[fx] = f[fx]
+            }
+        }
+
+        console.log("Searching for ", s, nF, fu, fu_ei)
+
+        var user_names_filter = ""
+        var first_user_names_filter = true
+        for (var ux in fu) {
+            var uy = fu[ux]
+
+            if (uy) {
+                if (first_user_names_filter || fu_ei === false) {
+                    first_user_names_filter = false
+                    user_names_filter += " AND cert_user_id " + (fu_ei ? "" : "NOT") + " LIKE(\"%" + uy + "%\")"
+                } else {
+                    user_names_filter += " OR cert_user_id LIKE(\"%" + uy + "%\")"
+                }
+            }
+        }
+
+        var media_filter = ""
+        var first_media_filter = true
+        for (var mx in nF.media) {
+            var my = nF.media[mx]
+
+            if (my && m_schemes.hasOwnProperty(mx)) {
+                if (first_media_filter)
+                    first_media_filter = false
+                else
+                    media_filter += " OR"
+
+                media_filter += " body LIKE(\"%" + m_schemes[mx] + "%\")"
+            }
+        }
+        if (media_filter !== "")
+            media_filter = " AND (" + media_filter + ")"
+
+        var SELECT_STR = "SELECT * FROM messages LEFT JOIN json USING (json_id) WHERE date_added > " + nF.from_time +
+            " AND date_added < " + nF.to_time +
+            user_names_filter +
+            " AND body LIKE(\"%" + s + "%\")" +
+            media_filter +
+            " ORDER BY date_added " + nF.order_dir
+
+        this.cmd("dbQuery", [
+            SELECT_STR
+        ], (results) => {
+            console.log("Search-results for ", s, nF, fu, fu_ei, SELECT_STR, results)
+
+            typeof cb === "function" && cb(results, s, nF, fu, fu_ei)
+        })
+    }
+
+    filrchGui(s, nF, fu, fu_ei, cb) {
+        var s = s || $('#filrch_input_search').val()
+        var nF = nF || page.filrch_nF
+        var fu = fu || $('#filrch_input_users').val()
+        var fu_ei = fu_ei || page.fu_ei
+
+        console.log("Filrch-GUI user-list", fu, fu_ei)
+
+        if (typeof fu === "string")
+            fu = fu.replace(/\s/gm, '').split(',')
+
+        console.log("Filrch-GUI", s, nF, fu, fu_ei, page.filrch_nF)
+
+        page.filrch(s, nF, fu, fu_ei, function(results, s, nF, fu, fu_ei) {
+            var $m = $('#found_messages')
+
+            $m.html('<div class="icon icons loading"></div>')
+
+            if (results) {
+                results.reverse()
+
+                var senders = []
+                for (var i = 0; i < results.length; i++) {
+                    var msg = results[i]
+
+                    if (senders.indexOf(msg.cert_user_id) === -1)
+                        senders.push(msg.cert_user_id)
+
+                    page.addMessage(msg.key, msg.cert_user_id, msg.body, msg.date_added, false, "#found_messages")
+                }
+            }
+            $m.children('.loading').remove()
+
+            for (var x in senders) {
+                var sender2 = senders[x];
+
+                (function(sender) {
+                    // console.log("LOADING IMAGE FOR ", sender)
+                    page.getAvatar(sender, (img, ov, ov_s, av, av_n, av_u, path) => {
+                        // console.log("IMAGE FOR ", sender, img, ov, ov_s, av, av_n, av_u, path)
+                        $('[avatarimg="' + sender + '"]').replaceWith(img)
+                    })
+                })(sender2)
+            }
+
+            typeof cb === "function" && cb(results, s, nF)
+        })
+    }
+
+    filrchGuiInit() {
+        var nF = page.filrchDefaultFilters()
+        page.filrch_nF = JSON.parse(JSON.stringify(nF))
+
+        page.fu_ei = true
+
+        $('#filrch_media_filters').html('')
+
+        for (var mx in nF.media) {
+            var my = nF.media[mx];
+
+            (function(_mx, _my) {
+                var $el = $('<label class="form-checkbox"><i class="form-icon"></i> ' + _mx + '</label>').appendTo('#filrch_media_filters')
+                var $elInput = $('<input type="checkbox" ' + (_my ? ' checked' : '') + ' />').prependTo($el)
+
+                $elInput.on('click', function() {
+                    console.log($elInput, JSON.parse(JSON.stringify(page.filrch_nF)))
+
+                    page.filrch_nF.media[_mx] = !page.filrch_nF.media[_mx]
+
+                    if (page.filrch_nF.media[_mx])
+                        $elInput.attr('checked')
+                    else
+                        $elInput.removeAttr('checked')
+                })
+            })(mx, my)
+        }
     }
 
     getAvatar(username, cb) {
@@ -2898,6 +3064,8 @@ class ThunderWave extends ZeroFrame {
 
                 $(document).ready(function() {
                     page.setSettingsOptions()
+
+                    page.filrchGuiInit()
 
                     page.messageCounterArr = {}
                     page.loadMessages("first time")

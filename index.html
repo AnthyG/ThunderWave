@@ -44,16 +44,9 @@
                             <a target-tab="LastSeen" href="javascript:void(0)"><i class="icon icon-time"></i></a>
                         </li>
 
-                        <!--<li class="tab-item hideifnotloggedin hide">
-                            <a target-tab="Media" href="javascript:void(0)">Media</a>
-                        </li>
-
                         <li class="tab-item hideifnotloggedin hide">
-                            <a target-tab="Settings" href="javascript:void(0)">Settings</a>
+                            <a target-tab="Search" href="javascript:void(0)"><i class="icon icon-search"></i></a>
                         </li>
-                        <li class="tab-item">
-                            <a target-tab="About" href="javascript:void(0)">About</a>
-                        </li>-->
                     </ul>
                 </section>
                 <section class="navbar-center">
@@ -69,7 +62,7 @@
                         <button class="btn btn-primary btn-action btn-lg btn-link dropdown-btn" tabindex="0">
                             <i class="icon icon-menu"></i>
                         </button>
-                        <ul class="menu workin-tabber" tabs-target="#main-tabs">
+                        <ul class="menu workin-tabber light" tabs-target="#main-tabs">
                             <li class="menu-item">
                                 <div class="tile tile-centered">
                                     <div class="tile-icon" id="current_user_avatar">
@@ -196,12 +189,37 @@
                 <div class="panel-body" style="overflow-x: hidden;">
                     <p>Total number of logged-in users: <b id="last_seen_list_c">0</b></p>
                     <div class="input-group">
-                        <input class="form-input" type="text" id="lastseen_filterer" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.lastSeenList(true); return false; }" />
+                        <input class="form-input" placeholder="Search" type="search" id="lastseen_filterer" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.lastSeenList(true); return false; }" />
                         <button class="btn btn-action input-group-btn" onclick="return page.lastSeenList(true);"><i class="icon icon-search"></i></button>
                     </div>
                     <dl id="last_seen_list">
 
                     </dl>
+                </div>
+            </div>
+
+            <div tab="Search" class="panel">
+                <div class="panel-nav">
+                    <div class="form-horizontal">
+                        <div class="form-group input-group">
+                            <input class="form-input" placeholder="Comma-seperated list of users" type="text" id="filrch_input_users" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.filrchGui(); return false; }" />
+                            <label class="form-switch">
+                                <input id="filrch_excinc_users" type="checkbox" checked onchange="page.fu_ei = !page.fu_ei; page.filrchGui();">
+                                <i class="form-icon"></i> exclude/ only
+                            </label>
+                        </div>
+                        <div class="form-group input-group">
+                            <input class="form-input" placeholder="Search" type="search" id="filrch_input_search" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.filrchGui(); return false; }" />
+                            <button class="btn btn-action input-group-btn" onclick="return page.filrchGui();"><i class="icon icon-search"></i></button>
+                        </div>
+                        <div class="form-group input-group">
+                            <div class="input-group-addon">Only: </div>
+                            <div class="form-group" id="filrch_media_filters"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body" style="overflow-x: hidden;">
+                    <ul id="found_messages" class="unstyled message-list"></ul>
                 </div>
             </div>
 
@@ -262,14 +280,15 @@
                             <ul>
                                 <li>Citation of messages (kinda like an answer/reply)</li>
                                 <li><span class="icon icon-time"></span> {Workin on it..} Media implementation (audio, video (maybe just in private chats?))</li>
-                                <li><span class="icon icon-time"></span> {Workin on it..} Automatic Option-Updating, with 'Option'-Merging, to preserve the Users Option-States</li>
+                                <li><span class="icon icon-time"></span> {Workin on it..} Search/Filter-function in chat(s)</li>
                                 <li class="divider"></li>
 
-                                <li>Private messages (kinda like ZeroMail) [End2End-Encrypted, both Users have complete non-seeding encrypted Chat-history, only readable with their own private key.<br>So this will probably be <b>very</b> hard for me to create,
-                                    like really! :/]</li>
-                                <li>Search/Filter-function in chat(s)</li>
+                                <li><span class="icon icon-check"></span> {8th October, 2017} Automatic Option-Updating, with 'Option'-Merging, to preserve the Users Option-States</li>
                                 <li class="divider"></li>
 
+
+                                <li><span class="icon icon-check"></span> {April 15th, 2017} Private messages (kinda like ZeroMail) [End2End-Encrypted, both Users have complete non-seeding encrypted Chat-history, only readable with their own private key.<br>So
+                                    this will probably be <b>very</b> hard for me to create, like really! :/]</li>
                                 <li><span class="icon icon-check"></span> {April 12th, 2017} Added option to delete all cached Emoji's</li>
                                 <li><span class="icon icon-check"></span> {April 12th, 2017} Added option to disable Emoji's</li>
                                 <li class="divider"></li>
@@ -489,7 +508,7 @@
                     maxCount: 5
                 }], {
                     appendTo: el2,
-                    dropdownClassName: 'menu dropdown-menu-messageinput',
+                    dropdownClassName: 'menu dropdown-menu-messageinput light',
                     footer: '<a href="https://emoji.codes" target="_blank">Browse All<span class="arrow">»</span></a>',
                     maxCount: 5
                 })
