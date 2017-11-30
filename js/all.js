@@ -4997,7 +4997,7 @@ function imageViewGen(res, href, title, text) {
     return '<div class="popover hasimage isgif-' + isgif + '">' +
         imgHTML +
         '<div class="popover-container">' +
-        '<div class="card"><div class="card-header">' +
+        '<div class="card ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '"><div class="card-header">' +
         (title ? ('<div class="card-title">' + title + '</div>') :
             (text ? ('<div class="card-title">' + text + '</div>') : '')) +
         (title && text ? ('<div class="card-subtitle">' + text + '</div>') : '') +
@@ -5116,7 +5116,7 @@ class ThunderWave extends ZeroFrame {
         //         " :: " + moment(CDalreadyexistsC.children("li.message-container").first().attr("id").split("t_")[1], "x").format("MMMM Do, YYYY - HH:mm:ss"))
         // }
 
-        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="javascript:answer2MSG(\'tc_' + msgkey + '\');' + /*#tc_' + msgkey + '*/ '">' + curtime + '</a>')
+        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#" onclick="answer2MSG(\'tc_' + msgkey + '\');' + /*#tc_' + msgkey + '*/ '">' + curtime + '</a>')
             // var message_timestamp = ('<span class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '">' + curtime + '</span>')
         var message_parsed = marked(
                 message_escaped
@@ -5133,9 +5133,10 @@ class ThunderWave extends ZeroFrame {
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
             .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
-                page.quoteDisplayer(p1)
+                if (page.LS.opts.parse_quotes.value)
+                    page.quoteDisplayer(p1)
 
-                return '<div id="QUOTEREPLACE_' + p1 + '" class="icon icons loading">QUOTE ' + p1 + '</div>'
+                return '<div id="QUOTEREPLACE_' + p1 + '" class="' + (page.LS.opts.parse_quotes.value ? 'icon icons loading' : '') + '"><cite><q>?![tc_' + p1 + '</q> (Quote)</cite></div>'
             })
             .replace(/(?:\[(.+)\]!a!\((.+)\))/gm, function(match, p1) {
                 return '<div id="AUDIOREPLACE_' + p1 + '" class="icon icons loading"></div>'
@@ -5148,7 +5149,7 @@ class ThunderWave extends ZeroFrame {
 
         // console.log(CDalreadyexists, CDalreadyexistsC)
 
-        var msg_part_2_1 = '<div id="tc_' + msgkey + '" tc="' + date_added + '" class="card mb-5">' +
+        var msg_part_2_1 = '<div id="tc_' + msgkey + '" tc="' + date_added + '" class="card mb-5 ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' +
             ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
                 '<div class="card-header"><small class="tile-title"><a onclick="add2MSGInput(\'' + username + ' \'); return false;" href="?u/' + encodeURI(username) + '">' + username + '</a></small></div>') + '<div class="card-body text-break">' +
             message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
@@ -5176,7 +5177,7 @@ class ThunderWave extends ZeroFrame {
             var msg_part_1 = '<div class="tile-icon"><figure class="avatar avatar-lg message-user-avatar ' + user_mention_badge + '" data-initial="' + username.substr(0, 2) + '">' + message_pic + '</figure></div>',
                 msg_part_2 = '<div class="tile-content">' + msg_part_2_1 + '</div>'
 
-            var el = $('<li id="t_' + msgkey + '" t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
+            var el = $('<li id="t_' + msgkey + '" t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
 
             // if (addattop && !thismessageis.after && dCDalreadyexists) // && isafter2)
             //     el = el.prependTo(CDalreadyexistsC)
@@ -5321,7 +5322,7 @@ class ThunderWave extends ZeroFrame {
 
             for (var x in cList) {
                 var y = cList[x]
-                $pcl.append('<li class="tab-item" tab="' + y + '"><a href="javascript:page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');"><figure class="avatar avatar-sm" data-initial="' + y.substr(0, 2) + '"><div avatarimg="' + y + '"></div></figure> ' + y + '</a></li>');
+                $pcl.append('<li class="tab-item" tab="' + y + '"><a href="#" onclick="page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');"><figure class="avatar avatar-sm" data-initial="' + y.substr(0, 2) + '"><div avatarimg="' + y + '"></div></figure> ' + y + '</a></li>');
 
                 (function(_y) {
                     // console.log("Contacts list avatar", _y)
@@ -5480,10 +5481,16 @@ class ThunderWave extends ZeroFrame {
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
+            .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+                if (page.LS.opts.parse_quotes.value)
+                    page.quoteDisplayer(p1)
+
+                return '<div id="QUOTEREPLACE_' + p1 + '" class="' + (page.LS.opts.parse_quotes.value ? 'icon icons loading' : '') + '"><cite><q>?![tc_' + p1 + '</q> (Quote)</cite></div>'
+            })
         if (!page.LS.opts.disable_emojis.value)
             message_parsed = emojione.toImage(message_parsed)
 
-        var msg_part_2_1 = '<div id="P_tc_' + msgkey + '" P_tc="' + date_added + '" class="card mb-5">' +
+        var msg_part_2_1 = '<div id="P_tc_' + msgkey + '" P_tc="' + date_added + '" class="card mb-5 ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' +
             ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
                 '') + '<div class="card-body text-break">' +
             message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
@@ -5507,7 +5514,7 @@ class ThunderWave extends ZeroFrame {
             var msg_part_1 = '<div class="tile-icon"><figure class="avatar avatar-lg message-user-avatar ' + user_mention_badge + '" data-initial="' + username.substr(0, 2) + '">' + message_pic + '</figure></div>',
                 msg_part_2 = '<div class="tile-content">' + msg_part_2_1 + '</div>'
 
-            var el = $('<li id="P_t_' + msgkey + '" P_t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
+            var el = $('<li id="P_t_' + msgkey + '" P_t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
 
             el = el.appendTo(CDalreadyexistsC)
 
@@ -6145,11 +6152,17 @@ class ThunderWave extends ZeroFrame {
                         var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                         return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
                     })
+                    .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+                        if (page.LS.opts.parse_quotes.value)
+                            page.quoteDisplayer(p1)
+
+                        return '<div id="QUOTEREPLACE_' + p1 + '" class="' + (page.LS.opts.parse_quotes.value ? 'icon icons loading' : '') + '"><cite><q>?![tc_' + p1 + '</q> (Quote)</cite></div>'
+                    })
                 if (!page.LS.opts.disable_emojis.value)
                     quote_parsed = emojione.toImage(quote_parsed)
 
                 $('#QUOTEREPLACE_' + _tc).replaceWith($('<div class="quote">' +
-                    '<blockquote cite="tc_' + _tc + '">' +
+                    '<blockquote class="quotechild" cite="tc_' + _tc + '">' +
                     '<by>' + quote.cert_user_id
                     .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
                         var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
@@ -6217,7 +6230,7 @@ class ThunderWave extends ZeroFrame {
                         href + '\', \'' + escape(title) + '\', \'' + escape(text) +
                         '\')">Download ' + (title ? title : (text ? text : '')) +
                         '</button><div class="popover-container">' +
-                        '<div class="card"><div class="card-header">' +
+                        '<div class="card ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '"><div class="card-header">' +
                         (title ? ('<div class="card-title">' + title + '</div>') :
                             (text ? ('<div class="card-title">' + text + '</div>') : '')) +
                         (title && text ? ('<div class="card-subtitle">' + text + '</div>') : '') +
@@ -6323,7 +6336,7 @@ class ThunderWave extends ZeroFrame {
                 if (y.last_seen)
                     lsl_HTML += '<dd>last seen <i>' + moment(y.last_seen, "x").format("MMMM Do, YYYY - HH:mm:ss") + '</i></dd>'
                 if (y.public_key)
-                    lsl_HTML += '<dd>public key: <a href="javascript:page.addPrivateContact(\'' + y.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y.cert_user_id + '\');"><i>' + y.public_key + '</i></a></dd>'
+                    lsl_HTML += '<dd>public key: <a href="#" onclick="page.addPrivateContact(\'' + y.cert_user_id + '\', page.genContactsList);page.loadPrivateMessages(\'selected user\', true, \'' + y.cert_user_id + '\');$(\'#private_recipient\').val(\'' + y.cert_user_id + '\');"><i>' + y.public_key + '</i></a></dd>'
             }
 
             $('#last_seen_list').html(lsl_HTML)
@@ -6670,335 +6683,567 @@ class ThunderWave extends ZeroFrame {
         )
     }
 
+    returnDefaultsOpts(cb) {
+        var curOptsV = 27
+        var defaultOpts = {
+            // "parse_links": {
+            //     "label": "Parse Links", // The Label of this option
+            //     "desc": "Activate to parse links in messages", // The description of this option
+            //     "value": false, // The value of this option
+            //     "r_ms": false, // Reload messages
+            //     "cb": { // Callback ..
+            //         "change": '(' + ( // .. on change
+            //             function() {
+            //                 $('#messages').find('.message-link').each(function() {
+            //                     var elY = $(this);
+            //                     if (page.LS.opts.parse_links.value) {
+            //                         elY.replaceWith($('<a class="message-link" href="' + elY.text() + '" target="_blank">' + elY.text() + '</a>'));
+            //                     } else {
+            //                         elY.replaceWith($('<span class="message-link">' + elY.text() + '</span>'));
+            //                     }
+            //                 })
+            //             }
+            //         ).toString() + ')'
+            //     }
+            // },
+            "divider_7": "Notifications",
+            "feed_notifications": {
+                "label": "Notifications in ZeroHello-Feed",
+                "desc": "Activate, to get notifications in the ZeroHello-Feed",
+                "value": 0,
+                "values": [
+                    [0, "Off"],
+                    [1, "Only mentions"],
+                    [2, "All messages"]
+                ],
+                "type": "select",
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            var parsedVal = parseInt(page.LS.opts.feed_notifications.value)
+                            if (parsedVal === 1) {
+                                page.cmd("feedFollow", [{
+                                    "Mentions": [
+                                        "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
+                                            ""
+                                        ]
+                                    ]
+                                }])
+                                page.LS.opts.feed_notifications.value = 1
+                            } else if (parsedVal === 2) {
+                                page.cmd("feedFollow", [{
+                                    "Mentions": [
+                                        "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
+                                            ""
+                                        ]
+                                    ],
+                                    "Messages": [
+                                        "SELECT messages.message_id AS event_uri, 'comment' AS type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id)", [
+                                            ""
+                                        ]
+                                    ]
+                                }])
+                                page.LS.opts.feed_notifications.value = 2
+                            } else {
+                                page.cmd("feedFollow", [{}])
+                                page.LS.opts.feed_notifications.value = 0
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_3": "Parsing",
+            "parse_profile_links": {
+                "label": "Parse Profile Links",
+                "desc": "Activate to parse profile links in messages (@...)",
+                "value": true,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            $('#messages').find('.message-profile-link').each(function() {
+                                var elY = $(this);
+                                if (page.LS.opts.parse_profile_links.value) {
+                                    elY.replaceWith($('<a class="message-profile-link" href="?u/' + elY.text() + '">' + elY.text() + '</a>'));
+                                } else {
+                                    elY.replaceWith($('<span class="message-profile-link">' + elY.text() + '</span>'));
+                                }
+                            })
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "parse_quotes": {
+                "label": "Parse Quotes",
+                "desc": "Activate to parse quotes in messages (?![tc_xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx])",
+                "value": true,
+                "r_ms": true,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_5": "Extra infos",
+            "user_mention_badge": {
+                "label": "User mention badge",
+                "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
+                "value": true,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.LS.opts.user_mention_badge.value) {
+                                $('#messages').find('.user-is-mentioned').find('.message-user-avatar').addClass("badge")
+                                    // $('#messages').find('.message-user-mention-badge').removeClass("hide")
+                            } else {
+                                $('#messages').find('.user-is-mentioned').find('.message-user-avatar').removeClass("badge")
+                                    // $('#messages').find('.message-user-mention-badge').addClass("hide")
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "show_timestamps": {
+                "label": "Toggle Timestamps",
+                "desc": "Activate to show Timestamps in chat",
+                "value": true,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            $('#messages').find('.message-timestamp').each(function() {
+                                var elY = $(this);
+                                if (page.LS.opts.show_timestamps.value) {
+                                    elY.parent().parent().removeClass("card-footer")
+                                    elY.removeClass("hide")
+                                } else {
+                                    elY.parent().parent().addClass("card-footer")
+                                    elY.addClass("hide")
+                                }
+                            })
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_6": "Design",
+            "avatar_type": {
+                "label": "Allow specific avatar-types only",
+                "desc": "Choose which avatar-locations are allowed (if a user has no location specified, the avatar-generator will be used)",
+                "value": 1,
+                "values": [
+                    [0, "TW & ZM"],
+                    [1, "ThunderWave"],
+                    [2, "ZeroMe"],
+                    [3, "none"]
+                ],
+                "type": "select",
+                "r_ms": true,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            var parsedVal = parseInt(page.LS.opts.avatar_type.value)
+                            page.LS.opts.avatar_type.value = (parsedVal < 4 && parsedVal > -1 ? parsedVal : 1)
+                        }
+                    ).toString() + ')'
+                }
+
+            },
+            "avatar_size": {
+                "label": "Set avatar-size",
+                "desc": "Sets the resolution of generated avatars",
+                "value": 64,
+                "values": [
+                    [0, "Off (2char-initial)"],
+                    [32, "32x32"],
+                    [64, "64x64 (default)"],
+                    [128, "128x128"],
+                    [256, "256x256"],
+                    [512, "512x512"]
+                ],
+                "type": "select",
+                "r_ms": true,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            var parsedVal = parseInt(page.LS.opts.avatar_size.value)
+                            page.LS.opts.avatar_size.value = (parsedVal > 0 ? parsedVal : (parsedVal === 0 ? 0 : 64))
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "message_design_type": {
+                "label": "Change design of messages",
+                "desc": "Changes the design of the messages",
+                "value": 2,
+                "values": [
+                    [1, "Square"],
+                    [2, "Arrow at top (default)"],
+                    [3, "Arrow at middle of avatar"]
+                ],
+                "type": "select",
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            var parsedVal = parseInt(page.LS.opts.message_design_type.value)
+                            if (parsedVal === 1) {
+                                $('#messages').removeAttr("design-type")
+                                page.LS.opts.message_design_type.value = 1
+                            } else {
+                                $('#messages').attr("design-type", parsedVal)
+                                page.LS.opts.message_design_type.value = parsedVal
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_4": "Theming",
+            "theme_body_light": {
+                "label": "Toggle light themed body",
+                "desc": "If activated, the body will have a light theme",
+                "value": false,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.LS.opts.theme_body_light.value) {
+                                $('body').addClass('light')
+                            } else {
+                                $('body').removeClass('light')
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "theme_message_dark": {
+                "label": "Toggle dark themed message-bubbles",
+                "desc": "If activated, the message-bubbles will have a dark theme (works good with dark body!)",
+                "value": false,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.LS.opts.theme_message_dark.value) {
+                                $('#messages').find('.tile').removeClass('light')
+                                $('#messages').find('.tile').find('.card').removeClass('light')
+                            } else {
+                                $('#messages').find('.tile').addClass('light')
+                                $('#messages').find('.tile').find('.card').addClass('light')
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "theme_navbar_light": {
+                "label": "Toggle light themed navbar",
+                "desc": "If activated, the navbar will have a light theme",
+                "value": false,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.LS.opts.theme_navbar_light.value) {
+                                $('header.navbar.fixed').addClass('light')
+                            } else {
+                                $('header.navbar.fixed').removeClass('light')
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_1": "Emoji's",
+            "disable_emojis": {
+                "label": "Disable loading of Emoji's",
+                "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
+                "value": false,
+                "r_ms": true,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "seed_all_emojis": {
+                "label": "Seed all Emoji's",
+                "desc": "Downloads and seeds all Emoji's automatically!",
+                "value": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            if (page.site_info.cert_user_id === "glightstar@zeroid.bit" ||
+                                page.site_info.cert_user_id === "glightstar@kaffie.bit") {
+                                page.LS.opts.seed_all_emojis.value = true
+                            }
+                            if (page.LS.opts.seed_all_emojis.value) {
+                                page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
+                                    (res) => {
+                                        console.log(res)
+                                    })
+                            } else {
+                                page.cmd("OptionalHelpRemove", ["css/png"],
+                                    (res) => {
+                                        console.log(res)
+                                        page.cmd("wrapperNotification", [
+                                            "done", "You are no longer Auto-Seeding Emoji's!", 5000
+                                        ])
+                                    })
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "delete_all_emojis": {
+                "label": "Delete all Emoji's",
+                "desc": "All Emoji's in your \"cache\" will be deleted",
+                "value": "Delete",
+                "type": "button",
+                "r_ms": true,
+                "cb": {
+                    "click": '(' + (
+                        function() {
+                            if (page.site_info.cert_user_id !== "glightstar@zeroid.bit" &&
+                                page.site_info.cert_user_id !== "glightstar@kaffie.bit") {
+                                var count = 0
+                                page.cmd("optionalFileList", [], (data) => {
+                                    for (var x in data) {
+                                        var y = data[x]
+                                        if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
+                                            page.cmd("optionalFileDelete", y.inner_path, (res) => {
+                                                console.log("deleted emoji at path " + y.inner_path)
+                                                count++
+                                            })
+                                    }
+                                    page.cmd("wrapperNotification", [
+                                        "done", "Removed " + count + " Emoji's!", 5000
+                                    ])
+                                })
+                            } else {
+                                page.cmd("wrapperNotification", [
+                                    "error", "You can't delete Emoji's!", 5000
+                                ])
+                                var count = 0
+                                page.cmd("optionalFileList", [], (data) => {
+                                    console.log(data)
+                                    for (var x in data) {
+                                        var y = data[x]
+                                        if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/") {
+                                            console.log("would have removed emoji at path " + y.inner_path)
+                                            count++
+                                        }
+                                    }
+                                    page.cmd("wrapperNotification", [
+                                        "done", "Would have removed " + count + " Emoji's!", 5000
+                                    ])
+                                })
+                            }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "divider_2": "Other",
+            "reset_options_to_default": {
+                "label": "Reset to default",
+                "desc": "Resets all options to their default values",
+                "value": "Reset",
+                "type": "button",
+                "r_ms": true,
+                "cb": {
+                    "click": '(' + (
+                        function() {
+                            delete page.LS.opts;
+                            page.cmd("wrapperSetLocalStorage", page.LS, function() {});
+                            page.setSettingsOptions();
+                        }
+                    ).toString() + ')'
+                }
+            }
+        }
+        typeof cb === "function" && cb(curOptsV, defaultOpts)
+    }
+
+    settingsOptions(gos, cb) {
+        console.log(gos, cb)
+        this.returnDefaultsOpts(function(curOptsV, defaultOpts) {
+            var data_inner_path = "data/users/" + page.site_info.auth_address + "/data.json"
+
+            if (gos === "get") {
+                page.cmd("fileQuery", {
+                    "dir_inner_path": data_inner_path,
+                    "query": "settings"
+                }, (settings) => {
+                    console.log(settings)
+                    if (settings[0] && settings[1]) {
+                        var rOpts = JSON.parse(JSON.stringify(defaultOpts))
+                        console.log(rOpts, settings[0], settings[1])
+                        for (var optX in rOpts) {
+                            // console.log(optX)
+                            if (typeof rOpts[optX] !== "string")
+                                rOpts[optX].value = settings[0][optX]
+                        }
+
+                        typeof cb === "function" && cb({
+                            opts: rOpts,
+                            optsV: settings[1].optsV
+                        }, curOptsV, defaultOpts)
+                    } else {
+                        typeof cb === "function" && cb(
+                            undefined,
+                            curOptsV, defaultOpts)
+                    }
+                })
+            } else if (gos === "reset") {
+                page.cmd("fileGet", {
+                    "inner_path": data_inner_path,
+                    "required": false
+                }, (data) => {
+                    if (data)
+                        var data = JSON.parse(data)
+                    else {
+                        page.verifyUserFiles()
+                        return false
+                    }
+
+                    data.settings = [{}, {}]
+
+                    for (var optX in defaultOpts) {
+                        var optY = defaultOpts[optX]
+
+                        data.settings[0][optX] = optY.value
+                    }
+
+                    data.settings[1].optsV = curOptsV
+
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    page.cmd("fileWrite", [
+                        data_inner_path,
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            var rOpts = JSON.parse(JSON.stringify(defaultOpts))
+
+                            typeof cb === "function" && cb({
+                                opts: rOpts,
+                                optsV: curOptsV
+                            }, curOptsV, defaultOpts)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                    })
+                })
+            } else if (typeof gos === "object" &&
+                gos[0] === "set" && typeof gos[1] === "object" && Object.keys(gos[1]).length > 0) {
+                page.cmd("fileGet", {
+                    "inner_path": data_inner_path,
+                    "required": false
+                }, (data) => {
+                    if (data)
+                        var data = JSON.parse(data)
+                    else {
+                        page.verifyUserFiles()
+                        return false
+                    }
+                    for (var optX in gos[1]) {
+                        var hasvalue = false
+                        if (defaultOpts.hasOwnProperty(optX) &&
+                            typeof gos[1][optX] === typeof defaultOpts.value) {
+                            if (!defaultOpts.hasOwnProperty("values")) {
+                                hasvalue = true
+                            } else if (defaultOpts.hasOwnProperty("values")) {
+                                var opt_arrS = defaultOpts.values.filter(function(a, b) {
+                                    console.log(a, b)
+                                    if (a[0] === arrS)
+                                        return true
+                                    else
+                                        return false
+                                })
+                                if (opt_arrS.length > 0 && typeof opt_arrS[0] === "object" && opt_arrS[0].length === 2) {
+                                    hasvalue = true
+                                }
+                            }
+                        }
+
+                        // if (hasvalue)
+                        data.settings[0][optX] = gos[1][optX].value
+                    }
+
+                    data.settings[1].optsV = (typeof gos[2] === "number" ? gos[2] : data.settings[1].optsV)
+
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    page.cmd("fileWrite", [
+                        data_inner_path,
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            var rOpts = JSON.parse(JSON.stringify(defaultOpts))
+                            for (var optX in rOpts) {
+                                if (typeof rOpts[optX] !== "string")
+                                    rOpts[optX].value = data.settings[0][optX]
+                            }
+
+                            console.log(gos, rOpts, data.settings, curOptsV)
+
+                            typeof cb === "function" && cb({
+                                opts: rOpts,
+                                optsV: data.settings[1].optsV
+                            }, curOptsV, defaultOpts)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                    })
+                })
+            }
+        })
+    }
+
     setSettingsOptions() {
         console.log("Settings options..")
 
-        var dis = this
-        this.cmd("wrapperGetLocalStorage", [], (LS) => {
-            var LS = (typeof LS === "object" ? (LS || {}) : {})
+        // page.cmd("wrapperGetLocalStorage", [], (LS) => {
+        page.settingsOptions("get", (LS, curOptsV, defaultOpts) => {
+            var LS = (typeof LS === "object" ? (Object.keys(LS).length > 0 ? LS : {}) : {})
 
-            // console.log(LS, LS.hasOwnProperty("opts"), LS.opts)
-            var curOptsV = 14
-            var defaultOpts = {
-                // "parse_links": {
-                //     "label": "Parse Links", // The Label of this option
-                //     "desc": "Activate to parse links in messages", // The description of this option
-                //     "value": false, // The value of this option
-                //     "r_ms": false, // Reload messages
-                //     "cb": { // Callback ..
-                //         "change": '(' + ( // .. on change
-                //             function() {
-                //                 $('#messages').find('.message-link').each(function() {
-                //                     var elY = $(this);
-                //                     if (page.LS.opts.parse_links.value) {
-                //                         elY.replaceWith($('<a class="message-link" href="' + elY.text() + '" target="_blank">' + elY.text() + '</a>'));
-                //                     } else {
-                //                         elY.replaceWith($('<span class="message-link">' + elY.text() + '</span>'));
-                //                     }
-                //                 })
-                //             }
-                //         ).toString() + ')'
-                //     }
-                // },
-                "feed_notifications": {
-                    "label": "Notifications in ZeroHello-Feed",
-                    "desc": "Activate, to get notifications in the ZeroHello-Feed",
-                    "value": 0,
-                    "values": [
-                        [0, "Off"],
-                        [1, "Only mentions"],
-                        [2, "All messages"]
-                    ],
-                    "type": "select",
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                var parsedVal = parseInt(page.LS.opts.feed_notifications.value)
-                                if (parsedVal === 1) {
-                                    page.cmd("feedFollow", [{
-                                        "Mentions": [
-                                            "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
-                                                ""
-                                            ]
-                                        ]
-                                    }])
-                                } else if (parsedVal === 2) {
-                                    page.cmd("feedFollow", [{
-                                        "Mentions": [
-                                            "SELECT messages.message_id AS event_uri, 'mention' as type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id) WHERE (messages.body LIKE '%" + page.site_info.cert_user_id + "%' OR messages.body LIKE '%@" + page.site_info.cert_user_id.split("@")[0] + "' OR messages.body LIKE '@" + page.site_info.cert_user_id.split("@")[0] + "%')", [
-                                                ""
-                                            ]
-                                        ],
-                                        "Messages": [
-                                            "SELECT messages.message_id AS event_uri, 'comment' AS type, messages.date_added AS date_added, 'the Lobby' AS title, json.cert_user_id || ': ' || messages.body AS body, '' AS url FROM messages LEFT JOIN json USING (json_id)", [
-                                                ""
-                                            ]
-                                        ]
-                                    }])
-                                } else {
-                                    page.cmd("feedFollow", [{}])
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "divider_3": "",
-                "parse_profile_links": {
-                    "label": "Parse Profile Links",
-                    "desc": "Activate to parse profile links in messages (@...)",
-                    "value": true,
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                $('#messages').find('.message-profile-link').each(function() {
-                                    var elY = $(this);
-                                    if (page.LS.opts.parse_profile_links.value) {
-                                        elY.replaceWith($('<a class="message-profile-link" href="?u/' + elY.text() + '">' + elY.text() + '</a>'));
-                                    } else {
-                                        elY.replaceWith($('<span class="message-profile-link">' + elY.text() + '</span>'));
-                                    }
-                                })
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "user_mention_badge": {
-                    "label": "User mention badge",
-                    "desc": "Activate to show a little badge next to the avatar of the sender, if the message contains your username",
-                    "value": true,
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                if (page.LS.opts.user_mention_badge.value) {
-                                    $('#messages').find('.user-is-mentioned').find('.message-user-avatar').addClass("badge")
-                                        // $('#messages').find('.message-user-mention-badge').removeClass("hide")
-                                } else {
-                                    $('#messages').find('.user-is-mentioned').find('.message-user-avatar').removeClass("badge")
-                                        // $('#messages').find('.message-user-mention-badge').addClass("hide")
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "show_timestamps": {
-                    "label": "Toggle Timestamps",
-                    "desc": "Activate to show Timestamps in chat",
-                    "value": true,
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                $('#messages').find('.message-timestamp').each(function() {
-                                    var elY = $(this);
-                                    if (page.LS.opts.show_timestamps.value) {
-                                        elY.parent().parent().removeClass("card-footer")
-                                        elY.removeClass("hide")
-                                    } else {
-                                        elY.parent().parent().addClass("card-footer")
-                                        elY.addClass("hide")
-                                    }
-                                })
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "avatar_type": {
-                    "label": "Allow specific avatar-types only",
-                    "desc": "Choose which avatar-locations are allowed (if a user has no location specified, the avatar-generator will be used)",
-                    "value": 1,
-                    "values": [
-                        [0, "TW & ZM"],
-                        [1, "ThunderWave"],
-                        [2, "ZeroMe"],
-                        [3, "none"]
-                    ],
-                    "type": "select",
-                    "r_ms": true,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                var parsedVal = parseInt(page.LS.opts.avatar_type.value)
-                                page.LS.opts.avatar_type.value = (parsedVal < 4 && parsedVal > -1 ? parsedVal : 1)
-                            }
-                        ).toString() + ')'
-                    }
-
-                },
-                "avatar_size": {
-                    "label": "Set avatar-size",
-                    "desc": "Sets the avatar-size to this dimensions",
-                    "value": 64,
-                    "values": [
-                        [0, "Off (2char-initial)"],
-                        [32, "32x32"],
-                        [64, "64x64 (default)"],
-                        [128, "128x128"],
-                        [256, "256x256"],
-                        [512, "512x512"]
-                    ],
-                    "type": "select",
-                    "r_ms": true,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                var parsedVal = parseInt(page.LS.opts.avatar_size.value)
-                                page.LS.opts.avatar_size.value = (parsedVal > 0 ? parsedVal : (parsedVal === 0 ? 0 : 64))
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "message_design_type": {
-                    "label": "Change design of messages",
-                    "desc": "Changes the design of the messages",
-                    "value": 2,
-                    "values": [
-                        [1, "Square"],
-                        [2, "Arrow at top (default)"],
-                        [3, "Arrow at middle of avatar"]
-                    ],
-                    "type": "select",
-                    "r_ms": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                var parsedVal = parseInt(page.LS.opts.message_design_type.value)
-                                if (parsedVal === 1) {
-                                    $('#messages').removeAttr("design-type")
-                                } else {
-                                    $('#messages').attr("design-type", parsedVal)
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "divider_1": "",
-                "disable_emojis": {
-                    "label": "Disable loading of Emoji's",
-                    "desc": "If activated, Emoji's will stop being loaded, and all existing will change to text!",
-                    "value": false,
-                    "r_ms": true,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "seed_all_emojis": {
-                    "label": "Seed all Emoji's",
-                    "desc": "Downloads and seeds all Emoji's automatically!",
-                    "value": false,
-                    "cb": {
-                        "change": '(' + (
-                            function() {
-                                if (page.LS.opts.seed_all_emojis.value) {
-                                    page.cmd("OptionalHelp", ["css/png", "ThunderWave's Emoji's"],
-                                        (res) => {
-                                            console.log(res)
-                                        })
-                                } else {
-                                    page.cmd("OptionalHelpRemove", ["css/png"],
-                                        (res) => {
-                                            console.log(res)
-                                            page.cmd("wrapperNotification", [
-                                                "done", "You are no longer Auto-Seeding Emoji's!", 5000
-                                            ])
-                                        })
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "delete_all_emojis": {
-                    "label": "Delete all Emoji's",
-                    "desc": "All Emoji's in your \"cache\" will be deleted",
-                    "value": "Delete",
-                    "type": "button",
-                    "r_ms": true,
-                    "cb": {
-                        "click": '(' + (
-                            function() {
-                                if (page.site_info.cert_user_id !== "glightstar@zeroid.bit") {
-                                    var count = 0
-                                    page.cmd("optionalFileList", [], (data) => {
-                                        for (var x in data) {
-                                            var y = data[x]
-                                            if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/")
-                                                page.cmd("optionalFileDelete", y.inner_path, (res) => {
-                                                    console.log("deleted emoji at path " + y.inner_path)
-                                                    count++
-                                                })
-                                        }
-                                        page.cmd("wrapperNotification", [
-                                            "done", "Removed " + count + " Emoji's!", 5000
-                                        ])
-                                    })
-                                } else {
-                                    page.cmd("wrapperNotification", [
-                                        "error", "You can't delete Emoji's!", 5000
-                                    ])
-                                    var count = 0
-                                    page.cmd("optionalFileList", [], (data) => {
-                                        console.log(data)
-                                        for (var x in data) {
-                                            var y = data[x]
-                                            if (y && y.hasOwnProperty("inner_path") && y.inner_path.substr(0, "css/png/".length) === "css/png/") {
-                                                console.log("would have removed emoji at path " + y.inner_path)
-                                                count++
-                                            }
-                                        }
-                                        page.cmd("wrapperNotification", [
-                                            "done", "Would have removed " + count + " Emoji's!", 5000
-                                        ])
-                                    })
-                                }
-                            }
-                        ).toString() + ')'
-                    }
-                },
-                "divider_2": "",
-                "reset_options_to_default": {
-                    "label": "Reset to default",
-                    "desc": "Resets all options to their default values",
-                    "value": "Reset",
-                    "type": "button",
-                    "r_ms": true,
-                    "cb": {
-                        "click": '(' + (
-                            function() {
-                                delete page.LS.opts;
-                                page.cmd("wrapperSetLocalStorage", page.LS, function() {});
-                                page.setSettingsOptions();
-                            }
-                        ).toString() + ')'
-                    }
-                }
-            }
+            console.log(JSON.parse(JSON.stringify(LS)),
+                LS.hasOwnProperty("opts"), LS.hasOwnProperty("optsV"),
+                JSON.parse(JSON.stringify(LS.opts)),
+                JSON.parse(JSON.stringify(LS.optsV)),
+                curOptsV, defaultOpts)
 
             if (!LS.hasOwnProperty("opts")) {
                 LS.optsV = curOptsV
-
-                if (LS.hasOwnProperty("opts"))
-                    var oldOpts = LS.opts
 
                 LS.opts = JSON.parse(JSON.stringify(defaultOpts))
             }
 
             if (LS.optsV !== curOptsV) {
+                console.log("New options available!")
                 page.cmd("wrapperConfirm", [
                     "There are some new Options available, do you want to update?",
                     "Update"
                 ], (confirmed) => {
+                    console.log("Updating options..", confirmed)
+
                     LS.optsV = curOptsV
 
                     if (LS.hasOwnProperty("opts"))
-                        var oldOpts = LS.opts
+                        var oldOpts = JSON.parse(JSON.stringify(LS.opts))
 
                     LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+
+                    console.log(oldOpts, JSON.parse(JSON.stringify(LS.opts)))
 
                     for (var optX in LS.opts) {
                         var optY = LS.opts[optX]
@@ -7029,17 +7274,29 @@ class ThunderWave extends ZeroFrame {
 
                             if (hasvalue) {
                                 optY.value = OoptY.value
-
-                                if (optY.cb.hasOwnProperty("change") && typeof eval(optY.cb.change) === "function") {
-                                    eval(optY.cb.change + '()')
-                                }
                             }
                         }
 
                         LS.opts[optX] = optY
                     }
+                    page.LS = LS
+
+                    page.settingsOptions([
+                        "set",
+                        LS.opts,
+                        LS.optsV
+                    ])
 
                     page.genSettingsHTML(LS)
+
+                    for (var optX in LS.opts) {
+                        var optY = LS.opts[optX]
+
+                        if (optY.hasOwnProperty("cb") && optY.cb.hasOwnProperty("change") && typeof eval(optY.cb.change) === "function") {
+                            // console.log("executing option", optX, optY)
+                            eval(optY.cb.change + '()')
+                        }
+                    }
                 })
             }
 
@@ -7054,16 +7311,32 @@ class ThunderWave extends ZeroFrame {
             //             y2.value = y2.value
             //     }
             // }
-            dis.LS = LS
-                // console.log(LS, dis.LS)
-            dis.cmd("wrapperSetLocalStorage", LS, function() {})
+            page.LS = LS
+                // console.log(LS, page.LS)
+
+            page.settingsOptions([
+                "set",
+                LS.opts
+            ])
+
+            // page.cmd("wrapperSetLocalStorage", LS, function() {})
+
             page.genSettingsHTML(LS)
+
+            for (var optX in LS.opts) {
+                var optY = LS.opts[optX]
+
+                if (optY.hasOwnProperty("cb") && optY.cb.hasOwnProperty("change") && typeof eval(optY.cb.change) === "function") {
+                    // console.log("executing option", optX, optY)
+                    eval(optY.cb.change + '()')
+                }
+            }
         })
     }
 
     genSettingsHTML(LS) {
         $('#sttngs_container').html('<div class="icon icons loading"></div>')
-        var opts = LS.opts
+        var opts = LS.opts || page.LS.opts
 
         var cntrls = {
             "button": '<div class="col-3"><label class="form-label">Y_LABEL</label></div><div class="col-3"><button class="btn" type="button" name="sttngs-button-X" id="sttngs-button-X">Y_VALUE</button></div><div class="col-6">Y_DESC</div>',
@@ -7077,8 +7350,8 @@ class ThunderWave extends ZeroFrame {
         for (var x in opts) {
             var y = opts[x]
 
-            if (y === "") {
-                $('<hr>').appendTo(sHTML)
+            if (typeof y === "string") {
+                $('<div class="divider text-center" data-content="' + (y ? y : '') + '"></div>').appendTo(sHTML)
                 continue
             }
 
@@ -7099,7 +7372,13 @@ class ThunderWave extends ZeroFrame {
                         page.LS.opts[x].value = this.value
 
                         page.LS = LS
-                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        page.settingsOptions([
+                            "set",
+                            LS.opts
+                        ])
+
+                        // page.cmd("wrapperSetLocalStorage", page.LS, function() {})
 
                         var r_ms = page.LS.opts[x].r_ms
                         if (typeof eval(page.LS.opts[x].cb.change) === "function")
@@ -7122,7 +7401,13 @@ class ThunderWave extends ZeroFrame {
                         page.LS.opts[x].value = this.checked
 
                         page.LS = LS
-                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        page.settingsOptions([
+                            "set",
+                            LS.opts
+                        ])
+
+                        // page.cmd("wrapperSetLocalStorage", page.LS, function() {})
 
                         var r_ms = page.LS.opts[x].r_ms
                         if (typeof eval(page.LS.opts[x].cb.change) === "function")
@@ -7149,7 +7434,13 @@ class ThunderWave extends ZeroFrame {
                         page.LS.opts[x].value = this.value
 
                         page.LS = LS
-                        page.cmd("wrapperSetLocalStorage", page.LS, function() {})
+
+                        page.settingsOptions([
+                            "set",
+                            LS.opts
+                        ])
+
+                        // page.cmd("wrapperSetLocalStorage", page.LS, function() {})
 
                         var r_ms = page.LS.opts[x].r_ms
                         if (typeof eval(page.LS.opts[x].cb.change) === "function")
@@ -7277,6 +7568,21 @@ class ThunderWave extends ZeroFrame {
                     delete data.last_seen
                 if (data.hasOwnProperty("public_key"))
                     delete data.public_key
+
+
+                if (!data.hasOwnProperty("settings") || !data.settings[0] || !data.settings[1]) {
+                    page.returnDefaultsOpts(function(curOptsV, defaultOpts) {
+                        data.settings = [{}, {}]
+
+                        for (var optX in defaultOpts) {
+                            var optY = defaultOpts[optX]
+
+                            data.settings[0][optX] = optY.value
+                        }
+
+                        data.settings[1].optsV = curOptsV
+                    })
+                }
 
                 if (!data.hasOwnProperty("extra_data") || !data.extra_data[0])
                     data.extra_data = [{}]
@@ -7432,8 +7738,6 @@ class ThunderWave extends ZeroFrame {
     }
 
     onOpenWebsocket() {
-        this.setSettingsOptions()
-
         this.cmd("siteInfo", {}, (site_info) => {
             this.site_info = site_info
             this.setSiteInfo(site_info)
@@ -7441,8 +7745,13 @@ class ThunderWave extends ZeroFrame {
                 // $("#select_user").text(site_info.cert_user_id)
 
                 this.verifyUserFiles()
-                this.messageCounterArr = {}
-                this.loadMessages("first time")
+
+                $(document).ready(function() {
+                    page.setSettingsOptions()
+
+                    page.messageCounterArr = {}
+                    page.loadMessages("first time")
+                })
             }
         })
 
