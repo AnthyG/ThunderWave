@@ -6179,15 +6179,15 @@ class ThunderWave extends ZeroFrame {
     quoteDisplayer(tc) {
         if (!tc) return false
 
-        console.log("Getting quote", tc);
+        // console.log("Getting quote", tc);
 
-        (function(_tc) {
+            (function(_tc) {
             page.cmd("dbQuery", [
                 "SELECT * FROM messages LEFT JOIN json USING (json_id) WHERE key = \"" + _tc + "\""
             ], (quote) => {
                 if (quote && quote[0])
                     quote = quote[0]
-                console.log("Got quote", _tc, quote)
+                    // console.log("Got quote", _tc, quote)
 
                 var mmnt = moment(quote.date_added, "x")
 
@@ -6245,7 +6245,7 @@ class ThunderWave extends ZeroFrame {
             hrefArr.shift()
         var isvalidimage = false
 
-        console.log("Checkin image", href, hrefArr)
+        // console.log("Checkin image", href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
         if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
@@ -6261,19 +6261,19 @@ class ThunderWave extends ZeroFrame {
         if (!isvalidimage)
             return false
 
-        console.log("Image is valid", hrefArr)
+        // console.log("Image is valid", hrefArr)
         this.cmd("dbQuery", [
             "SELECT * FROM images LEFT JOIN json USING (json_id) WHERE directory = \"users/" + hrefArr[0] + "\" AND images.file_name = \"" + hrefArr[1] + "\""
         ], (images) => {
-            console.log("IMAGES", images)
+            // console.log("IMAGES", images)
             if (!images || !images[0])
                 return false
 
             var image = images[0]
 
-            console.log("Loading image..", image)
+            // console.log("Loading image..", image)
             page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
-                console.log("Image result: ", res)
+                // console.log("Image result: ", res)
 
                 var $mfr = $('#MEDIAFILEREPLACE_' + uh)
                 if (res.is_downloaded === 1) {
@@ -6304,7 +6304,7 @@ class ThunderWave extends ZeroFrame {
             hrefArr.shift()
         var isvalidimage = false
 
-        console.log("Checkin image", href, hrefArr)
+        // console.log("Checkin image", href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
         if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
@@ -6320,19 +6320,19 @@ class ThunderWave extends ZeroFrame {
         if (!isvalidimage)
             return false
 
-        console.log("Image is valid", hrefArr)
+        // console.log("Image is valid", hrefArr)
         page.cmd("dbQuery", [
             "SELECT * FROM images LEFT JOIN json USING (json_id) WHERE directory = \"users/" + hrefArr[0] + "\" AND images.file_name = \"" + hrefArr[1] + "\""
         ], (images) => {
-            console.log("IMAGES", images)
+            // console.log("IMAGES", images)
             if (!images || !images[0])
                 return false
 
             var image = images[0]
 
-            console.log("Loading image..", image)
+            // console.log("Loading image..", image)
             page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
-                console.log("Image result: ", res)
+                // console.log("Image result: ", res)
                 var el2 = $(el).parent().replaceWith($(imageViewGen(res, href, unescape(title), unescape(text))))
                 if (res.inner_path.match('.+\\.(.*)')[1] === "gif")
                     Gifffer(el2.find('img'));
