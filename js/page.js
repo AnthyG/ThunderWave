@@ -36,6 +36,32 @@ function hexToString(tmp) {
 
 
 
+function openNewTab(url) {
+    page.cmd("wrapperOpenWindow", [url, "_blank", ""])
+    return false
+}
+
+function ownLink(q) {
+    app.curPage = q
+    page.cmd('wrapperPushState', [null, '', q])
+    $(window).scrollTop(0)
+    app.hide_app = false
+
+    return false
+}
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(:([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+
+
 generateGUID = (typeof(window.crypto) != 'undefined' &&
         typeof(window.crypto.getRandomValues) != 'undefined') ?
     function() {
@@ -874,6 +900,14 @@ class ThunderWave extends ZeroFrame {
         changeWorkinTabber('#main-tabs', 'PrivateChat')
 
         page.addPrivateContact(sender, function() {
+            $('#private_recipient').val(sender)
+
+            page.cmd("wrapperPushState", [
+                {},
+                "ThunderWave - ZeroNet",
+                "?PC:" + sender
+            ])
+
             page.genContactsList(function() {
                 var $pcl = $('#private_contacts_list')
 
@@ -3052,6 +3086,14 @@ class ThunderWave extends ZeroFrame {
 
                     page.messageCounterArr = {}
                     page.loadMessages("first time")
+
+                    var pbn_pc = getParameterByName('PC')
+
+                    console.log("Opening private chat", pbn_pc)
+
+                    if (pbn_pc) {
+                        page.loadPrivateMessages('selected user', true, pbn_pc)
+                    }
                 })
             }
         })
