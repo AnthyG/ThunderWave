@@ -42,10 +42,8 @@ function openNewTab(url) {
 }
 
 function ownLink(q) {
-    app.curPage = q
     page.cmd('wrapperPushState', [null, '', q])
     $(window).scrollTop(0)
-    app.hide_app = false
 
     return false
 }
