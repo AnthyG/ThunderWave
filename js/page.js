@@ -42,10 +42,8 @@ function openNewTab(url) {
 }
 
 function ownLink(q) {
-    app.curPage = q
     page.cmd('wrapperPushState', [null, '', q])
     $(window).scrollTop(0)
-    app.hide_app = false
 
     return false
 }
@@ -146,12 +144,27 @@ function openNewTab(url) {
 function imageViewGen(res, href, title, text) {
     var imgHTML = ''
     var isgif = res.inner_path.match('.+\\.(.*)')[1] === "gif"
+
+    var caudio = res.inner_path.match('.+\\.(.*)')[1]
+    var isaudio = (caudio === "mp3" || caudio === "ogg")
+
+    var cvideo = res.inner_path.match('.+\\.(.*)')[1]
+    var isvideo = (cvideo === "ogg" || cvideo === "mp4")
+
     if (isgif) {
         imgHTML = '<img data-gifffer="' + href +
             '" data-gifffer-alt="' + text +
             '" class="img-responsive rounded" ' +
             (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
             (markedR.options.xhtml ? '/>' : '>')
+    } else if (isaudio) {
+        imgHTML = '<audio controls crossorigin2="anonymous" src="' + href + '"' +
+            (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
+            '></audio>'
+    } else if (isvideo) {
+        imgHTML = '<video class="video-responsive" controls crossorigin2="anonymous" src="' + href + '"' +
+            (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
+            '></video>'
     } else {
         imgHTML = '<img src="' + href +
             '" alt="' + text +
@@ -304,6 +317,15 @@ class ThunderWave extends ZeroFrame {
                     page.quoteDisplayer(p1)
 
                 return '<div id="QUOTEREPLACE_' + p1 + '" class="' + (page.LS.opts.parse_quotes.value ? 'icon icons loading' : '') + '"><cite><q>?![tc_' + p1 + '</q> (Quote)</cite></div>'
+            })
+            // Maybe rather just use the existing imageViewGen, and modify the stuff related with it
+            // That would be, I believe, much easier to achieve, and a lot cleaner,
+            // than copying all the stuff from it, and modifying that.!
+            .replace(/(?:\[(.+)\]!a!\((.+)\))/gm, function(match, p1, p2) {
+                return markedR.image(p2, p1, p1)
+            })
+            .replace(/(?:\[(.+)\]!v!\((.+)\))/gm, function(match, p1, p2) {
+                return markedR.image(p2, p1, p1)
             })
         if (!page.LS.opts.disable_emojis.value)
             message_parsed = emojione.toImage(message_parsed)
@@ -1175,7 +1197,7 @@ class ThunderWave extends ZeroFrame {
             var fY = files[fX]
             console.log("MUP >> 3.1 :: ", fX, fY)
 
-            if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\/(png|jpg|jpeg|gif)|(audio)\/(mp3|ogg)|(video)\/(ogg)')) // |audio|video      || !fY.name.match(/\.IMAGETYPE$/gm)
+            if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\/(png|jpg|jpeg|gif)|(audio)\/(mp3|ogg)|(video)\/(ogg|mp4)')) // |audio|video      || !fY.name.match(/\.IMAGETYPE$/gm)
                 continue
 
             var reader = new FileReader()
@@ -1247,6 +1269,10 @@ class ThunderWave extends ZeroFrame {
                                                     console.log("MUP >> 3.2.2 :: ", output_url, f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                     if (f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                         var rtrn = ' ![ALTTEXT](' + output_url + ') '
+                                                    else if (f2.type.match('(audio)\/(mp3|ogg)'))
+                                                        var rtrn = ' [ALTTEXT]!a!(' + output_url + ')'
+                                                    else if (f2.type.match('(video)\/(ogg|mp4)'))
+                                                        var rtrn = ' [ALTTEXT]!v!(' + output_url + ')'
                                                     else
                                                         var rtrn = ' [TITLE](' + output_url + ') '
 
@@ -1292,15 +1318,15 @@ class ThunderWave extends ZeroFrame {
     quoteDisplayer(tc) {
         if (!tc) return false
 
-        console.log("Getting quote", tc);
+        // console.log("Getting quote", tc);
 
-        (function(_tc) {
+            (function(_tc) {
             page.cmd("dbQuery", [
                 "SELECT * FROM messages LEFT JOIN json USING (json_id) WHERE key = \"" + _tc + "\""
             ], (quote) => {
                 if (quote && quote[0])
                     quote = quote[0]
-                console.log("Got quote", _tc, quote)
+                    // console.log("Got quote", _tc, quote)
 
                 var mmnt = moment(quote.date_added, "x")
 
@@ -2991,8 +3017,8 @@ class ThunderWave extends ZeroFrame {
                     var data2 = {}
                 var olddata2 = JSON.parse(JSON.stringify(data2))
 
-                var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg)"
-                var curignore = "(?!(.+\\.(png|jpg|jpeg|gif|mp3|ogg)|data.json))"
+                var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg|mp4)"
+                var curignore = "(?!(.+\\.(png|jpg|jpeg|gif|mp3|ogg|mp4)|data.json))"
                 if (!data2.hasOwnProperty("optional") || data2.optional !== curoptional)
                     data2.optional = curoptional
                 if (!data2.hasOwnProperty("ignore") || data2.ignore !== curignore)

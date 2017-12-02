@@ -128,13 +128,15 @@
                 </div>
 
                 <div id="inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
-                    <input class="hide form-input media_uploader" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg" />
+                    <input class="hide form-input media_uploader" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
 
-                    <div class="hide media_preview">
-                        <figure class="figure">
-                            <img src="" class="img-responsive img-fit-contain" alt="" />
-                            <figcaption class="figure-caption text-center"></figcaption>
-                        </figure>
+                    <div class="hide media_previewC container grid-lg">
+                        <div class="media_preview">
+                            <figure class="figure">
+                                <img src="" class="img-responsive img-fit-contain" alt="" />
+                                <figcaption class="figure-caption text-center"></figcaption>
+                            </figure>
+                        </div>
                     </div>
 
                     <div class="container grid-lg pt-5 pb-5" style="/*background-color: #202a2f;*/">
@@ -165,13 +167,15 @@
                 </div>
 
                 <div id="private_inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
-                    <input class="hide form-input media_uploader" is-private="true" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg" />
+                    <input class="hide form-input media_uploader" is-private="true" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
 
-                    <div class="hide media_preview" is-private="true">
-                        <figure class="figure">
-                            <img src="" class="img-responsive img-fit-contain" alt="" />
-                            <figcaption class="figure-caption text-center"></figcaption>
-                        </figure>
+                    <div class="hide media_previewC container grid-lg">
+                        <div class="media_preview" is-private="true">
+                            <figure class="figure">
+                                <img src="" class="img-responsive img-fit-contain" alt="" />
+                                <figcaption class="figure-caption text-center"></figcaption>
+                            </figure>
+                        </div>
                     </div>
 
                     <div class="container grid-lg pt-5 pb-5" style="/*background-color: #202a2f;*/">
@@ -558,7 +562,7 @@
                     var fY = files[fX]
                     console.log("MUP >> 2.1 :: ", fX, fY)
 
-                    if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\.(png|jpg|jpeg|gif)*')) // !first ||      |audio|video
+                    if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\.(png|jpg|jpeg|gif)*|(audio)\.(mp3|ogg)*|(video)\.(ogg|mp4)*')) // !first ||      |audio|video
                         continue
 
                     var reader = new FileReader()
@@ -573,7 +577,11 @@
                             // page.MediaFiles.push(f2)
 
                             // Render thumbnail
-                            var media = event.target.result ? (f2.type.match('image\..*') ? '<img class="img-responsive rounded {{CLASSES}}" src="' + event.target.result + '" title="' + escape(f2.name) + '" />' : false) : false // (f2.type.match('audio\..*') ? '<audio controls src="' + event.target.result + '" />' : (f2.type.match('video\..*') ? '<video controls src="' + event.target.result + '" />' : false))) : 
+                            var media = event.target.result ?
+                                (f2.type.match('image\..*') ? '<img class="img-responsive rounded {{CLASSES}}" src="' + event.target.result + '" title="' + escape(f2.name) + '" />' :
+                                    (f2.type.match('audio\..*') ? '<audio controls class="{{CLASSES}}" src="' + event.target.result + '" title="' + escape(f2.name) + '"></audio>' :
+                                        (f2.type.match('video\..*') ? '<video controls class="{{CLASSES}}" src="' + event.target.result + '" title="' + escape(f2.name) + '"></video>' : false))) :
+                                false // (f2.type.match('audio\..*') ? '<audio controls src="' + event.target.result + '" />' : (f2.type.match('video\..*') ? '<video controls src="' + event.target.result + '" />' : false))) : 
 
                             if (first) {
                                 first = false
@@ -581,7 +589,7 @@
                                     .replace(/\{\{CLASSES\}\}/gm, 'centered" alt="' + f2.name + '"') +
                                     '<figcaption class="figure-caption text-center">' + f2.name + '</figcaption>'
                                 )
-                                $('.media_preview' + isp).removeClass("hide")
+                                $('.media_previewC' + isp).removeClass("hide")
                                 $('.media_selector_cancel_btn' + isp).removeClass('hide')
                             }
 
@@ -603,7 +611,7 @@
                     readMedia(e, isp)
                 } else {
                     console.log("MUP >> 1.1.1 :: ", $('.media_uploader' + isp)[0].files[0])
-                    $('.media_preview' + isp).addClass("hide")
+                    $('.media_previewC' + isp).addClass("hide")
                     $('.media_selector_cancel_btn' + isp).addClass('hide')
                 }
             })
@@ -617,10 +625,10 @@
                         else
                             add2MSGInput(rtrn)
                     })
-                    $('.media_preview' + isp).addClass('hide')
+                    $('.media_previewC' + isp).addClass('hide')
                     $('.media_selector_cancel_btn' + isp).addClass('hide')
                 } else {
-                    $('.media_preview' + isp).removeClass("hide")
+                    $('.media_previewC' + isp).removeClass("hide")
                     $('.media_selector_cancel_btn' + isp).removeClass('hide')
                 }
             })
@@ -636,7 +644,7 @@
                         else
                             add2MSGInput(rtrn)
                     })
-                    $('.media_preview').addClass('hide')
+                    $('.media_previewC').addClass('hide')
                     $('.media_selector_cancel_btn' + isp).addClass('hide')
                     $('.media_selector_btn' + isp).html('<i class="icon icon-plus"></i>')
                 } else {
@@ -654,7 +662,7 @@
                     ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
                 }
 
-                $('.media_preview' + isp).addClass('hide')
+                $('.media_previewC' + isp).addClass('hide')
                 $('.media_selector_cancel_btn' + isp).addClass('hide')
                 $('.media_selector_btn' + isp).html('<i class="icon icon-plus"></i>')
             })
@@ -738,7 +746,7 @@
                     var $mp = $('#messages').parent()
                     var bcsH = $mp[0].scrollHeight - 2000
 
-                    console.log($mp[0].scrollHeight, bcsH, $mp.scrollTop())
+                    // console.log($mp[0].scrollHeight, bcsH, $mp.scrollTop())
 
                     // var bcsH = $('body>.container')[0].scrollHeight - ($('body>.container')[0].scrollHeight / 10)
                     if ($('#main-tabs').attr("curtab") === "Lobby" && $mp.scrollTop() < bcsH) {
