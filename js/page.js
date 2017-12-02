@@ -146,12 +146,27 @@ function openNewTab(url) {
 function imageViewGen(res, href, title, text) {
     var imgHTML = ''
     var isgif = res.inner_path.match('.+\\.(.*)')[1] === "gif"
+
+    var caudio = res.inner_path.match('.+\\.(.*)')[1]
+    var isaudio = (caudio === "mp3" || caudio === "ogg")
+
+    var cvideo = res.inner_path.match('.+\\.(.*)')[1]
+    var isvideo = (cvideo === "ogg" || cvideo === "mp4")
+
     if (isgif) {
         imgHTML = '<img data-gifffer="' + href +
             '" data-gifffer-alt="' + text +
             '" class="img-responsive rounded" ' +
             (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
             (markedR.options.xhtml ? '/>' : '>')
+    } else if (isaudio) {
+        imgHTML = '<audio controls crossorigin2="anonymous" src="' + href + '"' +
+            (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
+            '></audio>'
+    } else if (isvideo) {
+        imgHTML = '<video class="video-responsive" controls crossorigin2="anonymous" src="' + href + '"' +
+            (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
+            '></video>'
     } else {
         imgHTML = '<img src="' + href +
             '" alt="' + text +
@@ -308,19 +323,11 @@ class ThunderWave extends ZeroFrame {
             // Maybe rather just use the existing imageViewGen, and modify the stuff related with it
             // That would be, I believe, much easier to achieve, and a lot cleaner,
             // than copying all the stuff from it, and modifying that.!
-            .replace(/(?:\[(.+)\]!a!\((.+)\))/gm, function(match, p1) {
-                var uh = Math.random().toString(36).substring(7);
-
-                page.audioDisplayer(uh)
-
-                return '<div id="AUDIOREPLACE_' + uh + '" class="icon icons loading"></div>'
+            .replace(/(?:\[(.+)\]!a!\((.+)\))/gm, function(match, p1, p2) {
+                return markedR.image(p2, p1, p1)
             })
-            .replace(/(?:\[(.+)\]!v!\((.+)\))/gm, function(match, p1) {
-                var uh = Math.random().toString(36).substring(7);
-
-                page.videoDisplayer(uh)
-
-                return '<div id="VIDEOREPLACE_' + uh + '" class="icon icons loading"></div>'
+            .replace(/(?:\[(.+)\]!v!\((.+)\))/gm, function(match, p1, p2) {
+                return markedR.image(p2, p1, p1)
             })
         if (!page.LS.opts.disable_emojis.value)
             message_parsed = emojione.toImage(message_parsed)
@@ -1192,7 +1199,7 @@ class ThunderWave extends ZeroFrame {
             var fY = files[fX]
             console.log("MUP >> 3.1 :: ", fX, fY)
 
-            if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\/(png|jpg|jpeg|gif)|(audio)\/(mp3|ogg)|(video)\/(ogg)')) // |audio|video      || !fY.name.match(/\.IMAGETYPE$/gm)
+            if (!fY || typeof fY !== 'object' || !fY.type.match('(image)\/(png|jpg|jpeg|gif)|(audio)\/(mp3|ogg)|(video)\/(ogg|mp4)')) // |audio|video      || !fY.name.match(/\.IMAGETYPE$/gm)
                 continue
 
             var reader = new FileReader()
@@ -1264,6 +1271,10 @@ class ThunderWave extends ZeroFrame {
                                                     console.log("MUP >> 3.2.2 :: ", output_url, f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                     if (f2.type.match('(image)\/(png|jpg|jpeg|gif)'))
                                                         var rtrn = ' ![ALTTEXT](' + output_url + ') '
+                                                    else if (f2.type.match('(audio)\/(mp3|ogg)'))
+                                                        var rtrn = ' [ALTTEXT]!a!(' + output_url + ')'
+                                                    else if (f2.type.match('(video)\/(ogg|mp4)'))
+                                                        var rtrn = ' [ALTTEXT]!v!(' + output_url + ')'
                                                     else
                                                         var rtrn = ' [TITLE](' + output_url + ') '
 
@@ -1375,7 +1386,7 @@ class ThunderWave extends ZeroFrame {
             hrefArr.shift()
         var isvalidimage = false
 
-        // console.log("Checkin image", href, hrefArr)
+        console.log("Checkin image", href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
         if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
@@ -1391,19 +1402,19 @@ class ThunderWave extends ZeroFrame {
         if (!isvalidimage)
             return false
 
-        // console.log("Image is valid", hrefArr)
+        console.log("Image is valid", hrefArr)
         this.cmd("dbQuery", [
             "SELECT * FROM images LEFT JOIN json USING (json_id) WHERE directory = \"users/" + hrefArr[0] + "\" AND images.file_name = \"" + hrefArr[1] + "\""
         ], (images) => {
-            // console.log("IMAGES", images)
+            console.log("IMAGES", images)
             if (!images || !images[0])
                 return false
 
             var image = images[0]
 
-            // console.log("Loading image..", image)
+            console.log("Loading image..", image)
             page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
-                // console.log("Image result: ", res)
+                console.log("Image result: ", res)
 
                 var $mfr = $('#MEDIAFILEREPLACE_' + uh)
                 if (res.is_downloaded === 1) {
@@ -1434,7 +1445,7 @@ class ThunderWave extends ZeroFrame {
             hrefArr.shift()
         var isvalidimage = false
 
-        // console.log("Checkin image", href, hrefArr)
+        console.log("Checkin image", href, hrefArr)
         if (hrefArr[0] === this.site_info.address)
             hrefArr.shift()
         if (hrefArr[0] === "data" && hrefArr[1] === "users" && hrefArr[2] && hrefArr[3]) {
@@ -1450,19 +1461,19 @@ class ThunderWave extends ZeroFrame {
         if (!isvalidimage)
             return false
 
-        // console.log("Image is valid", hrefArr)
+        console.log("Image is valid", hrefArr)
         page.cmd("dbQuery", [
             "SELECT * FROM images LEFT JOIN json USING (json_id) WHERE directory = \"users/" + hrefArr[0] + "\" AND images.file_name = \"" + hrefArr[1] + "\""
         ], (images) => {
-            // console.log("IMAGES", images)
+            console.log("IMAGES", images)
             if (!images || !images[0])
                 return false
 
             var image = images[0]
 
-            // console.log("Loading image..", image)
+            console.log("Loading image..", image)
             page.cmd("optionalFileInfo", 'data/' + image.directory + '/' + image.file_name, (res) => {
-                // console.log("Image result: ", res)
+                console.log("Image result: ", res)
                 var el2 = $(el).parent().replaceWith($(imageViewGen(res, href, unescape(title), unescape(text))))
                 if (res.inner_path.match('.+\\.(.*)')[1] === "gif")
                     Gifffer(el2.find('img'));
@@ -3008,8 +3019,8 @@ class ThunderWave extends ZeroFrame {
                     var data2 = {}
                 var olddata2 = JSON.parse(JSON.stringify(data2))
 
-                var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg)"
-                var curignore = "(?!(.+\\.(png|jpg|jpeg|gif|mp3|ogg)|data.json))"
+                var curoptional = ".+\\.(png|jpg|jpeg|gif|mp3|ogg|mp4)"
+                var curignore = "(?!(.+\\.(png|jpg|jpeg|gif|mp3|ogg|mp4)|data.json))"
                 if (!data2.hasOwnProperty("optional") || data2.optional !== curoptional)
                     data2.optional = curoptional
                 if (!data2.hasOwnProperty("ignore") || data2.ignore !== curignore)

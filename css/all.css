@@ -1566,7 +1566,7 @@ ul.unstyled {
     z-index: 1;
 }
 
-.inputsC2 .media_preview {
+.inputsC2 .media_previewC {
     /* max-height: calc(500px + 0.4rem * 3); */
     width: 100%;
     /* height: calc(100vh - 72px * 2 + 0.6rem * 2); */
