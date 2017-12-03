@@ -437,6 +437,10 @@
             $('#private_message').val($('#private_message').val() + text)
         }
 
+        function add2GMSGInput(text) {
+            $('#group_message').val($('#group_message').val() + text)
+        }
+
         function workinTabberS(s) {
             var s = s || '.workin-tabber'
             $(s).each(function(elX, elY) {
@@ -560,6 +564,7 @@
             }
             bindEmojiCompleter('#message', '#inputsC2')
             bindEmojiCompleter('#private_message', '#private_inputsC2')
+            bindEmojiCompleter('#group_message', '#group_inputsC2')
 
             autosize($('.message'))
             var oldresizeH = 0

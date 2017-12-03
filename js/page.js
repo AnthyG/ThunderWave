@@ -494,7 +494,7 @@ class ThunderWave extends ZeroFrame {
 
         var msg_part_2_1 = '<div id="G_tc_' + msgkey + '" G_tc="' + date_added + '" class="card mb-5 ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' +
             ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
-                '') + '<div class="card-body text-break">' +
+                '<div class="card-header"><small class="tile-title"><a onclick="add2MSGInput(\'' + username + ' \'); return false;" href="?u/' + encodeURI(username) + '">' + username + '</a></small></div>') + '<div class="card-body text-break">' +
             message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
 
         if ( /*((users_own_message && thismessageis.same_user) || */ thismessageis.same_user /*)*/ && thismessageis.same_date && thismessageis.in_time_range) {
@@ -792,9 +792,7 @@ class ThunderWave extends ZeroFrame {
                 if (messages1.length > 0) {
                     console.log("Starting group-chat load...", 1)
                     checkLoops(1, -1)
-                }
-
-                if (messages2.length > 0) {
+                } else if (messages2.length > 0) {
                     console.log("Starting group-chat load...", 2)
                     checkLoops(2, -1)
                 }
@@ -885,7 +883,7 @@ class ThunderWave extends ZeroFrame {
 
             for (var x in gList) {
                 var y = gList[x]
-                $gl.append('<li class="tab-item" tab="' + y + '"><a href="#" onclick="page.loadGroupMessages(\'selected group\', true, \'' + y + '\');$(\'#group_recipient\').val(\'' + y + '\');">' + y + '</a></li>');
+                $gl.append('<li class="tab-item" tab="' + y + '"><a href="#" onclick="page.loadGroupMessages(\'selected group\', true, \'' + y + '\');$(\'#group_recipient\').val(\'' + y + '\'); return false;">' + y + '</a></li>');
             }
 
             $gl.children('[tab="' + oldactive + '"]').addClass('active')
@@ -1018,7 +1016,7 @@ class ThunderWave extends ZeroFrame {
 
             for (var x in cList) {
                 var y = cList[x]
-                $pcl.append('<li class="tab-item" tab="' + y + '"><a href="#" onclick="page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\');"><figure class="avatar avatar-sm" data-initial="' + y.substr(0, 2) + '"><div avatarimg="' + y + '"></div></figure> ' + y + '</a></li>');
+                $pcl.append('<li class="tab-item" tab="' + y + '"><a href="#" onclick="page.loadPrivateMessages(\'selected user\', true, \'' + y + '\');$(\'#private_recipient\').val(\'' + y + '\'); return false;"><figure class="avatar avatar-sm" data-initial="' + y.substr(0, 2) + '"><div avatarimg="' + y + '"></div></figure> ' + y + '</a></li>');
 
                 (function(_y) {
                     // console.log("Contacts list avatar", _y)
