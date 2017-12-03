@@ -41,6 +41,10 @@
                         </li>
 
                         <li class="tab-item hideifnotloggedin hide">
+                            <a target-tab="GroupChat" href="javascript:void(0)"><i class="icon icon-share"></i></a>
+                        </li>
+
+                        <li class="tab-item hideifnotloggedin hide">
                             <a target-tab="LastSeen" href="javascript:void(0)"><i class="icon icon-time"></i></a>
                         </li>
 
@@ -147,6 +151,43 @@
                             <!--<input type="text" class="form-input input-lg" placeholder="Message.." id="message" onkeypress="if (event.keyCode == 13) page.sendMessage()" />-->
                             <textarea class="form-input input-lg message" placeholder="Message.." id="message" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendMessage(); return false; }" rows="1"></textarea>
                             <button class="btn btn-primary btn-lg btn-action input-group-btn" id="send" onclick="return page.sendMessage()"><i class="icon icon-forward"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div tab="GroupChat" class="panel">
+                <div class="panel-nav">
+                    <input type="hidden" id="group_recipient" />
+                    <ul class="tab" id="group_list">
+                    </ul>
+                </div>
+                <div id="group_messagesAt" class="label fixed"></div>
+
+                <div class="panel-body" style="overflow-x: hidden;">
+                    <button id="group_scrolltobottombtn" class="btn btn-action btn-lg btn-primary shadow-drop-2-bottom circle hide"><i class="icon icon-arrow-down"></i></button>
+
+                    <ul id="group_messages" class="unstyled message-list"></ul>
+                </div>
+
+                <div id="group_inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
+                    <input class="hide form-input media_uploader" is-group="true" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
+
+                    <div class="hide media_previewC container grid-lg">
+                        <div class="media_preview" is-group="true">
+                            <figure class="figure">
+                                <img src="" class="img-responsive img-fit-contain" alt="" />
+                                <figcaption class="figure-caption text-center"></figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <div class="container grid-lg pt-5 pb-5" style="/*background-color: #202a2f;*/">
+                        <div class="input-group" style="/*padding-right: 4rem;*/">
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-group="true" id="group_media_selector_btn"><i class="icon icon-plus"></i></button>
+                            <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-group="true" id="group_media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
+                            <textarea class="form-input input-lg message" placeholder="Message.." id="group_message" is-group="true" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendGroupMessage(); return false; }" rows="1"></textarea>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="group_send" is-group="true" onclick="return page.sendGroupMessage()"><i class="icon icon-forward"></i></button>
                         </div>
                     </div>
                 </div>

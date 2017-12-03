@@ -424,6 +424,519 @@ class ThunderWave extends ZeroFrame {
         // ).prependTo(CDalreadyexistsC)
     }
 
+    addGroupMessage(msgkey, username, message, date_added, addattop) {
+        var message_escaped = message
+
+        var message_pic = '<div avatarimg="' + username + '"></div>'
+
+        var mmnt = moment(date_added, "x")
+
+        var curdate = mmnt.format("MMMM Do, YYYY")
+        var curtime = mmnt.format("HH:mm:ss")
+
+        var curdate2 = moment(curdate, "MMMM Do, YYYY").format("x")
+        var rcurdate = moment().format("MMMM Do, YYYY")
+        var curdate3 = (curdate === rcurdate ? "Today" : (moment(rcurdate, "MMMM Do, YYYY").subtract(1, "d").format("MMMM Do, YYYY") === curdate ? "Yesterday" : curdate));
+        var CDalreadyexists = $("#group_messages").find('[G_timestamp-date="' + curdate2 + '"]')[0] || false
+
+        // console.log("Adding GMSG", msgkey, username, message, date_added, addattop, curdate, curtime)
+
+        var users_own_message = (username === page.site_info.cert_user_id)
+        var user_is_mentioned = (message_escaped.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
+        var user_mention_badge = (page.LS.opts.user_mention_badge.value && user_is_mentioned) ? "badge" : ""
+
+        var thismessageis = {
+            "same_user": (page.lastgroupmessagewas.hasOwnProperty("username") && page.lastgroupmessagewas.username === username),
+            "same_date": (page.lastgroupmessagewas.hasOwnProperty("curdate2") && page.lastgroupmessagewas.curdate2 === curdate2),
+            "in_time_range": (page.lastgroupmessagewas.hasOwnProperty("date_added") && moment(page.lastgroupmessagewas.date_added, "x").add(15, "minutes").isSameOrAfter(date_added))
+        }
+
+        var dCDalreadyexists = CDalreadyexists === false ? false : true
+
+        if (typeof CDalreadyexists !== "undefined" && CDalreadyexists !== false) {
+            CDalreadyexists = $(CDalreadyexists)
+        } else {
+            CDalreadyexists = $("<li id='G_d_" + curdate2 + "' G_timestamp-date='" + curdate2 + "'><div class='divider text-center' data-content='" + (curdate3) + "' onclick='window.location.hash=\"#d_" + curdate2 + "\";'></div><ul class='times-messages unstyled'></ul></li>")
+            CDalreadyexists = CDalreadyexists.appendTo("#group_messages")
+
+            var items = $("#group_messages").children("[G_timestamp-date]").get()
+
+            items.sort(function(a, b) {
+                var A = parseInt($(a).attr('id').split("G_d_")[1])
+                var B = parseInt($(b).attr('id').split("G_d_")[1])
+
+                if (A < B) return -1
+                if (A > B) return 1
+                return 0
+            });
+            $("#group_messages").html("").append(items)
+        }
+        var CDalreadyexistsC = CDalreadyexists.children('.times-messages')
+
+        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#G_tc_' + msgkey + '">' + curtime + '</a>')
+
+        var message_parsed = marked(message_escaped, {
+                renderer: markedR
+            })
+            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+                var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2GMSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
+                var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
+                return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
+            })
+            .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+                if (page.LS.opts.parse_quotes.value)
+                    page.quoteDisplayer(p1)
+
+                return '<div id="QUOTEREPLACE_' + p1 + '" class="' + (page.LS.opts.parse_quotes.value ? 'icon icons loading' : '') + '"><cite><q>?![tc_' + p1 + '</q> (Quote)</cite></div>'
+            })
+        if (!page.LS.opts.disable_emojis.value)
+            message_parsed = emojione.toImage(message_parsed)
+
+        var msg_part_2_1 = '<div id="G_tc_' + msgkey + '" G_tc="' + date_added + '" class="card mb-5 ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' +
+            ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
+                '') + '<div class="card-body text-break">' +
+            message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
+
+        if ( /*((users_own_message && thismessageis.same_user) || */ thismessageis.same_user /*)*/ && thismessageis.same_date && thismessageis.in_time_range) {
+            var el = page.lastgroupmessagewas.el
+            var el2 = $(msg_part_2_1).appendTo($(el).find('.tile-content'))
+
+            var items = $(el).find('.tile-content').children('.card').get()
+
+            items.sort(function(a, b) {
+                var A = parseInt($(a).attr('G_tc'))
+                var B = parseInt($(b).attr('G_tc'))
+
+                if (A < B) return -1
+                if (A > B) return 1
+                return 0
+            });
+            $(el).find('.tile-content').html("").append(items)
+        } else {
+            var msg_part_1 = '<div class="tile-icon"><figure class="avatar avatar-lg message-user-avatar ' + user_mention_badge + '" data-initial="' + username.substr(0, 2) + '">' + message_pic + '</figure></div>',
+                msg_part_2 = '<div class="tile-content">' + msg_part_2_1 + '</div>'
+
+            var el = $('<li id="G_t_' + msgkey + '" G_t="' + date_added + '" class="message-container ' + (user_is_mentioned ? "user-is-mentioned " : "") + '" message-owner="' + username + '" users-own-message="' + users_own_message + '"><div class="tile ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' + (users_own_message ? (msg_part_2 + msg_part_1) : (msg_part_1 + msg_part_2)) + '</div></li>')
+
+            el = el.appendTo(CDalreadyexistsC)
+
+            var items = CDalreadyexistsC.children("li.message-container").get()
+
+            items.sort(function(a, b) {
+                var A = parseInt($(a).attr('G_t'))
+                var B = parseInt($(b).attr('G_t'))
+
+                if (A < B) return -1
+                if (A > B) return 1
+                return 0
+            });
+            CDalreadyexistsC.html("").append(items)
+        }
+
+        page.lastgroupmessagewas = {
+            "username": username,
+            "curdate2": curdate2,
+            "date_added": date_added,
+            "el": el
+        }
+        if (page.firstgroupmessagewas.date_added > date_added)
+            page.firstgroupmessagewas.date_added = date_added
+    }
+
+    sendGroupMessage(message3, group2) {
+        var verified = this.verifyUser()
+        if (!verified)
+            return false
+
+        this.verifyUserFiles()
+
+        var group2 = group2 || false
+        var group = group2 || $('#group_recipient').val()
+        if (!group)
+            group = Math.random().toString(36).substring(2).toString()
+
+        var bR = btoa(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
+
+        var message3 = message3 || false
+        var message2 = message3 || $('#group_message').val()
+        var message = message2
+            .replace(/\n{3,}/gm, "\n\n")
+            .trim()
+
+        var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
+
+        console.log("LOLO", message3, message2, message, group2, group)
+
+        this.cmd("fileGet", {
+            "inner_path": data_inner_path,
+            "required": false
+        }, (data) => {
+            if (data)
+                var data = JSON.parse(data)
+            else
+                var data = {}
+
+            if (!data.hasOwnProperty("group_messages"))
+                data.group_messages = []
+
+            var msg_date_added = parseInt(moment().utc().format("x"))
+
+            if (message && /\S/.test(message)) {
+                page.cmd("aesEncrypt", [
+                    JSON.stringify({
+                        "group": group,
+                        "body": emojione.toShort(message),
+                        "date_added": msg_date_added
+                    }),
+                    bR,
+                    bR
+                ], (res) => {
+                    console.log("Res: ", res)
+
+                    // Add the new message to data
+                    var di = data.group_messages.push({
+                        "message": res[2]
+                    })
+
+                    // Encode data array to utf8 json text
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data), undefined, '\t'))
+                    var json_rawA = btoa(json_raw)
+
+                    // Write file to disk
+                    page.cmd("fileWrite", [
+                        data_inner_path,
+                        json_rawA
+                    ], (res2) => {
+                        if (res2 == "ok") {
+                            if (!message3)
+                                $('#group_message').val("")
+                            autosize.update($('#group_message'))
+
+                            page.loadGroupMessages("sent group message", true)
+
+                            // Publish the file to other users
+                            page.verifyUserFiles(null, function() {
+                                console.log("Sent group message", {
+                                    "group": group,
+                                    "body": emojione.toShort(message),
+                                    "SOMEWHAT-date_added": parseInt(moment().utc().format("x"))
+                                })
+                            })
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res5)
+                            ])
+                        }
+                    })
+                })
+            }
+        })
+    }
+
+    loadGroupMessages(loadcode, override, group2) {
+        var verified = this.verifyUser()
+        if (!verified)
+            return false
+
+        var group2 = group2 || false
+        var group = group2 || $('#group_recipient').val()
+
+        if (!group)
+            group = Math.random().toString(36).substring(2).toString()
+
+        var override = override || false
+        var goingback = goingback || false
+
+        console.log("Loading group messages with code >" + loadcode + "<..", group, override, goingback)
+
+        changeWorkinTabber('#main-tabs', 'GroupChat')
+
+        page.addGroup(group, function() {
+            $('#group_recipient').val(group)
+
+            page.cmd("wrapperPushState", [
+                {},
+                "ThunderWave - ZeroNet",
+                "?GC:" + group
+            ])
+
+            page.genGroupsList(function() {
+                var $gl = $('#group_list')
+
+                $gl.children('lui.active').removeClass('active')
+                $gl.children('[tab="' + group + '"]').addClass('active')
+            })
+        })
+
+        page.cmd("dbQuery", [
+            "SELECT * FROM group_messages LEFT JOIN json USING (json_id) WHERE NOT cert_user_id = '" + page.site_info.cert_user_id + "'"
+        ], (messages1) => {
+            console.log(messages1)
+
+            var $m = $('#group_messages')
+
+            var message_design_type = parseInt(page.LS.opts.message_design_type.value)
+            if (message_design_type === 1) {
+                $m.removeAttr("design-type")
+            } else {
+                $m.attr("design-type", message_design_type)
+            }
+
+            if (override) {
+                page.lastgroupmessagewas = ""
+                $m.html('<div class="icon icons loading"></div>')
+            }
+
+            page.cmd("dbQuery", [
+                "SELECT * FROM group_messages LEFT JOIN json USING (json_id) WHERE cert_user_id = '" + page.site_info.cert_user_id + "'"
+            ], (messages2) => {
+                console.log(messages2)
+
+                var first = true
+
+                var messages = []
+
+                var checkLoops = function(l, x) {
+                    if (eval("messages" + l + ".length > x + 1")) {
+                        // console.log("Continuing " + l + ".. ", eval("messages" + l + ".length"), x + 1)
+                        eval("loop" + l + "(x + 1)")
+                    } else {
+                        // console.log("Stopped " + l + ".")
+                        if (l === 1 /* && sender !== page.site_info.cert_user_id*/ ) {
+                            checkLoops(2, -1)
+                        } else {
+                            l = 2
+                        }
+                        if (l === 2) {
+                            messages.sort(function(a, b) {
+                                var A = a.msg.date_added
+                                var B = b.msg.date_added
+
+                                if (A < B) return -1
+                                if (A > B) return 1
+                                return 0
+                            })
+
+                            for (var x3 = 0; x3 < messages.length; x3++) {
+                                var y3 = messages[x3]
+
+                                if (first) {
+                                    page.firstgroupmessagewas = {
+                                        "date_added": y3.msg.date_added
+                                    }
+                                    first = false
+                                }
+
+                                page.addGroupMessage(x3, y3.sender, y3.msg.body, y3.msg.date_added, override ? false : true)
+                            }
+                        }
+                    }
+                }
+
+                var loop2 = function(x2) {
+                    var y2 = messages2[x2]
+
+                    var bS = btoa(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
+                    page.cmd("aesDecrypt", [
+                        bS,
+                        y2.message,
+                        bS
+                    ], (msg) => {
+                        if (msg) {
+                            var msg = JSON.parse(msg)
+                            if (msg !== null) {
+                                console.log("own", x2, y2, msg)
+
+                                messages.push({
+                                    "id": y2.message_id,
+                                    "msg": msg,
+                                    "sender": page.site_info.cert_user_id
+                                })
+                            }
+
+                            checkLoops(2, x2)
+                        } else {
+                            checkLoops(2, x2)
+                        }
+                    })
+                }
+
+                var loop1 = function(x1) {
+                    var y1 = messages1[x1]
+
+                    var bS = btoa(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
+                    page.cmd("aesDecrypt", [
+                        bS,
+                        y1.message,
+                        bS
+                    ], (msg) => {
+                        if (msg) {
+                            var msg = JSON.parse(msg)
+                            if (msg !== null) {
+                                console.log("other", x1, y1, msg)
+
+                                messages.push({
+                                    "id": y1.message_id,
+                                    "msg": msg,
+                                    "sender": y1.cert_user_id
+                                })
+                            }
+
+                            checkLoops(1, x1)
+                        } else {
+                            checkLoops(1, x1)
+                        }
+                    })
+                }
+
+                if (messages1.length > 0) {
+                    console.log("Starting group-chat load...", 1)
+                    checkLoops(1, -1)
+                }
+
+                if (messages2.length > 0) {
+                    console.log("Starting group-chat load...", 2)
+                    checkLoops(2, -1)
+                }
+
+                $m.children('.loading').remove()
+
+                config$bH(loadcode === "load more" || goingback, true)
+            })
+        })
+    }
+
+    addGroup(group, cb) {
+        page.listGroups(function(data, gList) {
+            console.log("Encrypting group", group, data, gList, gList.indexOf(group))
+            if (gList.indexOf(group) === -1) {
+                page.cmd("eciesEncrypt", [
+                    group
+                ], (group2) => {
+                    console.log(group, "> ENCRYPTED GROUP >", group2)
+
+                    // Add the new group to data
+                    var di = data.group_messages_with.unshift(group2)
+
+                    // Encode data array to utf8 json text
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    // Write file to disk
+                    page.cmd("fileWrite", [
+                        "data/users/" + page.site_info.auth_address + "/data_private.json",
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            // console.log("Added group", username)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                        if (typeof cb === "function")
+                            cb(data, gList)
+                    })
+                })
+            } else {
+                console.log("Group already added")
+
+                page.cmd("eciesEncrypt", [
+                    group
+                ], (group2) => {
+                    // console.log("Moving group to index 0", gList.indexOf(group), group, gList, group2)
+
+                    data.group_messages_with.splice(gList.indexOf(group), 1)
+                    data.group_messages_with.splice(0, 0, group2)
+                    gList.splice(gList.indexOf(group), 1)
+                    gList.splice(0, 0, group)
+
+                    // Encode data array to utf8 json text
+                    var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
+                    var json_rawA = btoa(json_raw)
+
+                    // Write file to disk
+                    page.cmd("fileWrite", [
+                        "data/users/" + page.site_info.auth_address + "/data_private.json",
+                        json_rawA
+                    ], (res) => {
+                        if (res == "ok") {
+                            // console.log("Moved contact", group, gList.indexOf(group), gList)
+                        } else {
+                            page.cmd("wrapperNotification", [
+                                "error", "File write error: " + JSON.stringify(res)
+                            ])
+                        }
+                        if (typeof cb === "function")
+                            cb(data, gList)
+                    })
+                })
+            }
+        })
+    }
+
+    genGroupsList(cb) {
+        page.listGroups(function(data, gList) {
+            var $gl = $('#group_list')
+
+            var oldactive = $($gl.children('li.active')[0]).attr('tab')
+
+            $gl.html("")
+
+            for (var x in gList) {
+                var y = gList[x]
+                $gl.append('<li class="tab-item" tab="' + y + '"><a href="#" onclick="page.loadGroupMessages(\'selected group\', true, \'' + y + '\');$(\'#group_recipient\').val(\'' + y + '\');">' + y + '</a></li>');
+            }
+
+            $gl.children('[tab="' + oldactive + '"]').addClass('active')
+
+            typeof cb === "function" && cb()
+        })
+    }
+
+    listGroups(cb) {
+        var gList = []
+        this.cmd("fileGet", {
+            "inner_path": "data/users/" + this.site_info.auth_address + "/data_private.json",
+            "required": false
+        }, (data) => {
+            if (data)
+                var data = JSON.parse(data)
+            else
+                var data = {}
+
+            if (!data.hasOwnProperty("group_messages_with"))
+                data.group_messages_with = []
+
+            var groups = JSON.parse(JSON.stringify(data.group_messages_with))
+
+            if (groups.length > 0) {
+                var addG = function(x) {
+                    var x = x - 1
+                    var y = groups[x]
+                    page.cmd("eciesDecrypt", y, (group) => {
+                        if (group)
+                            gList.push(group)
+
+                        if (x === 0) {
+                            groups = groups.reverse()
+
+                            if (typeof cb === "function")
+                                cb(data, gList)
+                        } else {
+                            addG(x)
+                        }
+                    })
+                }
+                groups = groups.reverse()
+                addG(groups.length)
+            } else {
+                if (typeof cb === "function")
+                    cb(data, [])
+            }
+        })
+    }
+
     addPrivateContact(username, cb) {
         page.listPrivateContacts(function(data, cList) {
             console.log("Encrypting username", username, data, cList, cList.indexOf(username))
@@ -947,9 +1460,9 @@ class ThunderWave extends ZeroFrame {
 
             var message_design_type = parseInt(page.LS.opts.message_design_type.value)
             if (message_design_type === 1) {
-                $('#private_messages').removeAttr("design-type")
+                $m.removeAttr("design-type")
             } else {
-                $('#private_messages').attr("design-type", message_design_type)
+                $m.attr("design-type", message_design_type)
             }
 
             if (override) {
@@ -1318,9 +1831,10 @@ class ThunderWave extends ZeroFrame {
     quoteDisplayer(tc) {
         if (!tc) return false
 
-        // console.log("Getting quote", tc);
+        // console.log("Getting quote", tc)
 
-            (function(_tc) {
+        ;
+        (function(_tc) {
             page.cmd("dbQuery", [
                 "SELECT * FROM messages LEFT JOIN json USING (json_id) WHERE key = \"" + _tc + "\""
             ], (quote) => {
@@ -2863,6 +3377,9 @@ class ThunderWave extends ZeroFrame {
                 if (!data.hasOwnProperty("private_messages_with"))
                     data.private_messages_with = []
 
+                if (!data.hasOwnProperty("group_messages_with"))
+                    data.group_messages_with = []
+
                 console.log("VERIFIED data_private.json", olddata, data)
 
                 page.addPrivateContact(page.site_info.cert_user_id, function(data2, cList) {
@@ -2922,6 +3439,9 @@ class ThunderWave extends ZeroFrame {
 
                 if (!data.hasOwnProperty("private_messages"))
                     data.private_messages = []
+
+                if (!data.hasOwnProperty("group_messages"))
+                    data.group_messages = []
 
                 if (data.hasOwnProperty("last_seen"))
                     delete data.last_seen
@@ -3114,11 +3634,14 @@ class ThunderWave extends ZeroFrame {
                     page.loadMessages("first time")
 
                     var pbn_pc = getParameterByName('PC')
+                    var pbn_gc = getParameterByName('GC')
 
-                    console.log("Opening private chat", pbn_pc)
+                    console.log("Opening a chat", pbn_pc, pbn_gc)
 
                     if (pbn_pc) {
                         page.loadPrivateMessages('selected user', true, pbn_pc)
+                    } else if (pbn_gc) {
+                        page.loadGroupMessages('selected group', true, pbn_gc)
                     }
                 })
             }
