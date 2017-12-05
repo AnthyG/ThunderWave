@@ -118,7 +118,7 @@
         </header>
 
         <div id="main-tabs" curtab="Lobby">
-            <div tab="Lobby" class="panel">
+            <div tab="Lobby" class="panel" onthistab="changeURL()">
                 <div id="messagesAt" class="label fixed message-listAt"></div>
 
                 <div class="panel-body" style="overflow-x: hidden;">
@@ -156,7 +156,7 @@
                 </div>
             </div>
 
-            <div tab="GroupChat" class="panel">
+            <div tab="GroupChat" class="panel" onthistab="changeURL(2)">
                 <div class="panel-nav">
                     <input type="hidden" id="group_recipient" />
                     <ul class="tab" id="group_list">
@@ -171,10 +171,10 @@
                 </div>
 
                 <div id="group_inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
-                    <input class="hide form-input media_uploader" is-group="true" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
+                    <input class="hide form-input media_uploader" is-chattype="2" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
 
                     <div class="hide media_previewC container grid-lg">
-                        <div class="media_preview" is-group="true">
+                        <div class="media_preview" is-chattype="2">
                             <figure class="figure">
                                 <img src="" class="img-responsive img-fit-contain" alt="" />
                                 <figcaption class="figure-caption text-center"></figcaption>
@@ -184,16 +184,16 @@
 
                     <div class="container grid-lg pt-5 pb-5" style="/*background-color: #202a2f;*/">
                         <div class="input-group" style="/*padding-right: 4rem;*/">
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-group="true" id="group_media_selector_btn"><i class="icon icon-plus"></i></button>
-                            <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-group="true" id="group_media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
-                            <textarea class="form-input input-lg message" placeholder="Message.." id="group_message" is-group="true" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendGroupMessage(); return false; }" rows="1"></textarea>
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="group_send" is-group="true" onclick="return page.sendGroupMessage()"><i class="icon icon-forward"></i></button>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="2" id="group_media_selector_btn"><i class="icon icon-plus"></i></button>
+                            <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-chattype="2" id="group_media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
+                            <textarea class="form-input input-lg message" placeholder="Message.." id="group_message" is-chattype="2" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendGroupMessage(); return false; }" rows="1"></textarea>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="group_send" is-chattype="2" onclick="return page.sendGroupMessage()"><i class="icon icon-forward"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div tab="PrivateChat" class="panel">
+            <div tab="PrivateChat" class="panel" onthistab="changeURL(1)">
                 <div class="panel-nav">
                     <input type="hidden" id="private_recipient" />
                     <ul class="tab" id="private_contacts_list">
@@ -208,10 +208,10 @@
                 </div>
 
                 <div id="private_inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
-                    <input class="hide form-input media_uploader" is-private="true" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
+                    <input class="hide form-input media_uploader" is-chattype="1" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
 
                     <div class="hide media_previewC container grid-lg">
-                        <div class="media_preview" is-private="true">
+                        <div class="media_preview" is-chattype="1">
                             <figure class="figure">
                                 <img src="" class="img-responsive img-fit-contain" alt="" />
                                 <figcaption class="figure-caption text-center"></figcaption>
@@ -221,16 +221,16 @@
 
                     <div class="container grid-lg pt-5 pb-5" style="/*background-color: #202a2f;*/">
                         <div class="input-group" style="/*padding-right: 4rem;*/">
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-private="true" id="private_media_selector_btn"><i class="icon icon-plus"></i></button>
-                            <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-private="true" id="private_media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
-                            <textarea class="form-input input-lg message" placeholder="Message.." id="private_message" is-private="true" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendPrivateMessage(); return false; }" rows="1"></textarea>
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="private_send" is-private="true" onclick="return page.sendPrivateMessage()"><i class="icon icon-forward"></i></button>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="1" id="private_media_selector_btn"><i class="icon icon-plus"></i></button>
+                            <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-chattype="1" id="private_media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
+                            <textarea class="form-input input-lg message" placeholder="Message.." id="private_message" is-chattype="1" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendPrivateMessage(); return false; }" rows="1"></textarea>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="private_send" is-chattype="1" onclick="return page.sendPrivateMessage()"><i class="icon icon-forward"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div tab="LastSeen" class="panel">
+            <div tab="LastSeen" class="panel" onthistab="changeURL()">
                 <div class="panel-body" style="overflow-x: hidden;">
                     <p>Total number of logged-in users: <b id="last_seen_list_c">0</b></p>
                     <div class="input-group">
@@ -243,7 +243,7 @@
                 </div>
             </div>
 
-            <div tab="Search" class="panel">
+            <div tab="Search" class="panel" onthistab="changeURL()">
                 <div class="panel-nav">
                     <div class="form-horizontal">
                         <div class="form-group input-group">
@@ -268,18 +268,18 @@
                 </div>
             </div>
 
-            <div tab="Media" class="panel">
+            <div tab="Media" class="panel" onthistab="changeURL()">
                 <input class="form-input" type="file" id="media_uploader" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg" />
                 <output id="media_list"></output>
                 <button class="btn btn-primary btn-action" id="media_upload_btn"><i class="icon icon-upload"></i></button>
             </div>
 
-            <div tab="Settings" class="panel">
+            <div tab="Settings" class="panel" onthistab="changeURL()">
                 <div class="panel-body" style="overflow-x: hidden;">
                     <div id="sttngs_container"></div>
                 </div>
             </div>
-            <div tab="About" class="panel">
+            <div tab="About" class="panel" onthistab="changeURL()">
                 <div class="panel-nav">
                     <ul class="tab workin-tabber" tabs-target="#about-tabs">
                         <li class="tab-item active">
@@ -324,8 +324,10 @@
                             <hr>
                             <ul>
                                 <li>Citation of messages (kinda like an answer/reply)</li>
-                                <li><span class="icon icon-time"></span> {Workin on it..} Media implementation (audio, video (maybe just in private chats?))</li>
-                                <li><span class="icon icon-time"></span> {Workin on it..} Search/Filter-function in chat(s)</li>
+                                <li><span class="icon icon-check"></span> {Workin on it..} Search/Filter-function in chat(s)</li>
+                                <li class="divider"></li>
+
+                                <li><span class="icon icon-check"></span> {2nd December, 2017} Media implementation (audio, video (maybe just in private chats?))</li>
                                 <li class="divider"></li>
 
                                 <li><span class="icon icon-check"></span> {8th October, 2017} Automatic Option-Updating, with 'Option'-Merging, to preserve the Users Option-States</li>
@@ -364,22 +366,6 @@
         </div>
     </div>
 
-    <!--<PRESETS style="display: none !important;">
-        <div id="PRESET_message-container">
-            <li id='t_{{date_added}}' class='columns col-gapless message-container'>
-                <div class='col-1 text-center'>
-                    <a class='inline-block' href='?u/{{username}}'>
-                        <figure class='avatar' data-initial='{{username.substr(0, 2)}}'>{{message_pic}}</figure>
-                    </a>
-                </div>
-                <div class='col-11 columns col-gapless'>
-                    <h6 class='col-12' style='margin-bottom: .4rem;'><a href='?u/{{username}}'>{{username}}</a> <span class='message-user-mention-badge {{(page.LS.opts.user_mention_badge.value ? ((message_parsed.match(page.site_info.cert_user_id) || message_parsed.match(page.site_info.cert_user_id.split("@")[0])) ? "badge" : "") : "")}}'></span><small>{{message_timestamp}}</small></h6>
-                    <p class='col-12'>{{message_parsed}}</p>
-                </div>
-            </li>
-        </div>
-    </PRESETS>-->
-
     <!-- <script src="zerocdn.min.js"></script>
     <script>
         ZeroCDN.js("jquery", "2.1.4", function() {
@@ -387,10 +373,10 @@
         });
     </script> -->
     <script>
-        function config$bH(goingback, is_private) {
-            var is_private = is_private ? 'private_' : ''
+        function config$bH(goingback, is_chattype) {
+            var is_chattype = is_chattype === 1 ? 'private_' : (is_chattype === 2 ? 'group_' : '')
 
-            // console.log("configuring bodyHeight..", is_private)
+            // console.log("configuring bodyHeight..", is_chattype)
 
             function configIt(alert) {
                 var alert = alert || false
@@ -398,8 +384,10 @@
                 // $('body').height($('body>.container')[0].scrollHeight + 28) // Disabling this, is visually preferred, but the complete thing doesn't work without it >:|
                 // $('body').css('overflow-x', 'hidden')
 
-                var $mp = $('#' + is_private + 'messages').parent()
-                if (($('#main-tabs').attr('curtab') === "Lobby" || $('#main-tabs').attr('curtab') === "PrivateChat") &&
+                var $mp = $('#' + is_chattype + 'messages').parent()
+                if (($('#main-tabs').attr('curtab') === "Lobby" ||
+                        $('#main-tabs').attr('curtab') === "PrivateChat" ||
+                        $('#main-tabs').attr('curtab') === "GroupChat") &&
                     (!goingback || $mp[0].scrollHeight - 25 <= $mp.scrollTop())) {
                     $mp.scrollTop($mp[0].scrollHeight)
                         //     $(document).scrollTop($('body>.container')[0].scrollHeight + 28)
@@ -409,7 +397,7 @@
                 }
 
                 if (alert)
-                    console.log("bodyHeight configured!", is_private)
+                    console.log("bodyHeight configured!", is_chattype)
             }
             $(document).ready(function() {
                 configIt(false)
@@ -419,8 +407,33 @@
             })
         }
 
-        function answer2MSG(msgkey) {
-            add2MSGInput('?![' + msgkey + ']')
+        function changeURL(to) {
+            var to_chattype = (to < 3 && to > -1) ? to : 0
+
+            console.log("Changing URL to chattype", to)
+
+            if (to === 1) {
+                var recipient = $('#private_recipient').val()
+                page.cmd("wrapperPushState", [{},
+                    "ThunderWave - ZeroNet",
+                    "?PC:" + recipient
+                ])
+            } else if (to === 2) {
+                var group = $('#group_recipient').val()
+                page.cmd("wrapperPushState", [{},
+                    "ThunderWave - ZeroNet",
+                    "?GC:" + group
+                ])
+            } else {
+                page.cmd("wrapperPushState", [{},
+                    "ThunderWave - ZeroNet",
+                    "?"
+                ])
+            }
+        }
+
+        function answer2MSG(msgkey, is_chattype) {
+            add2MSGInput('?![' + msgkey + ']', is_chattype)
 
             // if (typeof $('#tc_' + msgkey)[0] !== 'undefined') {
             //     var toMSG = $($('#tc_' + msgkey).children('div.card-body.text-break')[0]).text()
@@ -429,16 +442,10 @@
             // }
         }
 
-        function add2MSGInput(text) {
-            $('#message').val($('#message').val() + text)
-        }
+        function add2MSGInput(text, is_chattype) {
+            var is_chattype = is_chattype === 1 ? 'private_' : (is_chattype === 2 ? 'group_' : '')
 
-        function add2PMSGInput(text) {
-            $('#private_message').val($('#private_message').val() + text)
-        }
-
-        function add2GMSGInput(text) {
-            $('#group_message').val($('#group_message').val() + text)
+            $('#' + is_chattype + 'message').val($('#' + is_chattype + 'message').val() + text)
         }
 
         function workinTabberS(s) {
@@ -477,6 +484,9 @@
 
             $dis.find('[target-tab="' + curtab + '"]').parent().removeClass("active")
             $dis3.parent().addClass("active")
+
+            console.log("ONTHISTAB", $ncurtab, $ncurtab.attr('onthistab'))
+            eval($ncurtab.attr('onthistab'))
 
             $curtab.hide()
             $ncurtab.show()
@@ -590,7 +600,7 @@
 
 
             function readMedia(e, isp) {
-                var isp = isp || '[is-private!="true"]'
+                var isp = isp || '[is-chattype="0"]'
 
                 // Check for the various File API support.
                 if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
@@ -648,7 +658,7 @@
                 }
             }
             $('.media_uploader').on('change', function(e) {
-                var isp = ($(this).attr("is-private") ? '[is-private="true"]' : '[is-private!="true"]')
+                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? 'is-chattype="2"' : '[is-chattype="0"]'))
                 console.log("MUP >> 1.0 :: " + isp, $('.media_uploader' + isp)[0].files)
                 if ($('.media_uploader' + isp)[0].files[0]) {
                     console.log("MUP >> 1.1.0 :: ", $('.media_uploader' + isp)[0].files[0])
@@ -663,10 +673,10 @@
             })
 
             $('#media_upload_btn').on('click', function() {
-                var isp = ($(this).attr("is-private") ? '[is-private="true"]' : '[is-private!="true"]')
+                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? 'is-chattype="2"' : '[is-chattype="0"]'))
                 if ($('.media_uploader' + isp)[0].files[0]) {
                     page.uploadMedia(isp, function(rtrn) {
-                        if (isp === '[is-private="true"]')
+                        if (isp === '[is-chattype="1"]')
                             add2PMSGInput(rtrn)
                         else
                             add2MSGInput(rtrn)
@@ -680,12 +690,12 @@
             })
 
             $('.media_selector_btn').on('click', function() {
-                var isp = ($(this).attr("is-private") ? '[is-private="true"]' : '[is-private!="true"]')
+                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? 'is-chattype="2"' : '[is-chattype="0"]'))
                 console.log("MUP >> 0.0 :: " + isp)
                 if ($('.media_uploader' + isp)[0].files[0]) {
                     console.log("MUP >> 0.1.0 :: ", $('.media_uploader' + isp)[0].files[0])
                     page.uploadMedia(isp, function(rtrn) {
-                        if (isp === '[is-private="true"]')
+                        if (isp === '[is-chattype="1"]')
                             add2PMSGInput(rtrn)
                         else
                             add2MSGInput(rtrn)
@@ -699,7 +709,7 @@
                 }
             })
             $('.media_selector_cancel_btn').on('click', function() {
-                var isp = ($(this).attr("is-private") ? '[is-private="true"]' : '[is-private!="true"]')
+                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? 'is-chattype="2"' : '[is-chattype="0"]'))
                 var ctrl = $('.media_uploader' + isp)[0]
                 try {
                     ctrl.value = null;
