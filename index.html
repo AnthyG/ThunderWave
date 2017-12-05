@@ -118,7 +118,7 @@
         </header>
 
         <div id="main-tabs" curtab="Lobby">
-            <div tab="Lobby" class="panel" onthistab="changeURL()">
+            <div tab="Lobby" class="panel" onthistab="changeURL(0)">
                 <div id="messagesAt" class="label fixed message-listAt"></div>
 
                 <div class="panel-body" style="overflow-x: hidden;">
@@ -132,10 +132,10 @@
                 </div>
 
                 <div id="inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
-                    <input class="hide form-input media_uploader" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
+                    <input class="hide form-input media_uploader" is-chattype="0" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
 
-                    <div class="hide media_previewC container grid-lg">
-                        <div class="media_preview">
+                    <div class="hide media_previewC container grid-lg" is-chattype="0">
+                        <div class="media_preview" is-chattype="0">
                             <figure class="figure">
                                 <img src="" class="img-responsive img-fit-contain" alt="" />
                                 <figcaption class="figure-caption text-center"></figcaption>
@@ -145,12 +145,12 @@
 
                     <div class="container grid-lg pt-5 pb-5" style="/*background-color: #202a2f;*/">
                         <div class="input-group" style="/*padding-right: 4rem;*/">
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" id="media_selector_btn"><i class="icon icon-plus"></i></button>
-                            <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" id="media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="0" id="media_selector_btn"><i class="icon icon-plus"></i></button>
+                            <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-chattype="0" id="media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
                             <!--<span class="input-group-addon addon-lg"><a href="#Select+user" id="select_user" onclick='return page.selectUser()'>Select user</a></span>-->
                             <!--<input type="text" class="form-input input-lg" placeholder="Message.." id="message" onkeypress="if (event.keyCode == 13) page.sendMessage()" />-->
-                            <textarea class="form-input input-lg message" placeholder="Message.." id="message" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendMessage(); return false; }" rows="1"></textarea>
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="send" onclick="return page.sendMessage()"><i class="icon icon-forward"></i></button>
+                            <textarea class="form-input input-lg message" placeholder="Message.." id="message" is-chattype="0" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendMessage(); return false; }" rows="1"></textarea>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="send" is-chattype="0" onclick="return page.sendMessage()"><i class="icon icon-forward"></i></button>
                         </div>
                     </div>
                 </div>
@@ -173,7 +173,7 @@
                 <div id="group_inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
                     <input class="hide form-input media_uploader" is-chattype="2" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
 
-                    <div class="hide media_previewC container grid-lg">
+                    <div class="hide media_previewC container grid-lg" is-chattype="2">
                         <div class="media_preview" is-chattype="2">
                             <figure class="figure">
                                 <img src="" class="img-responsive img-fit-contain" alt="" />
@@ -210,7 +210,7 @@
                 <div id="private_inputsC2" class="panel-footer #fixed shadow-drop-top inputsC2">
                     <input class="hide form-input media_uploader" is-chattype="1" type="file" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
 
-                    <div class="hide media_previewC container grid-lg">
+                    <div class="hide media_previewC container grid-lg" is-chattype="1">
                         <div class="media_preview" is-chattype="1">
                             <figure class="figure">
                                 <img src="" class="img-responsive img-fit-contain" alt="" />
@@ -658,7 +658,7 @@
                 }
             }
             $('.media_uploader').on('change', function(e) {
-                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? 'is-chattype="2"' : '[is-chattype="0"]'))
+                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? '[is-chattype="2"]' : '[is-chattype="0"]'))
                 console.log("MUP >> 1.0 :: " + isp, $('.media_uploader' + isp)[0].files)
                 if ($('.media_uploader' + isp)[0].files[0]) {
                     console.log("MUP >> 1.1.0 :: ", $('.media_uploader' + isp)[0].files[0])
@@ -673,11 +673,13 @@
             })
 
             $('#media_upload_btn').on('click', function() {
-                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? 'is-chattype="2"' : '[is-chattype="0"]'))
+                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? '[is-chattype="2"]' : '[is-chattype="0"]'))
                 if ($('.media_uploader' + isp)[0].files[0]) {
                     page.uploadMedia(isp, function(rtrn) {
                         if (isp === '[is-chattype="1"]')
-                            add2PMSGInput(rtrn)
+                            add2MSGInput(rtrn, 1)
+                        else if (isp === '[is-chattype="2"]')
+                            add2MSGInput(rtrn, 2)
                         else
                             add2MSGInput(rtrn)
                     })
@@ -690,13 +692,15 @@
             })
 
             $('.media_selector_btn').on('click', function() {
-                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? 'is-chattype="2"' : '[is-chattype="0"]'))
+                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? '[is-chattype="2"]' : '[is-chattype="0"]'))
                 console.log("MUP >> 0.0 :: " + isp)
                 if ($('.media_uploader' + isp)[0].files[0]) {
                     console.log("MUP >> 0.1.0 :: ", $('.media_uploader' + isp)[0].files[0])
                     page.uploadMedia(isp, function(rtrn) {
                         if (isp === '[is-chattype="1"]')
-                            add2PMSGInput(rtrn)
+                            add2MSGInput(rtrn, 1)
+                        else if (isp === '[is-chattype="2"]')
+                            add2MSGInput(rtrn, 2)
                         else
                             add2MSGInput(rtrn)
                     })
@@ -709,7 +713,7 @@
                 }
             })
             $('.media_selector_cancel_btn').on('click', function() {
-                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? 'is-chattype="2"' : '[is-chattype="0"]'))
+                var isp = ($(this).attr("is-chattype") === "1" ? '[is-chattype="1"]' : ($(this).attr("is-chattype") === "2" ? '[is-chattype="2"]' : '[is-chattype="0"]'))
                 var ctrl = $('.media_uploader' + isp)[0]
                 try {
                     ctrl.value = null;
