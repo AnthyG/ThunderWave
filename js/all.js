@@ -7105,9 +7105,17 @@ class ThunderWave extends ZeroFrame {
             if (!page.identicons[asv].hasOwnProperty(username)) {
                 var uhash = stringToHex(username).split(' ').join('')
                 page.identicons[asv][username] = new Identicon(uhash, {
-                    margin: 0.2,
+                    margin: 0.225,
                     size: asv,
-                    format: 'svg'
+                    format: 'svg',
+                    // foregrund: [217, 140, 187, 255], // default
+                    background: [240, 240, 240, 255], // default
+
+                    foreground: [18, 183, 142, 255],
+
+                    foreground: [240, 240, 240, 255],
+                    background: [18, 183, 142, 255]
+
                 }).toString()
             }
             var idata = page.identicons[asv][username]
