@@ -548,7 +548,7 @@ class ThunderWave extends ZeroFrame {
         if (!verified)
             return false
 
-        this.verifyUserFiles()
+        // this.verifyUserFiles()
 
         var group2 = group2 || false
         var group = group2 || $('#group_recipient').val()
@@ -562,6 +562,10 @@ class ThunderWave extends ZeroFrame {
         var message = message2
             .replace(/\n{3,}/gm, "\n\n")
             .trim()
+
+        if (!message3)
+            $('#group_message').val("")
+        autosize.update($('#group_message'))
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
 
@@ -608,10 +612,6 @@ class ThunderWave extends ZeroFrame {
                         json_rawA
                     ], (res2) => {
                         if (res2 == "ok") {
-                            if (!message3)
-                                $('#group_message').val("")
-                            autosize.update($('#group_message'))
-
                             page.loadGroupMessages("sent group message", true)
 
                             // Publish the file to other users
@@ -1258,7 +1258,7 @@ class ThunderWave extends ZeroFrame {
         if (!verified)
             return false
 
-        this.verifyUserFiles()
+        // this.verifyUserFiles()
 
         var recipient2 = recipient2 || false
         var recipient = recipient2 || $('#private_recipient').val()
@@ -1273,6 +1273,10 @@ class ThunderWave extends ZeroFrame {
         var message = message2
             .replace(/\n{3,}/gm, "\n\n")
             .trim()
+
+        if (!message3)
+            $('#private_message').val("")
+        autosize.update($('#private_message'))
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
         var data2_inner_path = "data/users/" + this.site_info.auth_address + "/data_private.json"
@@ -1385,10 +1389,6 @@ class ThunderWave extends ZeroFrame {
                                                     json_rawA2
                                                 ], (res5) => {
                                                     if (res5 == "ok") {
-                                                        if (!message3)
-                                                            $('#private_message').val("")
-                                                        autosize.update($('#private_message'))
-
                                                         page.loadPrivateMessages("sent private message", true)
 
                                                         // Publish the file to other users
@@ -1610,13 +1610,17 @@ class ThunderWave extends ZeroFrame {
         if (!verified)
             return false
 
-        this.verifyUserFiles()
+        // this.verifyUserFiles()
 
         var message3 = message3 || false
         var message2 = message3 || $('#message').val()
         var message = message2
             .replace(/\n{3,}/gm, "\n\n")
             .trim()
+
+        if (!message3)
+            $('#message').val("")
+        autosize.update($('#message'))
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
         var content_inner_path = "data/users/" + this.site_info.auth_address + "/content.json"
@@ -1654,10 +1658,6 @@ class ThunderWave extends ZeroFrame {
                     json_rawA
                 ], (res) => {
                     if (res == "ok") {
-                        if (!message3)
-                            $('#message').val("")
-                        autosize.update($('#message'))
-
                         page.loadMessages("sent message", false, data.messages.length === 1 ? false : true)
 
                         // Publish the file to other users
@@ -1716,7 +1716,7 @@ class ThunderWave extends ZeroFrame {
         // else
         //     return false
 
-        this.verifyUserFiles()
+        // this.verifyUserFiles()
 
         console.log("MUP >> 3.0 :: " + isp, files);
 
