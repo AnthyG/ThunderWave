@@ -8109,10 +8109,18 @@ class ThunderWave extends ZeroFrame {
         var opts = LS.opts || page.LS.opts
 
         var cntrls = {
-            "button": '<div class="col-3"><label class="form-label">Y_LABEL</label></div><div class="col-3"><button class="btn" type="button" name="sttngs-button-X" id="sttngs-button-X">Y_VALUE</button></div><div class="col-6">Y_DESC</div>',
-            "input": '<div class="col-3><label class="form-label" for="sttngs-input-X">Y_LABEL</label></div><div class="col-3"><input class="form-input" type="text" name="sttngs-input-X" id="sttngs-input-X" placeholder="X" value="Y_VALUE" /></div><div class="col-6">Y_DESC</div>',
-            "checkbox": '<div class="col-3"></div><div class="col-3"><label class="form-switch"><input type="checkbox" name="sttngs-checkbox-X" id="sttngs-checkbox-X" /><i class="form-icon"></i>Y_LABEL</label></div><div class="col-6">Y_DESC</div>',
-            "select": '<div class="col-3"><label class="form-label" for="sttngs-select-X">Y_LABEL</label></div><div class="col-3"><select class="form-select" name="sttngs-select-X" id="sttngs-select-X">Y_VALUE</select></div><div class="col-6">Y_DESC</div>'
+            "button": '<div class="column col-3 col-sm-12"><label class="form-label">Y_LABEL</label></div>' +
+                '<div class="column col-3 col-sm-12"><button class="btn" type="button" name="sttngs-button-X" id="sttngs-button-X">Y_VALUE</button></div>' +
+                '<div class="column col-6 col-sm-12">Y_DESC</div>',
+            "input": '<div class="column col-3 col-sm-12><label class="form-label" for="sttngs-input-X">Y_LABEL</label></div>' +
+                '<div class="column col-3 col-sm-12"><input class="form-input" type="text" name="sttngs-input-X" id="sttngs-input-X" placeholder="X" value="Y_VALUE" /></div>' +
+                '<div class="column col-6 col-sm-12">Y_DESC</div>',
+            "checkbox": '<div class="column col-3 col-sm-12"></div>' +
+                '<div class="column col-3 col-sm-12"><label class="form-switch"><input type="checkbox" name="sttngs-checkbox-X" id="sttngs-checkbox-X" /><i class="form-icon"></i>Y_LABEL</label></div>' +
+                '<div class="column col-6 col-sm-12">Y_DESC</div>',
+            "select": '<div class="column col-3 col-sm-12"><label class="form-label" for="sttngs-select-X">Y_LABEL</label></div>' +
+                '<div class="column col-3 col-sm-12"><select class="form-select" name="sttngs-select-X" id="sttngs-select-X">Y_VALUE</select></div>' +
+                '<div class="column col-6 col-sm-12">Y_DESC</div>'
         }
 
         var sHTML = $('<form class="form-horizontal"></form>');
@@ -8130,7 +8138,7 @@ class ThunderWave extends ZeroFrame {
             (function(x, y, cntrls) {
                 // console.log(x, y)
                 if (y.type === "input" || (typeof y.value === "string" && y.type === "")) {
-                    var el = $('<div class="form-group">' + (cntrls.input
+                    var el = $('<div class="form-group columns">' + (cntrls.input
                         .replace(/X/gm, x)
                         .replace(/Y_LABEL/gm, y.label)
                         .replace(/Y_DESC/gm, y.desc)
@@ -8157,7 +8165,7 @@ class ThunderWave extends ZeroFrame {
                             page.loadMessages("r_ms", true)
                     })
                 } else if (y.type === "checkbox" || y.type === "switch" || (typeof y.value === "boolean" && y.type === "")) {
-                    var el = $('<div class="form-group">' + (cntrls.checkbox
+                    var el = $('<div class="form-group columns">' + (cntrls.checkbox
                         .replace(/X/gm, x)
                         .replace(/Y_LABEL/gm, y.label)
                         .replace(/Y_DESC/gm, y.desc)
@@ -8191,7 +8199,7 @@ class ThunderWave extends ZeroFrame {
                         var vY = y.values[vX]
                         valuesHTML += '<option value="' + vY[0] + '">' + vY[1] + '</option>'
                     }
-                    var el = $('<div class="form-group">' + (cntrls.select
+                    var el = $('<div class="form-group columns">' + (cntrls.select
                         .replace(/X/gm, x)
                         .replace(/Y_LABEL/gm, y.label)
                         .replace(/Y_DESC/gm, y.desc)
@@ -8219,7 +8227,7 @@ class ThunderWave extends ZeroFrame {
                             page.loadMessages("r_ms", true)
                     })
                 } else if (y.type === "button") {
-                    var el = $('<div class="form-group">' + (cntrls.button
+                    var el = $('<div class="form-group columns">' + (cntrls.button
                         .replace(/X/gm, x)
                         .replace(/Y_LABEL/gm, y.label)
                         .replace(/Y_DESC/gm, y.desc)
