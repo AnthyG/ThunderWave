@@ -78,8 +78,11 @@
                                 </div>
                             </li>
                             <li class="divider hideifnotloggedin hide"></li>
-                            <li class="menu-item hideifnotloggedin hide">
+                            <!-- <li class="menu-item hideifnotloggedin hide">
                                 <a target-tab="Media" href="javascript:void(0)">Media</a>
+                            </li> -->
+                            <li class="menu-item hideifnotloggedin hide">
+                                <a onclick="changeWorkinTabber('#main-tabs', 'Search'); page.filrchGui('', {'media': {'links': false, 'images': true}, 'order_dir': 'DESC', 'from_time': 0, 'to_time': moment().format('x')}, page.site_info.cert_user_id); return false;" href="javascript:void(0)">Own Images</a>
                             </li>
                             <li class="menu-item hideifnotloggedin hide">
                                 <a target-tab="Settings" href="javascript:void(0)">Settings</a>
@@ -268,11 +271,14 @@
                 </div>
             </div>
 
-            <div tab="Media" class="panel" onthistab="changeURL()">
-                <input class="form-input" type="file" id="media_uploader" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg" />
-                <output id="media_list"></output>
+            <!-- <div tab="Media" class="panel" onthistab="changeURL()">
+                <button class="btn btn-primary btn-action" onclick=""><i class="icon icon-refresh"></i></button>
+
+                <input class="form-input" type="file" id="media_uploader" name="files[]" accept="image/png,image/jpg,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif,audio/mp3,audio/ogg,.mp3,.ogg,video/ogg,video/mp4,mp4" />
                 <button class="btn btn-primary btn-action" id="media_upload_btn"><i class="icon icon-upload"></i></button>
-            </div>
+
+                <output id="media_list"></output>
+            </div> -->
 
             <div tab="Settings" class="panel" onthistab="changeURL()">
                 <div class="panel-body" style="overflow-x: hidden;">

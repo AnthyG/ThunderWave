@@ -3669,6 +3669,8 @@ class ThunderWave extends ZeroFrame {
                 this.setSettingsOptions(function() {
                     page.onLoginUser()
 
+                    page.filrchGuiInit()
+
                     page.messageCounterArr = {}
                     page.loadMessages("first time")
 
