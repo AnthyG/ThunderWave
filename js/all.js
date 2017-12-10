@@ -5316,6 +5316,7 @@ class ThunderWave extends ZeroFrame {
             '\n 1. `0` if you want the generated avatar' +
             '\n 2. `1` if you want that users load the profile-pic from ThunderWave' +
             '\n 3. `2` if you want that they load it from ZeroMe' +
+            '\nThis requires you to use the same ID on both ZeroMe and ThunderWave!' +
             '\n\nYour `data.json`-File is located here:' +
             '\n`[Path to ZeroNet-Installation-Directory]/data/1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky/data/users/' + page.site_info.auth_address + '/data.json`' +
             '\n\nYou might need to go into the settings-page (through the menu-button in the upper-right corner), and change `Allow specific avatar-types only` to `TW & ZM` or `ZM`'
