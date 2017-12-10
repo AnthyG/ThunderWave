@@ -162,8 +162,8 @@ ul.unstyled {
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card {
     max-width: 25rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    /* padding-left: 1rem;
+    padding-right: 1rem; */
     display: table;
     border: 0;
 }
@@ -209,8 +209,8 @@ ul.unstyled {
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage {
-    left: -36px;
-    width: calc(100% + 36px * 2);
+    left: -.8rem;
+    width: calc(100% + .8rem * 2);
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage>.img-responsive {
@@ -256,7 +256,7 @@ ul.unstyled {
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card .tile-subtitle {
     width: calc(100% + 1rem * 2);
     position: relative;
-    left: 1rem;
+    /* left: 1rem; */
     /* background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent); */
 }
 
