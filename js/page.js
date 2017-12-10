@@ -678,6 +678,19 @@ class ThunderWave extends ZeroFrame {
             $('#group_message').val("")
         autosize.update($('#group_message'))
 
+        if (/^\?\!\/(.+)/.test(message)) {
+            console.log("CMD-MSG", message)
+
+            $('#group_message').val("")
+            autosize.update($('#group_message'))
+
+            // page.loadPrivateMessages("sent group message", true)
+
+            page.addBotMSG(message, false, '#group_messages')
+
+            return false
+        }
+
         var show = show || false
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
@@ -1392,6 +1405,19 @@ class ThunderWave extends ZeroFrame {
             $('#private_message').val("")
         autosize.update($('#private_message'))
 
+        if (/^\?\!\/(.+)/.test(message)) {
+            console.log("CMD-MSG", message)
+
+            $('#private_message').val("")
+            autosize.update($('#private_message'))
+
+            // page.loadPrivateMessages("sent private message", true)
+
+            page.addBotMSG(message, false, '#private_messages')
+
+            return false
+        }
+
         var show = show || false
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
@@ -1741,12 +1767,14 @@ class ThunderWave extends ZeroFrame {
 
         if (/^\?\!\/(.+)/.test(message)) {
             console.log("CMD-MSG", message)
-            page.addBotMSG(message, false, '#messages')
 
             $('#message').val("")
             autosize.update($('#message'))
 
             page.loadMessages("sent message", false, true)
+
+            page.addBotMSG(message, false, '#messages')
+
             return false
         }
 
