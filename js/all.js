@@ -5296,7 +5296,8 @@ class ThunderWave extends ZeroFrame {
         page.bot(message.substr(3, message.length), page.site_info.cert_user_id, function(answer) {
             console.log(answer)
 
-            page.addMessage('BotAnswer-' + generateGUID(), "Bot >> " + username, answer, date_added, true, toListEl)
+            if (answer)
+                page.addMessage('BotAnswer-' + generateGUID(), "Bot >> " + username, answer, date_added, true, toListEl)
         })
     }
 
@@ -5308,10 +5309,18 @@ class ThunderWave extends ZeroFrame {
 
         var answer = ''
 
-        if (message === "help")
+        var messageArr = message.split(' ')
+        var cmd = messageArr.splice(0, 1)[0]
+
+        var nyI = function() {
+            answer = 'Command not yet implemented: `' +
+                cmd + '`'
+        }
+
+        if (cmd === "help")
             answer = '`?!/help`: Shows this message' +
             '\n`?!/avatar`: Shows how to set the avatar'
-        else if (message === "avatar")
+        else if (cmd === "avatar")
             answer = 'To change your avatar on ThunderWave, you need to modify your `data.json`-File, and set `avatar_type` in `extra_data` to:' +
             '\n 1. `0` if you want the generated avatar' +
             '\n 2. `1` if you want that users load the profile-pic from ThunderWave' +
@@ -5331,8 +5340,33 @@ class ThunderWave extends ZeroFrame {
             '\n\nYour `data.json`-File is located here:' +
             '\n`[Path to ZeroNet-Installation-Directory]/data/1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky/data/users/' + page.site_info.auth_address + '/data.json`' +
             '\n\nYou might need to go into the settings-page (through the menu-button in the upper-right corner), and change `Allow specific avatar-types only` to `TW & ZM` or `ZM`'
+        else if (cmd === "opc") {
+            page.loadPrivateMessages('selected user', true, messageArr[0])
+
+            answer = "Opened private chat"
+        } else if (cmd === "ogc") {
+            page.loadGroupMessages('selected group', true, messageArr[0])
+
+            answer = "Opened group chat"
+        } else if (cmd === "sp") {
+            var to = messageArr.splice(0, 1)[0]
+            var msg = messageArr.join(' ')
+
+            page.sendPrivateMessage(msg, to, false)
+
+            answer = "Sent private message"
+        } else if (cmd === "sg") {
+            var to = messageArr.splice(0, 1)[0]
+            var msg = messageArr.join(' ')
+
+            page.sendGroupMessage(msg, to, false)
+
+            answer = "Sent group message"
+        } else if (cmd === "whois")
+            nyI()
         else
-            answer = 'Command not found.' +
+            answer = 'Command not found: `' +
+            cmd + '`' +
             '\nType `?!/help` for help.'
 
         typeof cb === "function" && cb(answer)
@@ -5457,7 +5491,7 @@ class ThunderWave extends ZeroFrame {
             page.firstgroupmessagewas.date_added = date_added
     }
 
-    sendGroupMessage(message3, group2) {
+    sendGroupMessage(message3, group2, show) {
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -5480,6 +5514,8 @@ class ThunderWave extends ZeroFrame {
         if (!message3)
             $('#group_message').val("")
         autosize.update($('#group_message'))
+
+        var show = show || false
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
 
@@ -5526,7 +5562,8 @@ class ThunderWave extends ZeroFrame {
                         json_rawA
                     ], (res2) => {
                         if (res2 == "ok") {
-                            page.loadGroupMessages("sent group message", true)
+                            if (show)
+                                page.loadGroupMessages("sent group message", true)
 
                             // Publish the file to other users
                             page.verifyUserFiles(null, function() {
@@ -6167,7 +6204,7 @@ class ThunderWave extends ZeroFrame {
             page.firstprivatemessagewas.date_added = date_added
     }
 
-    sendPrivateMessage(message3, recipient2) {
+    sendPrivateMessage(message3, recipient2, show) {
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -6191,6 +6228,8 @@ class ThunderWave extends ZeroFrame {
         if (!message3)
             $('#private_message').val("")
         autosize.update($('#private_message'))
+
+        var show = show || false
 
         var data_inner_path = "data/users/" + this.site_info.auth_address + "/data.json"
         var data2_inner_path = "data/users/" + this.site_info.auth_address + "/data_private.json"
@@ -6303,7 +6342,8 @@ class ThunderWave extends ZeroFrame {
                                                     json_rawA2
                                                 ], (res5) => {
                                                     if (res5 == "ok") {
-                                                        page.loadPrivateMessages("sent private message", true)
+                                                        if (show)
+                                                            page.loadPrivateMessages("sent private message", true)
 
                                                         // Publish the file to other users
                                                         page.verifyUserFiles(null, function() {
