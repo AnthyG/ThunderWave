@@ -5061,7 +5061,8 @@ markedR.image = function(href, title, text) {
 
 
 class ThunderWave extends ZeroFrame {
-    addMessage(msgkey, username, message, date_added, addattop, toListEl) {
+    addMessage(msgkey, username, message, date_added, addattop, classes, toListEl) {
+        var classes = classes || ""
         var toListEl = toListEl || "#messages"
 
         // var message_escaped = message.replace(/</g, "&lt;").replace(/>/g, "&gt;") // Escape html tags in the message
@@ -5193,7 +5194,7 @@ class ThunderWave extends ZeroFrame {
 
         // console.log(CDalreadyexists, CDalreadyexistsC)
 
-        var msg_part_2_1 = '<div id="tc_' + msgkey + '" tc="' + date_added + '" class="card mb-5 ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '">' +
+        var msg_part_2_1 = '<div id="tc_' + msgkey + '" tc="' + date_added + '" class="card mb-5 ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + ' ' + classes + '">' +
             ((users_own_message || (thismessageis.same_user && thismessageis.same_date && thismessageis.in_time_range)) ? "" :
                 '<div class="card-header"><small class="tile-title"><a onclick="add2MSGInput(\'' + username + ' \'); return false;" href="?u/' + encodeURI(username) + '">' + username + '</a></small></div>') + '<div class="card-body text-break">' +
             message_parsed + '</div><div class="' + (page.LS.opts.show_timestamps.value ? "" : "card-footer") + '"><small class="tile-subtitle float-right">' + message_timestamp + '</small></div></div>'
@@ -5291,13 +5292,18 @@ class ThunderWave extends ZeroFrame {
         var username = page.site_info.cert_user_id
         var date_added = moment()
 
-        page.addMessage('BotQuestion-' + generateGUID(), username, message, date_added, true, toListEl)
+        var classesO = "bot-msg"
+        var classesB = "bot-msg"
 
-        page.bot(message.substr(3, message.length), page.site_info.cert_user_id, function(answer) {
-            console.log(answer)
+        page.addMessage('BotQuestion-' + generateGUID(), username, message, date_added, true, classesO, toListEl)
+
+        page.bot(message.substr(3, message.length), page.site_info.cert_user_id, function(answer, err) {
+            console.log(answer, err)
+
+            classesB += ' ' + err
 
             if (answer)
-                page.addMessage('BotAnswer-' + generateGUID(), "Bot >> " + username, answer, date_added, true, toListEl)
+                page.addMessage('BotAnswer-' + generateGUID(), "Bot >> " + username, answer, date_added, true, classesB, toListEl)
         })
     }
 
@@ -5308,6 +5314,7 @@ class ThunderWave extends ZeroFrame {
         console.log("Bottin", message, username, cb)
 
         var answer = ''
+        var err = ''
 
         var messageArr = message.split(' ')
         var cmd = messageArr.splice(0, 1)[0]
@@ -5315,39 +5322,52 @@ class ThunderWave extends ZeroFrame {
         var nyI = function() {
             answer = 'Command not yet implemented: `' +
                 cmd + '`'
+            err = 'warning'
         }
 
-        if (cmd === "help")
+        if (cmd === "help") {
             answer = '`?!/help`: Shows this message' +
-            '\n`?!/avatar`: Shows how to set the avatar'
-        else if (cmd === "avatar")
+                '\n`?!/avatar`: Shows how to set the avatar' +
+                '\n`opc [us@idp]`: Open private chat with given user' +
+                '\n`ogc [gid]`: Open group chat with given group-id' +
+                '\n`sp [us@idp] [msg]`: Send private message (without changing to private chat)' +
+                '\n`sg [gid] [msg]`: Send group message (without changing to group chat)' +
+                '\n`whois [us@idp]`: Prints information about the given user' +
+                '\n\n`us` stands for username e.g. `glightstar`' +
+                '\n`idp` stands for "ID-Provider" e.g. `zeroid.bit`' +
+                '\n`gid` stands for Group-ID e.g. `Abcdefghijklmnopqrstuvwxyz`'
+            err = 'secondary'
+        } else if (cmd === "avatar") {
             answer = 'To change your avatar on ThunderWave, you need to modify your `data.json`-File, and set `avatar_type` in `extra_data` to:' +
-            '\n 1. `0` if you want the generated avatar' +
-            '\n 2. `1` if you want that users load the profile-pic from ThunderWave' +
-            '\n 3. `2` if you want that they load it from ZeroMe' +
-            '\nThis requires you to use the same ID on both ZeroMe and ThunderWave!' +
-            '\n\nSo afterwards it could look something like this (_some stuff has been removed from here!_):' +
-            '\n```' +
-            '\n...' +
-            '\n"extra_data": [' +
-            '\n    {' +
-            '\n        "avatar_file_name": "avatar.jpg", // For ThunderWave-Avatar' +
-            '\n        "avatar_type": 2, // E.g. for ZeroMe' +
-            '\n    }' +
-            '\n]' +
-            '\n...' +
-            '\n```' +
-            '\n\nYour `data.json`-File is located here:' +
-            '\n`[Path to ZeroNet-Installation-Directory]/data/1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky/data/users/' + page.site_info.auth_address + '/data.json`' +
-            '\n\nYou might need to go into the settings-page (through the menu-button in the upper-right corner), and change `Allow specific avatar-types only` to `TW & ZM` or `ZM`'
-        else if (cmd === "opc") {
+                '\n 1. `0` if you want the generated avatar' +
+                '\n 2. `1` if you want that users load the profile-pic from ThunderWave' +
+                '\n 3. `2` if you want that they load it from ZeroMe' +
+                '\nThis requires you to use the same ID on both ZeroMe and ThunderWave!' +
+                '\n\nSo afterwards it could look something like this (_some stuff has been removed from here!_):' +
+                '\n```' +
+                '\n...' +
+                '\n"extra_data": [' +
+                '\n    {' +
+                '\n        "avatar_file_name": "avatar.jpg", // For ThunderWave-Avatar' +
+                '\n        "avatar_type": 2, // E.g. for ZeroMe' +
+                '\n    }' +
+                '\n]' +
+                '\n...' +
+                '\n```' +
+                '\n\nYour `data.json`-File is located here:' +
+                '\n`[Path to ZeroNet-Installation-Directory]/data/1CWkZv7fQAKxTVjZVrLZ8VHcrN6YGGcdky/data/users/' + page.site_info.auth_address + '/data.json`' +
+                '\n\nYou might need to go into the settings-page (through the menu-button in the upper-right corner), and change `Allow specific avatar-types only` to `TW & ZM` or `ZM`'
+            err = 'secondary'
+        } else if (cmd === "opc") {
             page.loadPrivateMessages('selected user', true, messageArr[0])
 
             answer = "Opened private chat"
+            err = 'success'
         } else if (cmd === "ogc") {
             page.loadGroupMessages('selected group', true, messageArr[0])
 
             answer = "Opened group chat"
+            err = 'success'
         } else if (cmd === "sp") {
             var to = messageArr.splice(0, 1)[0]
             var msg = messageArr.join(' ')
@@ -5355,6 +5375,7 @@ class ThunderWave extends ZeroFrame {
             page.sendPrivateMessage(msg, to, false)
 
             answer = "Sent private message"
+            err = 'success'
         } else if (cmd === "sg") {
             var to = messageArr.splice(0, 1)[0]
             var msg = messageArr.join(' ')
@@ -5362,14 +5383,17 @@ class ThunderWave extends ZeroFrame {
             page.sendGroupMessage(msg, to, false)
 
             answer = "Sent group message"
-        } else if (cmd === "whois")
+            err = 'success'
+        } else if (cmd === "whois") {
             nyI()
-        else
+        } else {
             answer = 'Command not found: `' +
-            cmd + '`' +
-            '\nType `?!/help` for help.'
+                cmd + '`' +
+                '\nType `?!/help` for help.'
+            err = 'error'
+        }
 
-        typeof cb === "function" && cb(answer)
+        typeof cb === "function" && cb(answer, err)
     }
 
     addGroupMessage(msgkey, username, message, date_added, addattop) {
@@ -7146,7 +7170,7 @@ class ThunderWave extends ZeroFrame {
                     if (senders.indexOf(msg.cert_user_id) === -1)
                         senders.push(msg.cert_user_id)
 
-                    page.addMessage(msg.key, msg.cert_user_id, msg.body, msg.date_added, false, "#found_messages")
+                    page.addMessage(msg.key, msg.cert_user_id, msg.body, msg.date_added, false, "", "#found_messages")
                 }
             }
             $m.children('.loading').remove()

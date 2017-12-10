@@ -1688,6 +1688,34 @@ ul.unstyled {
     margin-left: auto;
 }
 
+.message-list>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card.bot-msg {
+    border-width: 2px;
+    border-style: solid;
+    border-color: #1de9b6;
+}
+
+.message-list>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card.bot-msg.error {
+    border-color: #e85600;
+}
+
+.message-list>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card.bot-msg.warning {
+    border-color: #ffb700;
+}
+
+.message-list>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card.bot-msg.success {
+    border-color: #32b643;
+}
+
+.message-list>li>ul.times-messages>li:not([users-own-message="true"])>.tile>.tile-content>.card.bot-msg.secondary {
+    border-color: #cbfaee;
+}
+
+.message-list>li>ul.times-messages>li[users-own-message="true"]>.tile>.tile-content>.card.bot-msg {
+    border-width: 2px;
+    border-style: dotted;
+    border-color: #263238;
+}
+
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body {
     /*white-space: pre-line;*/
 }
