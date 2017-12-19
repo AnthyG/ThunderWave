@@ -148,7 +148,7 @@
 
                     <div class="container grid-lg pt-5 pb-5" style="/*background-color: #202a2f;*/">
                         <div class="input-group" style="/*padding-right: 4rem;*/">
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="0" id="media_selector_btn"><i class="icon icon-plus"></i></button>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="0" id="media_selector_btn"><i class="icon icon-photo"></i></button>
                             <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-chattype="0" id="media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
                             <!--<span class="input-group-addon addon-lg"><a href="#Select+user" id="select_user" onclick='return page.selectUser()'>Select user</a></span>-->
                             <!--<input type="text" class="form-input input-lg" placeholder="Message.." id="message" onkeypress="if (event.keyCode == 13) page.sendMessage()" />-->
@@ -187,7 +187,7 @@
 
                     <div class="container grid-lg pt-5 pb-5" style="/*background-color: #202a2f;*/">
                         <div class="input-group" style="/*padding-right: 4rem;*/">
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="2" id="group_media_selector_btn"><i class="icon icon-plus"></i></button>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="2" id="group_media_selector_btn"><i class="icon icon-photo"></i></button>
                             <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-chattype="2" id="group_media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
                             <textarea class="form-input input-lg message" placeholder="Message.." id="group_message" is-chattype="2" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendGroupMessage(); return false; }" rows="1"></textarea>
                             <button class="btn btn-primary btn-lg btn-action input-group-btn" id="group_send" is-chattype="2" onclick="return page.sendGroupMessage()"><i class="icon icon-forward"></i></button>
@@ -224,7 +224,7 @@
 
                     <div class="container grid-lg pt-5 pb-5" style="/*background-color: #202a2f;*/">
                         <div class="input-group" style="/*padding-right: 4rem;*/">
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="1" id="private_media_selector_btn"><i class="icon icon-plus"></i></button>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="1" id="private_media_selector_btn"><i class="icon icon-photo"></i></button>
                             <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-chattype="1" id="private_media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
                             <textarea class="form-input input-lg message" placeholder="Message.." id="private_message" is-chattype="1" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendPrivateMessage(); return false; }" rows="1"></textarea>
                             <button class="btn btn-primary btn-lg btn-action input-group-btn" id="private_send" is-chattype="1" onclick="return page.sendPrivateMessage()"><i class="icon icon-forward"></i></button>
@@ -712,7 +712,7 @@
                     })
                     $('.media_previewC').addClass('hide')
                     $('.media_selector_cancel_btn' + isp).addClass('hide')
-                    $('.media_selector_btn' + isp).html('<i class="icon icon-plus"></i>')
+                    $('.media_selector_btn' + isp).html('<i class="icon icon-photo"></i>')
                 } else {
                     console.log("MUP >> 0.1.1 :: ", $('.media_uploader' + isp)[0].files[0])
                     $('.media_uploader' + isp)[0].click();
@@ -730,7 +730,7 @@
 
                 $('.media_previewC' + isp).addClass('hide')
                 $('.media_selector_cancel_btn' + isp).addClass('hide')
-                $('.media_selector_btn' + isp).html('<i class="icon icon-plus"></i>')
+                $('.media_selector_btn' + isp).html('<i class="icon icon-photo"></i>')
             })
 
 
