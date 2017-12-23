@@ -467,12 +467,13 @@ class ThunderWave extends ZeroFrame {
         if (cmd === "help") {
             answer = '`?!/help`: Shows this message' +
                 '\n`?!/avatar`: Shows how to set the avatar' +
-                '\n`opc [us@idp]`: Open private chat with given user' +
-                '\n`ogc [gid]`: Open group chat with given group-id' +
-                '\n`sp [us@idp] [msg]`: Send private message (without changing to private chat)' +
-                '\n`sg [gid] [msg]`: Send group message (without changing to group chat)' +
-                '\n`whois [us@idp]`: Prints information about the given user' +
-                '\n\n`us` stands for username e.g. `glightstar`' +
+                '\n`?!/opc [us@idp]`: Open private chat with given user' +
+                '\n`?!/ogc [gid]`: Open group chat with given group-id' +
+                '\n`?!/sp [us@idp] [msg]`: Send private message (without changing to private chat)' +
+                '\n`?!/sg [gid] [msg]`: Send group message (without changing to group chat)' +
+                '\n`?!/whois [us@idp]`: Prints information about the given user' +
+                '\n' +
+                '\n`us` stands for username e.g. `glightstar`' +
                 '\n`idp` stands for "ID-Provider" e.g. `zeroid.bit`' +
                 '\n`gid` stands for Group-ID e.g. `Abcdefghijklmnopqrstuvwxyz`'
             err = 'secondary'
