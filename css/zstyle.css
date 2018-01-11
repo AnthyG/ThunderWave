@@ -206,6 +206,8 @@ ul.unstyled {
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body {
     /*white-space: pre-line;*/
+    max-width: 25rem;
+    overflow-x: auto;
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage {

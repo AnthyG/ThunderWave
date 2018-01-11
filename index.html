@@ -189,8 +189,8 @@
                         <div class="input-group" style="/*padding-right: 4rem;*/">
                             <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="2" id="group_media_selector_btn"><i class="icon icon-photo"></i></button>
                             <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-chattype="2" id="group_media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
-                            <textarea class="form-input input-lg message" placeholder="Message.." id="group_message" is-chattype="2" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendGroupMessage(); return false; }" rows="1"></textarea>
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="group_send" is-chattype="2" onclick="return page.sendGroupMessage()"><i class="icon icon-forward"></i></button>
+                            <textarea class="form-input input-lg message" placeholder="Message.." id="group_message" is-chattype="2" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendGroupMessage(false, false, true); return false; }" rows="1"></textarea>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="group_send" is-chattype="2" onclick="return page.sendGroupMessage(false, false, true)"><i class="icon icon-forward"></i></button>
                         </div>
                     </div>
                 </div>
@@ -226,8 +226,8 @@
                         <div class="input-group" style="/*padding-right: 4rem;*/">
                             <button class="btn btn-primary btn-lg btn-action input-group-btn media_selector_btn" is-chattype="1" id="private_media_selector_btn"><i class="icon icon-photo"></i></button>
                             <button class="btn btn-lg btn-action input-group-btn hide media_selector_cancel_btn" is-chattype="1" id="private_media_selector_cancel_btn"><i class="icon icon-cross"></i></button>
-                            <textarea class="form-input input-lg message" placeholder="Message.." id="private_message" is-chattype="1" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendPrivateMessage(); return false; }" rows="1"></textarea>
-                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="private_send" is-chattype="1" onclick="return page.sendPrivateMessage()"><i class="icon icon-forward"></i></button>
+                            <textarea class="form-input input-lg message" placeholder="Message.." id="private_message" is-chattype="1" onkeypress="if (event.keyCode == 13 && !event.shiftKey) { page.sendPrivateMessage(false, false, true); return false; }" rows="1"></textarea>
+                            <button class="btn btn-primary btn-lg btn-action input-group-btn" id="private_send" is-chattype="1" onclick="return page.sendPrivateMessage(false, false, true)"><i class="icon icon-forward"></i></button>
                         </div>
                     </div>
                 </div>

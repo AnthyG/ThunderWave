@@ -313,7 +313,7 @@ class ThunderWave extends ZeroFrame {
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
-            .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+            .replace(/(?:\?\!\[tc_((.+)?(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
                 if (page.LS.opts.parse_quotes.value)
                     page.quoteDisplayer(p1)
 
@@ -595,7 +595,7 @@ class ThunderWave extends ZeroFrame {
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
-            .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+            .replace(/(?:\?\!\[tc_((.+)?(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
                 if (page.LS.opts.parse_quotes.value)
                     page.quoteDisplayer(p1)
 
@@ -761,7 +761,7 @@ class ThunderWave extends ZeroFrame {
         })
     }
 
-    loadGroupMessages(loadcode, override, group2) {
+    loadGroupMessages(loadcode, override, group2, redirect) {
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -773,20 +773,22 @@ class ThunderWave extends ZeroFrame {
             group = Math.random().toString(36).substring(2).toString()
 
         var override = override || false
+        var redirect = redirect === false ? false : true
         var goingback = goingback || false
 
-        console.log("Loading group messages with code >" + loadcode + "<..", group, override, goingback)
+        console.log("Loading group messages with code >" + loadcode + "<..", group, override, redirect, goingback)
 
         changeWorkinTabber('#main-tabs', 'GroupChat')
 
         page.addGroup(group, function() {
             $('#group_recipient').val(group)
 
-            page.cmd("wrapperPushState", [
-                {},
-                "ThunderWave - ZeroNet",
-                "?GC:" + group
-            ])
+            if (redirect)
+                page.cmd("wrapperPushState", [
+                    {},
+                    "ThunderWave - ZeroNet",
+                    "?GC:" + group
+                ])
 
             page.genGroupsList(function() {
                 var $gl = $('#group_list')
@@ -1321,7 +1323,7 @@ class ThunderWave extends ZeroFrame {
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
-            .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+            .replace(/(?:\?\!\[tc_((.+)?(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
                 if (page.LS.opts.parse_quotes.value)
                     page.quoteDisplayer(p1)
 
@@ -1577,7 +1579,7 @@ class ThunderWave extends ZeroFrame {
         return false
     }
 
-    loadPrivateMessages(loadcode, override, sender2) {
+    loadPrivateMessages(loadcode, override, sender2, redirect) {
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -1588,20 +1590,22 @@ class ThunderWave extends ZeroFrame {
             sender = this.site_info.cert_user_id
 
         var override = override || false
+        var redirect = redirect === false ? false : true
         var goingback = goingback || false
 
-        console.log("Loading private messages with code >" + loadcode + "<..", sender, override, goingback)
+        console.log("Loading private messages with code >" + loadcode + "<..", sender, override, redirect, goingback)
 
         changeWorkinTabber('#main-tabs', 'PrivateChat')
 
         page.addPrivateContact(sender, function() {
             $('#private_recipient').val(sender)
 
-            page.cmd("wrapperPushState", [
-                {},
-                "ThunderWave - ZeroNet",
-                "?PC:" + sender
-            ])
+            if (redirect)
+                page.cmd("wrapperPushState", [
+                    {},
+                    "ThunderWave - ZeroNet",
+                    "?PC:" + sender
+                ])
 
             page.genContactsList(function() {
                 var $pcl = $('#private_contacts_list')
@@ -2002,7 +2006,7 @@ class ThunderWave extends ZeroFrame {
     quoteDisplayer(tc) {
         if (!tc) return false
 
-        // console.log("Getting quote", tc)
+        console.log("Getting quote", tc)
 
         ;
         (function(_tc) {
@@ -2011,7 +2015,7 @@ class ThunderWave extends ZeroFrame {
             ], (quote) => {
                 if (quote && quote[0])
                     quote = quote[0]
-                    // console.log("Got quote", _tc, quote)
+                console.log("Got quote", _tc, quote)
 
                 var mmnt = moment(quote.date_added, "x")
 
@@ -2032,7 +2036,7 @@ class ThunderWave extends ZeroFrame {
                         var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                         return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
                     })
-                    .replace(/(?:\?\!\[tc_(.{8}-.{4}-.{4}-.{4}-.{12})\])/gm, function(match, p1) {
+                    .replace(/(?:\?\!\[tc_((.+)?(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
                         if (page.LS.opts.parse_quotes.value)
                             page.quoteDisplayer(p1)
 
@@ -2721,9 +2725,10 @@ class ThunderWave extends ZeroFrame {
         }
 
         if (message.params.hasOwnProperty("event") && message.params.event[0] == "file_done") {
+            console.log("Reloading messages because file-done-event");
             this.loadMessages("file done", false, true)
-                // this.loadPrivateMessages("file done", true)
-                // this.loadPrivateMessages("file done", true)
+                // this.loadPrivateMessages("file done", true, false, false)
+                // this.loadGroupMessages("file done", true, false, false)
         }
     }
 
