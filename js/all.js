@@ -5174,7 +5174,7 @@ class ThunderWave extends ZeroFrame {
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
-            .replace(/(?:\?\!\[tc_((.+)?(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
+            .replace(/(?:\?\!\[tc_((.*?)(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
                 if (page.LS.opts.parse_quotes.value)
                     page.quoteDisplayer(p1)
 
@@ -5456,7 +5456,7 @@ class ThunderWave extends ZeroFrame {
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
-            .replace(/(?:\?\!\[tc_((.+)?(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
+            .replace(/(?:\?\!\[tc_((.*?)(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
                 if (page.LS.opts.parse_quotes.value)
                     page.quoteDisplayer(p1)
 
@@ -6184,7 +6184,7 @@ class ThunderWave extends ZeroFrame {
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
             })
-            .replace(/(?:\?\!\[tc_((.+)?(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
+            .replace(/(?:\?\!\[tc_((.*?)(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
                 if (page.LS.opts.parse_quotes.value)
                     page.quoteDisplayer(p1)
 
@@ -6897,7 +6897,7 @@ class ThunderWave extends ZeroFrame {
                         var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                         return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
                     })
-                    .replace(/(?:\?\!\[tc_((.+)?(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
+                    .replace(/(?:\?\!\[tc_((.*?)(.{8}-.{4}-.{4}-.{4}-.{12}))\])/gm, function(match, p1) {
                         if (page.LS.opts.parse_quotes.value)
                             page.quoteDisplayer(p1)
 
