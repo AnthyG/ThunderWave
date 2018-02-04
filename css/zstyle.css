@@ -40,6 +40,10 @@ ul.unstyled {
     list-style: none;
 }
 
+.card {
+    background: #2c3a41;
+}
+
 #inputsC {
     display: block;
     bottom: 0px;
@@ -136,7 +140,7 @@ ul.unstyled {
     left: 0px;
     border-style: solid;
     border-width: 15px 10px 0;
-    border-color: #32424a transparent;
+    border-color: #2c3a41 transparent;
     display: block;
     width: 0px;
     z-index: 0;
