@@ -5304,7 +5304,7 @@ class ThunderWave extends ZeroFrame {
 
         page.addMessage('BotQuestion-' + generateGUID(), username, message, date_added, true, classesO, toListEl)
 
-        page.bot(message.substr(3, message.length), page.site_info.cert_user_id, function(answer, err) {
+        page.bot(message.substr('/'.length, message.length), page.site_info.cert_user_id, function(answer, err) {
             console.log(answer, err)
 
             classesB += ' ' + err
@@ -5333,17 +5333,23 @@ class ThunderWave extends ZeroFrame {
         }
 
         if (cmd === "help") {
-            answer = '`?!/help`: Shows this message' +
-                '\n`?!/avatar`: Shows how to set the avatar' +
-                '\n`?!/opc [us@idp]`: Open private chat with given user' +
-                '\n`?!/ogc [gid]`: Open group chat with given group-id' +
-                '\n`?!/sp [us@idp] [msg]`: Send private message (without changing to private chat)' +
-                '\n`?!/sg [gid] [msg]`: Send group message (without changing to group chat)' +
-                '\n`?!/whois [us@idp]`: Prints information about the given user' +
+            answer = '`/help`: Shows this message' +
+                '\n`/rules`: Prints all rules' +
+                '\n`/avatar`: Shows how to set the avatar' +
+                '\n`/opc [us@idp]`: Open private chat with given user' +
+                '\n`/ogc [gid]`: Open group chat with given group-id' +
+                '\n`/sp [us@idp] [msg]`: Send private message (without changing to private chat)' +
+                '\n`/sg [gid] [msg]`: Send group message (without changing to group chat)' +
+                '\n`/whois [us@idp]`: Prints information about the given user' +
                 '\n' +
                 '\n`us` stands for username e.g. `glightstar`' +
                 '\n`idp` stands for "ID-Provider" e.g. `zeroid.bit`' +
                 '\n`gid` stands for Group-ID e.g. `Abcdefghijklmnopqrstuvwxyz`'
+            err = 'secondary'
+        } else if (cmd === "rules") {
+            answer = 'These rules are not like a EULA where the user actually has to completely accept them, but rather they should provide a clear list of things that are or are not allowed/ supported/ accepted by me, @glightstar.' +
+                '\n - Do not post explicit media of any sort in the lobby. "Explicit" standing for stuff like pornography and similar.' +
+                '\n - Discussions are always welcome, but please keep in mind, that everybody is allowed to have their own opinion on any topic.'
             err = 'secondary'
         } else if (cmd === "avatar") {
             answer = 'To change your avatar on ThunderWave, you need to modify your `data.json`-File, and set `avatar_type` in `extra_data` to:' +
@@ -5396,8 +5402,8 @@ class ThunderWave extends ZeroFrame {
             nyI()
         } else {
             answer = 'Command not found: `' +
-                cmd + '`' +
-                '\nType `?!/help` for help.'
+                cmd +
+                '`\nType `/help` for help.'
             err = 'error'
         }
 
@@ -5554,7 +5560,7 @@ class ThunderWave extends ZeroFrame {
             $('#group_message').val("")
         autosize.update($('#group_message'))
 
-        if (/^\?\!\/(.+)/.test(message)) {
+        if (/^\/(.+)?/.test(message)) {
             console.log("CMD-MSG", message)
 
             $('#group_message').val("")
@@ -6290,7 +6296,7 @@ class ThunderWave extends ZeroFrame {
             $('#private_message').val("")
         autosize.update($('#private_message'))
 
-        if (/^\?\!\/(.+)/.test(message)) {
+        if (/^\/(.+)?/.test(message)) {
             console.log("CMD-MSG", message)
 
             $('#private_message').val("")
@@ -6652,7 +6658,7 @@ class ThunderWave extends ZeroFrame {
             $('#message').val("")
         autosize.update($('#message'))
 
-        if (/^\?\!\/(.+)/.test(message)) {
+        if (/^\/(.+)?/.test(message)) {
             console.log("CMD-MSG", message)
 
             $('#message').val("")
