@@ -60,6 +60,13 @@ function getParameterByName(name, url) {
 
 
 
+Math.seed = function(s) {
+    return function() {
+        s = Math.sin(s) * 10000
+        return s - Math.floor(s)
+    }
+}
+
 generateGUID = (typeof(window.crypto) != 'undefined' &&
         typeof(window.crypto.getRandomValues) != 'undefined') ?
     function() {
@@ -162,7 +169,7 @@ function imageViewGen(res, href, title, text) {
             (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
             '></audio>'
     } else if (isvideo) {
-        imgHTML = '<video class="video-responsive" controls crossorigin2="anonymous" src="' + href + '"' +
+        imgHTML = '<video class="video-responsive rounded" controls crossorigin2="anonymous" src="' + href + '"' +
             (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
             '></video>'
     } else {
@@ -172,9 +179,9 @@ function imageViewGen(res, href, title, text) {
             (title ? ('title="' + title + '"') : (text ? ('title="' + text + '"') : '')) +
             (markedR.options.xhtml ? '/>' : '>')
     }
-    return '<div class="popover hasimage isgif-' + isgif + '">' +
+    return '<div class="popover hasimage isgif-' + isgif + '"><div class="popoverimgC">' +
         imgHTML +
-        '<div class="popover-container">' +
+        '</div><div class="popover-container">' +
         '<div class="card ' + (page.LS.opts.theme_message_dark.value ? '' : 'light') + '"><div class="card-header">' +
         (title ? ('<div class="card-title">' + title + '</div>') :
             (text ? ('<div class="card-title">' + text + '</div>') : '')) +
@@ -184,7 +191,7 @@ function imageViewGen(res, href, title, text) {
         '<br>Type: ' + res.inner_path.match('.+\\.(.*)')[1] +
         '</div><div class="card-footer"><button class="btn" onclick="page.imageDeleter(this, \'' +
         href + '\', \'' + escape(title) + '\', \'' + escape(text) +
-        '\') return false;">Delete file</button><a class="btn btn-link" href="' +
+        '\'); return false;">Delete file</button><a class="btn btn-link" href="' +
         href + '" target="_blank">Open in new tab</a></div></div></div>'
 }
 markedR.image = function(href, title, text) {
@@ -297,7 +304,7 @@ class ThunderWave extends ZeroFrame {
         //         " :: " + moment(CDalreadyexistsC.children("li.message-container").first().attr("id").split("t_")[1], "x").format("MMMM Do, YYYY - HH:mm:ss"))
         // }
 
-        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#" onclick="answer2MSG(\'tc_' + msgkey + '\'); return false;' + /*#tc_' + msgkey + '*/ ' return false;">' + curtime + '</a>')
+        var message_timestamp = ('<a class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '" href="#" onclick="answer2MSG(\'tc_' + msgkey + '\'); return false;' + /*#tc_' + msgkey + '*/ '">' + curtime + '</a>')
             // var message_timestamp = ('<span class="message-timestamp ' + (page.LS.opts.show_timestamps.value ? "" : "hide") + '">' + curtime + '</span>')
         var message_parsed = marked(
                 message_escaped
@@ -667,6 +674,13 @@ class ThunderWave extends ZeroFrame {
         if (!group)
             group = Math.random().toString(36).substring(2).toString()
 
+        var rgroup = group;
+        if (group.length < 16) {
+            var addStr = Math.seed(group.charCodeAt(0))().toString().substring(2) + Math.seed(group.charCodeAt(1))().toString().substring(2);
+            group += addStr;
+            // console.log("AddStr: ", addStr, group);
+        }
+
         var bR = btoa(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
 
         var message3 = message3 || false
@@ -772,6 +786,13 @@ class ThunderWave extends ZeroFrame {
         if (!group)
             group = Math.random().toString(36).substring(2).toString()
 
+        var rgroup = group;
+        if (group.length < 16) {
+            var addStr = Math.seed(group.charCodeAt(0))().toString().substring(2) + Math.seed(group.charCodeAt(1))().toString().substring(2);
+            group += addStr;
+            // console.log("AddStr: ", addStr, group);
+        }
+
         var override = override || false
         var redirect = redirect === false ? false : true
         var goingback = goingback || false
@@ -780,21 +801,21 @@ class ThunderWave extends ZeroFrame {
 
         changeWorkinTabber('#main-tabs', 'GroupChat')
 
-        page.addGroup(group, function() {
-            $('#group_recipient').val(group)
+        page.addGroup(rgroup, function() {
+            $('#group_recipient').val(rgroup)
 
             if (redirect)
                 page.cmd("wrapperPushState", [
                     {},
                     "ThunderWave - ZeroNet",
-                    "?GC:" + group
+                    "?GC:" + rgroup
                 ])
 
             page.genGroupsList(function() {
                 var $gl = $('#group_list')
 
                 $gl.children('lui.active').removeClass('active')
-                $gl.children('[tab="' + group + '"]').addClass('active')
+                $gl.children('[tab="' + rgroup + '"]').addClass('active')
             })
         })
 
@@ -2006,7 +2027,7 @@ class ThunderWave extends ZeroFrame {
     quoteDisplayer(tc) {
         if (!tc) return false
 
-        console.log("Getting quote", tc)
+        // console.log("Getting quote", tc)
 
         ;
         (function(_tc) {
@@ -2015,7 +2036,7 @@ class ThunderWave extends ZeroFrame {
             ], (quote) => {
                 if (quote && quote[0])
                     quote = quote[0]
-                console.log("Got quote", _tc, quote)
+                    // console.log("Got quote", _tc, quote)
 
                 var mmnt = moment(quote.date_added, "x")
 

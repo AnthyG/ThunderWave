@@ -1723,12 +1723,22 @@ ul.unstyled {
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body {
     /*white-space: pre-line;*/
     max-width: 25rem;
+    /* overflow-x: auto; */
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>pre {
     overflow-x: auto;
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage {
     left: -.8rem;
     width: calc(100% + .8rem * 2);
+}
+
+.message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage>.popoverimgC {
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage>.img-responsive {
