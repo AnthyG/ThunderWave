@@ -435,13 +435,16 @@ class ThunderWave extends ZeroFrame {
     addBotMSG(message, addattop, toListEl) {
         var toListEl = toListEl || "#messages"
 
+        var addattop = addattop || false
+
         var username = page.site_info.cert_user_id
         var date_added = moment()
 
         var classesO = "bot-msg"
         var classesB = "bot-msg"
 
-        page.addMessage('BotQuestion-' + generateGUID(), username, message, date_added, true, classesO, toListEl)
+        if (message !== "/onloadcmd")
+            page.addMessage('BotQuestion-' + generateGUID(), username, message, date_added, addattop, classesO, toListEl)
 
         page.bot(message.substr('/'.length, message.length), page.site_info.cert_user_id, function(answer, err) {
             console.log(answer, err)
@@ -449,7 +452,7 @@ class ThunderWave extends ZeroFrame {
             classesB += ' ' + err
 
             if (answer)
-                page.addMessage('BotAnswer-' + generateGUID(), "Bot >> " + username, answer, date_added, true, classesB, toListEl)
+                page.addMessage('BotAnswer-' + generateGUID(), "Bot >> " + username, answer, date_added, addattop, classesB, toListEl)
         })
     }
 
@@ -539,10 +542,15 @@ class ThunderWave extends ZeroFrame {
             err = 'success'
         } else if (cmd === "whois") {
             nyI()
+        } else if (cmd === "onloadcmd") {
+            answer = '#### Hey there, I\'m ThunderWave\'s Bot!' +
+                '\nI can assist you in getting things done, quicker!' +
+                '\nSend `/help` as message to print all available commands.'
+            err = ''
         } else {
-            answer = 'Command not found: `' +
+            answer = 'Command not found: \n```\n' +
                 cmd +
-                '`\nType `/help` for help.'
+                '\n```\n\nType `/help` for help.'
             err = 'error'
         }
 
@@ -2780,7 +2788,7 @@ class ThunderWave extends ZeroFrame {
     }
 
     returnDefaultsOpts(cb) {
-        var curOptsV = 27
+        var curOptsV = 28
         var defaultOpts = {
             // "parse_links": {
             //     "label": "Parse Links", // The Label of this option
@@ -2845,6 +2853,19 @@ class ThunderWave extends ZeroFrame {
                                 page.cmd("feedFollow", [{}])
                                 page.LS.opts.feed_notifications.value = 0
                             }
+                        }
+                    ).toString() + ')'
+                }
+            },
+            "bot_welcomemsg": {
+                "label": "Bot-welcome-message",
+                "desc": "Activate to show the Bot's welcome-message on load",
+                "value": true,
+                "r_ms": false,
+                "cb": {
+                    "change": '(' + (
+                        function() {
+                            // console.log("bot_welcomemsg", page.LS.opts.bot_welcomemsg.value)
                         }
                     ).toString() + ')'
                 }
@@ -3862,6 +3883,11 @@ class ThunderWave extends ZeroFrame {
 
                     page.messageCounterArr = {}
                     page.loadMessages("first time")
+                    if (page.LS.opts.bot_welcomemsg.value) {
+                        setTimeout(function() {
+                            page.addBotMSG("/onloadcmd", false, '#messages')
+                        }, 1500)
+                    }
 
                     page.genContactsList()
                     page.genGroupsList()
@@ -3873,8 +3899,14 @@ class ThunderWave extends ZeroFrame {
 
                     if (pbn_pc) {
                         page.loadPrivateMessages('selected user', true, pbn_pc)
+                        setTimeout(function() {
+                            page.addBotMSG("/onloadcmd", false, '#private_messages')
+                        }, 500)
                     } else if (pbn_gc) {
                         page.loadGroupMessages('selected group', true, pbn_gc)
+                        setTimeout(function() {
+                            page.addBotMSG("/onloadcmd", false, '#group_messages')
+                        }, 500)
                     }
                 })
             }
