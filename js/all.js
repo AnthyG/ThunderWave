@@ -5335,6 +5335,8 @@ class ThunderWave extends ZeroFrame {
             err = 'warning'
         }
 
+        var cbAEauto = true
+
         if (cmd === "help") {
             answer = '`/help`: Shows this message' +
                 '\n`/rules`: Prints all rules' +
@@ -5415,7 +5417,11 @@ class ThunderWave extends ZeroFrame {
             err = 'error'
         }
 
-        typeof cb === "function" && cb(answer, err)
+        function cbAE() {
+            typeof cb === "function" && cb(answer, err)
+        }
+        if (cbAEauto)
+            cbAE()
     }
 
     addGroupMessage(msgkey, username, message, date_added, addattop) {
@@ -7649,7 +7655,7 @@ class ThunderWave extends ZeroFrame {
     }
 
     returnDefaultsOpts(cb) {
-        var curOptsV = 28
+        var curOptsV = 29
         var defaultOpts = {
             // "parse_links": {
             //     "label": "Parse Links", // The Label of this option
@@ -7674,7 +7680,7 @@ class ThunderWave extends ZeroFrame {
             "divider_7": "Notifications",
             "feed_notifications": {
                 "label": "Notifications in ZeroHello-Feed",
-                "desc": "Activate, to get notifications in the ZeroHello-Feed",
+                "desc": "Activate to get notifications in the ZeroHello-Feed",
                 "value": 0,
                 "values": [
                     [0, "Off"],
@@ -7734,7 +7740,7 @@ class ThunderWave extends ZeroFrame {
             "divider_3": "Parsing",
             "parse_profile_links": {
                 "label": "Parse Profile Links",
-                "desc": "Activate to parse profile links in messages (@...)",
+                "desc": "Activate to parse profile links in messages (`@...`)",
                 "value": true,
                 "r_ms": false,
                 "cb": {
@@ -7754,7 +7760,7 @@ class ThunderWave extends ZeroFrame {
             },
             "parse_quotes": {
                 "label": "Parse Quotes",
-                "desc": "Activate to parse quotes in messages (?![tc_xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx])",
+                "desc": "Activate to parse quotes in messages (`?![tc_xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx]`)",
                 "value": true,
                 "r_ms": true,
                 "cb": {
@@ -8035,7 +8041,7 @@ class ThunderWave extends ZeroFrame {
                     "click": '(' + (
                         function() {
                             delete page.LS.opts;
-                            page.cmd("wrapperSetLocalStorage", page.LS, function() {});
+                            // page.cmd("wrapperSetLocalStorage", page.LS, function() {});
                             page.setSettingsOptions();
                         }
                     ).toString() + ')'
