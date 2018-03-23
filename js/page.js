@@ -485,6 +485,9 @@ class ThunderWave extends ZeroFrame {
                 '\n`/sp [us@idp] [msg]`: Send private message (without changing to private chat)' +
                 '\n`/sg [gid] [msg]`: Send group message (without changing to group chat)' +
                 '\n`/whois [us@idp]`: Prints information about the given user' +
+                '\n`/settings`: Prints all options' +
+                '\n`/settings [option-id]`: Displays more in-depth information about the given option' +
+                '\n`/settings [option-id] [new value]`: Set\'s a given options value to a given new value' +
                 '\n' +
                 '\n`us` stands for username e.g. `glightstar`' +
                 '\n`idp` stands for "ID-Provider" e.g. `zeroid.bit`' +
@@ -544,6 +547,174 @@ class ThunderWave extends ZeroFrame {
             err = 'success'
         } else if (cmd === "whois") {
             nyI()
+        } else if (cmd === "settings") {
+            var optID = messageArr.splice(0, 1)[0]
+            var newVal = messageArr.splice(0, 1)[0]
+
+            cbAEauto = false
+
+            if (typeof optID !== "undefined" && optID !== "") {
+                if (typeof newVal !== "undefined" && newVal !== "") {
+                    // set option
+                    page.settingsOptions([
+                        "set",
+                        LS.opts
+                    ], (LS, curOptsV, defaultOpts) => {
+                        var LS = (typeof LS === "object" ? (Object.keys(LS).length > 0 ? LS : {}) : {})
+
+                        if (!LS.hasOwnProperty("opts")) {
+                            LS.optsV = curOptsV
+
+                            LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+                        }
+                    })
+                } else {
+                    // get option
+                    page.settingsOptions("get", (LS, curOptsV, defaultOpts) => {
+                        var LS = (typeof LS === "object" ? (Object.keys(LS).length > 0 ? LS : {}) : {})
+
+                        if (!LS.hasOwnProperty("opts")) {
+                            LS.optsV = curOptsV
+
+                            LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+                        }
+
+                        // answer = JSON.stringify(LS.opts)
+                        answer = ''
+
+                        var opts = LS.opts || page.LS.opts
+
+                        var cntrls = {
+                            "button": '##### X\n ###### Label\n Y_LABEL\n ###### Description\n Y_DESC\n ###### Current Value\n Y_VALUE\n ###### Available Values\n Y_VALUES\n',
+                            "input": '##### X\n ###### Label\n Y_LABEL\n ###### Description\n Y_DESC\n ###### Current Value\n Y_VALUE\n ###### Available Values\n Y_VALUES\n',
+                            "checkbox": '##### X\n ###### Label\n Y_LABEL\n ###### Description\n Y_DESC\n ###### Current Value\n Y_VALUE\n ###### Available Values\n Y_VALUES\n',
+                            "select": '##### X\n ###### Label\n Y_LABEL\n ###### Description\n Y_DESC\n ###### Current Value\n Y_VALUE\n ###### Available Values\n Y_VALUES\n'
+                        }
+
+                        var x = optID
+
+                        var y = opts[x]
+
+                        if (typeof y !== "string" && typeof y !== "undefined" && y !== "") {
+                            y.type = y.type || "";
+
+                            (function(x, y, cntrls) {
+                                if (y.type === "input" || (typeof y.value === "string" && y.type === "")) {
+                                    answer += (cntrls.input
+                                        .replace(/X/gm, x)
+                                        .replace(/Y_LABEL/gm, y.label)
+                                        .replace(/Y_DESC/gm, y.desc)
+                                        .replace(/Y_VALUES/gm, y.values ? y.values : typeof y.value)
+                                        .replace(/Y_VALUE/gm, y.value))
+                                } else if (y.type === "checkbox" || y.type === "switch" || (typeof y.value === "boolean" && y.type === "")) {
+                                    answer += (cntrls.checkbox
+                                        .replace(/X/gm, x)
+                                        .replace(/Y_LABEL/gm, y.label)
+                                        .replace(/Y_DESC/gm, y.desc)
+                                        .replace(/Y_VALUES/gm, y.values ? y.values : typeof y.value)
+                                        .replace(/Y_VALUE/gm, y.value))
+                                } else if (y.type === "select" || (y.values && y.values.constructor === Array && y.type === "")) {
+                                    answer += (cntrls.select
+                                        .replace(/X/gm, x)
+                                        .replace(/Y_LABEL/gm, y.label)
+                                        .replace(/Y_DESC/gm, y.desc)
+                                        .replace(/Y_VALUES/gm, y.values ? y.values : typeof y.value)
+                                        .replace(/Y_VALUE/gm, y.value))
+                                } else if (y.type === "button") {
+                                    answer += (cntrls.button
+                                        .replace(/X/gm, x)
+                                        .replace(/Y_LABEL/gm, y.label)
+                                        .replace(/Y_DESC/gm, y.desc)
+                                        .replace(/Y_VALUES/gm, y.values ? y.values : typeof y.value)
+                                        .replace(/Y_VALUE/gm, y.value))
+                                }
+                            })(x, y, cntrls)
+
+                            err = ''
+                        } else {
+                            answer += 'The given option doesn\'t exist!'
+
+                            err = 'error'
+                        }
+
+                        cbAE()
+                    });
+                }
+            } else {
+                // print all options
+                page.settingsOptions("get", (LS, curOptsV, defaultOpts) => {
+                    var LS = (typeof LS === "object" ? (Object.keys(LS).length > 0 ? LS : {}) : {})
+
+                    if (!LS.hasOwnProperty("opts")) {
+                        LS.optsV = curOptsV
+
+                        LS.opts = JSON.parse(JSON.stringify(defaultOpts))
+                    }
+
+                    // answer = JSON.stringify(LS.opts)
+                    answer = ''
+
+                    var opts = LS.opts || page.LS.opts
+
+                    var cntrls = {
+                        "button": ' - **X**: Y_LABEL\n',
+                        "input": ' - **X**: Y_LABEL\n',
+                        "checkbox": ' - **X**: Y_LABEL\n',
+                        "select": ' - **X**: Y_LABEL\n'
+
+                        // "button": '###### X\n _Label:_ Y_LABEL\n _Description:_ Y_DESC\n _Current Value:_ Y_VALUE\n _Available Values:_ Y_VALUES\n',
+                        // "input": '###### X\n _Label:_ Y_LABEL\n _Description:_ Y_DESC\n _Current Value:_ Y_VALUE\n _Available Values:_ Y_VALUES\n',
+                        // "checkbox": '###### X\n _Label:_ Y_LABEL\n _Description:_ Y_DESC\n _Current Value:_ Y_VALUE\n _Available Values:_ Y_VALUES\n',
+                        // "select": '###### X\n _Label:_ Y_LABEL\n _Description:_ Y_DESC\n _Current Value:_ Y_VALUE\n _Available Values:_ Y_VALUES\n'
+                    }
+
+                    for (var x in opts) {
+                        var y = opts[x]
+
+                        if (typeof y === "string") {
+                            continue
+                        }
+
+                        y.type = y.type || "";
+
+                        (function(x, y, cntrls) {
+                            if (y.type === "input" || (typeof y.value === "string" && y.type === "")) {
+                                answer += (cntrls.input
+                                    .replace(/X/gm, x)
+                                    .replace(/Y_LABEL/gm, y.label)
+                                    .replace(/Y_DESC/gm, y.desc)
+                                    .replace(/Y_VALUES/gm, y.values ? y.values : typeof y.value)
+                                    .replace(/Y_VALUE/gm, y.value))
+                            } else if (y.type === "checkbox" || y.type === "switch" || (typeof y.value === "boolean" && y.type === "")) {
+                                answer += (cntrls.checkbox
+                                    .replace(/X/gm, x)
+                                    .replace(/Y_LABEL/gm, y.label)
+                                    .replace(/Y_DESC/gm, y.desc)
+                                    .replace(/Y_VALUES/gm, y.values ? y.values : typeof y.value)
+                                    .replace(/Y_VALUE/gm, y.value))
+                            } else if (y.type === "select" || (y.values && y.values.constructor === Array && y.type === "")) {
+                                answer += (cntrls.select
+                                    .replace(/X/gm, x)
+                                    .replace(/Y_LABEL/gm, y.label)
+                                    .replace(/Y_DESC/gm, y.desc)
+                                    .replace(/Y_VALUES/gm, y.values ? y.values : typeof y.value)
+                                    .replace(/Y_VALUE/gm, y.value))
+                            } else if (y.type === "button") {
+                                answer += (cntrls.button
+                                    .replace(/X/gm, x)
+                                    .replace(/Y_LABEL/gm, y.label)
+                                    .replace(/Y_DESC/gm, y.desc)
+                                    .replace(/Y_VALUES/gm, y.values ? y.values : typeof y.value)
+                                    .replace(/Y_VALUE/gm, y.value))
+                            }
+                        })(x, y, cntrls)
+                    }
+
+                    err = ''
+
+                    cbAE()
+                });
+            }
         } else if (cmd === "onloadcmd") {
             answer = '#### Hey there, I\'m ThunderWave\'s Bot!' +
                 '\nI can assist you in getting things done, quicker!' +
