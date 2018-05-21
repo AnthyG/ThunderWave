@@ -414,22 +414,34 @@
         }
 
         function changeURL(to) {
-            var to_chattype = (to < 3 && to > -1) ? to : 0
+            var to_chattype = (to < 3 && to > -2) ? to : -1
 
-            console.log("Changing URL to chattype", to)
+            console.log("Changing URL to chattype", to, to_chattype)
 
-            if (to === 1) {
+            if (to_chattype === 1) {
                 var recipient = $('#private_recipient').val()
                 page.cmd("wrapperPushState", [{},
                     "ThunderWave - ZeroNet",
                     "?PC:" + recipient
                 ])
-            } else if (to === 2) {
+            } else if (to_chattype === 2) {
                 var group = $('#group_recipient').val()
                 page.cmd("wrapperPushState", [{},
                     "ThunderWave - ZeroNet",
                     "?GC:" + group
                 ])
+            } else if (to_chattype === 0) {
+                page.cmd("wrapperPushState", [{},
+                    "ThunderWave - ZeroNet",
+                    "?"
+                ])
+
+                page.messageCounterArr = {}
+                page.loadMessages("first time")
+
+                setTimeout(function() {
+                    config$bH()
+                }, 100)
             } else {
                 page.cmd("wrapperPushState", [{},
                     "ThunderWave - ZeroNet",
