@@ -255,10 +255,11 @@ ul.unstyled {
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>div.popover.hasimage+p:empty:last-child {
     margin-top: -1.6rem;
+    margin-bottom: 1.2rem;
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-header+.card-body>div.popover.hasimage+p:empty:last-child {
-    margin-bottom: calc(0.5rem + 3px);
+    /* margin-bottom: calc(0.5rem + 3px); */
 }
 
 .message-list>li>ul.times-messages>li>.tile>.tile-content>.card>.card-body>p:only-child>img.emojione:only-child {
