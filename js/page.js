@@ -209,7 +209,7 @@ markedR.image = function(href, title, text) {
 JSON.parseS = function(string) {
     try {
         var json = JSON.parse(string)
-    } catch {
+    } catch (e) {
         var json = null
     }
     return json
