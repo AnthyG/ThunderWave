@@ -8,15 +8,11 @@
     },
     "user_contents": {
         "cert_signers": {
-            "kaffie.bit": [
-                "1KH5BdNnqxh2KRWMMT8wUXzUgz4vVQ4S8p"
-            ],
-            "zeroid.bit": [
-                "1iD5ZQJMNXu43w1qLB8sfdHVKppVMduGz"
-            ],
-            "zeroverse.bit": [
-                "1HPgDoReCFtE9qy71hnp55ksBVvV1gHJLQ"
-            ]
+            "cryptoid.bit": ["18143WPue3rQykNaopx5KJKzYmaYhCjqhv"],
+            "kaffie.bit": ["1KH5BdNnqxh2KRWMMT8wUXzUgz4vVQ4S8p"],
+            "kxoid.bit": ["12F5SvxoPR128aiudte78h8pY7mobroG6V"],
+            "zeroid.bit": ["1iD5ZQJMNXu43w1qLB8sfdHVKppVMduGz"],
+            "zeroverse.bit": ["1HPgDoReCFtE9qy71hnp55ksBVvV1gHJLQ"]
         },
         "permission_rules": {
             ".*": {
