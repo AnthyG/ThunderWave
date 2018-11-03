@@ -6661,7 +6661,7 @@ class ThunderWave extends ZeroFrame {
                         if (msg2) {
                             page.cmd("eciesDecrypt", msg2, (msg) => {
                                 if (msg)
-                                    var msg = JSON.parse(msg)
+                                    var msg = JSON.parseS(msg)
                                 if (msg !== null) {
                                     // Log("own", x2, y2, msg)
 
@@ -6684,7 +6684,7 @@ class ThunderWave extends ZeroFrame {
                     var y1 = messages1[x1]
                     page.cmd("eciesDecrypt", y1.message, (msg) => {
                         if (msg)
-                            var msg = JSON.parse(msg)
+                            var msg = JSON.parseS(msg)
                         if (msg !== null) {
                             // Log(x1, y1, msg)
 

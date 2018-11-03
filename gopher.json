@@ -1,0 +1,44 @@
+{
+    "global": {
+        "quoteRenderer": { "= f(:body)": "${:body \"?![tc_((.*?)(.{8}-.{4}-.{4}-.{4}-.{12}))]\" \"QUOTE\" re_sub}" },
+        "quoteRenderer": { "= f(:body)": "${:body}" }
+    },
+    "rules": {
+        "": [
+            "${:site_title} for ZeroNet Gopher",
+            "${:site_peers} peers - ${:site_address}",
+            "",
+            "${:site_description}",
+            "",
+            "", ["1", "Lobby", "/${:site_address}/lobby/"],
+            "", ["1", "For devs", "/${:site_address}/devs/"],
+            "",
+            "Other Zopherholes to Check Out", ["1", "ZeroLSTN Gopher", "/1MQveQ3RPpimXX2wjW2geAGkNJ1GdXkvJ3/"],
+            ["1", "KxoVid Gopher", "/14c5LUN73J7KKMznp9LvZWkxpZFWgE1sDz/"]
+        ],
+        "devs": [
+            ["1", "[home]", "/${:site_address}/"],
+            "", ["0", "content.json", "/${:site_address}/content.json"],
+            ["0", "dbschema.json", "/${:site_address}/dbschema.json"],
+            ["0", "Users content.json", "/${:site_address}/data/users/content.json"],
+            "", ["1", "data", "/${:site_address}/data"]
+        ],
+        "lobby": [
+            ["1", "[home]", "/${:site_address}/"],
+            "",
+            { "sql": "SELECT 'i', 'Current date-time: ' || DATETIME('now', 'localtime')" },
+            {
+                "sql_foreach": "SELECT *, DATETIME(date_added / 1000, 'unixepoch', 'localtime') AS fdate_added, REPLACE(body, '\n', '\ni') AS rbody FROM messages LEFT JOIN json USING (json_id) WHERE DATETIME(date_added / 1000, 'unixepoch', 'localtime') < DATETIME('now', 'localtime') ORDER BY date_added DESC",
+                "do": [
+                    ["i\ni", "${:cert_user_id} on ${:fdate_added}:\ni${:rbody quoteRenderer}"]
+                ]
+            }
+        ],
+        "lobby": [
+            ["1", "[home]", "/${:site_address}/"],
+            "",
+            { "sql": "SELECT 'i', 'Current date-time: ' || DATETIME('now', 'localtime')" },
+            { "sql": "SELECT 'i', '\n' || cert_user_id || ' on ' || DATETIME(date_added / 1000, 'unixepoch', 'localtime') || ':\n' || body FROM messages LEFT JOIN json USING (json_id) WHERE DATETIME(date_added / 1000, 'unixepoch', 'localtime') < DATETIME('now', 'localtime') ORDER BY date_added DESC" }
+        ]
+    }
+}
