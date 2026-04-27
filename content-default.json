@@ -8,7 +8,7 @@
     "favicon": "favicon.ico",
     "files": {},
     "files_optional": {},
-    "ignore": "(data/.*db|data/users/.*/.*|disabled/.*|merged-.*|(js|css)/(?!(all.(js|css))|png)|^.git)",
+    "ignore": "(data/.*db|data/users/.*/.*|disabled/.*|merged-.*|(js|css)/(?!(all.(js|css))|png)|^.git|^.idea)",
     "includes": {
         "data/users/content.json": {
             "signers": [],
