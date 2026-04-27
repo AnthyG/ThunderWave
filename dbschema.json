@@ -68,10 +68,11 @@
             "cols": [
                 ["message_id", "INTEGER PRIMARY KEY AUTOINCREMENT"],
                 ["message", "TEXT"],
+                ["iv", "TEXT"],
                 ["json_id", "INTEGER REFERENCES json (json_id)"]
             ],
             "indexes": ["CREATE UNIQUE INDEX group_message_key ON group_messages(json_id, message_id)"],
-            "schema_changed": 1
+            "schema_changed": 2
         },
         "images": {
             "cols": [

@@ -34,6 +34,21 @@ function hexToString(tmp) {
     return str
 }
 
+async function sha256Base64(text) {
+    var encoder = new TextEncoder()
+    var data = encoder.encode(text)
+    var hashBuffer = await crypto.subtle.digest("SHA-256", data)
+    var hashBytes = new Uint8Array(hashBuffer)
+
+    var binary = ""
+    for (var i = 0; i < hashBytes.length; i++) {
+        binary += String.fromCharCode(hashBytes[i])
+    }
+
+    return btoa(binary)
+}
+
+
 
 
 function openNewTab(url) {
@@ -706,7 +721,7 @@ class ThunderWave extends ZeroFrame {
             page.firstgroupmessagewas.date_added = date_added
     }
 
-    sendGroupMessage(message3, group2, show) {
+    async sendGroupMessage(message3, group2, show) {
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -725,7 +740,7 @@ class ThunderWave extends ZeroFrame {
             // Log("AddStr: ", addStr, group);
         }
 
-        var bR = btoa(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
+        var bR = await sha256Base64(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
 
         var message3 = message3 || false
         var message2 = message3 || $('#group_message').val()
@@ -785,13 +800,13 @@ class ThunderWave extends ZeroFrame {
                         "date_added": msg_date_added
                     }),
                     bR,
-                    bR
                 ], (res) => {
                     Log("Res: ", res)
 
                     // Add the new message to data
                     var di = data.group_messages.push({
-                        "message": res[2]
+                        "iv": res[1],
+                        "message": res[2],
                     })
 
                     // Encode data array to utf8 json text
@@ -873,7 +888,7 @@ class ThunderWave extends ZeroFrame {
         page.cmd("dbQuery", [
             "SELECT * FROM group_messages LEFT JOIN json USING (json_id) WHERE NOT cert_user_id = '" + page.site_info.cert_user_id + "'"
         ], (messages1) => {
-            // Log(messages1)
+            Log('loadGroupMessages', 'messages1', messages1)
 
             var $m = $('#group_messages')
 
@@ -891,8 +906,57 @@ class ThunderWave extends ZeroFrame {
 
             page.cmd("dbQuery", [
                 "SELECT * FROM group_messages LEFT JOIN json USING (json_id) WHERE cert_user_id = '" + page.site_info.cert_user_id + "'"
-            ], (messages2) => {
-                // Log(messages2)
+            ], async (messages2) => {
+                Log('loadGroupMessages', 'messages2', messages2)
+
+                const parseMessages = async function(allMessages) {
+                    const bS = await sha256Base64(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group);
+
+                    Log("parseMessages", 'bS', bS, allMessages);
+
+                    const allParsedMessages = await Promise.allSettled(allMessages.map((y1) => {
+                        return new Promise((resolve, reject) => {
+                            if (!Object.hasOwn(y1, 'iv') || y1.iv === null) {
+                                return reject('no iv');
+                            }
+                            Log("parsing message", y1);
+
+                            page.cmd("aesDecrypt", [
+                                y1.iv || bS,
+                                y1.message,
+                                bS,
+                            ], (msg) => {
+                                Log("message parsed", y1, msg);
+
+                                if (!msg) {
+                                    return reject('decryption not successful');
+                                }
+                                var msg = JSON.parseS(msg)
+                                if (msg === null) {
+                                    return reject('json is null');
+                                }
+
+                                // messages.push({
+                                //     "id": y1.message_id,
+                                //     "msg": msg,
+                                //     "sender": y1.cert_user_id
+                                // })
+                                //
+                                // if (senders.indexOf(y1.cert_user_id) === -1) {
+                                //     senders.push(y1.cert_user_id)
+                                // }
+                                resolve({
+                                    "id": y1.message_id,
+                                    "msg": msg,
+                                    "sender": y1.cert_user_id
+                                });
+                            })
+                        });
+                    }));
+
+                    Log('loadGroupMessages', 'allParsedMessages', allParsedMessages);
+                }
+                // parseMessages([...messages1, ...messages2]);
 
                 var first = true
 
@@ -900,14 +964,14 @@ class ThunderWave extends ZeroFrame {
 
                 var senders = []
 
-                var checkLoops = function(l, x) {
+                var checkLoops = async function(l, x) {
                     if (eval("messages" + l + ".length > x + 1")) {
                         // Log("Continuing " + l + ".. ", eval("messages" + l + ".length"), x + 1)
-                        eval("loop" + l + "(x + 1)")
+                        await eval("loop" + l + "(x + 1)")
                     } else {
                         // Log("Stopped " + l + ".")
                         if (l === 1 /* && sender !== page.site_info.cert_user_id*/ ) {
-                            checkLoops(2, -1)
+                            await checkLoops(2, -1)
                         } else {
                             l = 2
                         }
@@ -954,19 +1018,19 @@ class ThunderWave extends ZeroFrame {
                 }
 
                 senders.push(page.site_info.cert_user_id)
-                var loop2 = function(x2) {
+                var loop2 = async function(x2) {
                     var y2 = messages2[x2]
 
-                    var bS = btoa(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
+                    var bS = await sha256Base64(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
                     page.cmd("aesDecrypt", [
-                        bS,
+                        y2.iv || bS,
                         y2.message,
-                        bS
-                    ], (msg) => {
+                        bS,
+                    ], async (msg) => {
                         if (msg) {
                             var msg = JSON.parseS(msg)
                             if (msg !== null) {
-                                // Log("own", x2, y2, msg)
+                                Log("own", x2, y2, msg)
 
                                 messages.push({
                                     "id": y2.message_id,
@@ -975,26 +1039,26 @@ class ThunderWave extends ZeroFrame {
                                 })
                             }
 
-                            checkLoops(2, x2)
+                            await checkLoops(2, x2)
                         } else {
-                            checkLoops(2, x2)
+                            await checkLoops(2, x2)
                         }
                     })
                 }
 
-                var loop1 = function(x1) {
+                var loop1 = async function(x1) {
                     var y1 = messages1[x1]
 
-                    var bS = btoa(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
+                    var bS = await sha256Base64(group.substr(group.length / 2 % 7, group.length / 3 % 5) + group.substr((group.length * group.length % 3) + 1) + group.substr(group.length - 3, 2) + group)
                     page.cmd("aesDecrypt", [
-                        bS,
+                        y1.iv || bS,
                         y1.message,
-                        bS
-                    ], (msg) => {
+                        bS,
+                    ], async (msg) => {
                         if (msg) {
                             var msg = JSON.parseS(msg)
                             if (msg !== null) {
-                                // Log("other", x1, y1, msg)
+                                Log("other", x1, y1, msg)
 
                                 messages.push({
                                     "id": y1.message_id,
@@ -1006,19 +1070,19 @@ class ThunderWave extends ZeroFrame {
                                     senders.push(y1.cert_user_id)
                             }
 
-                            checkLoops(1, x1)
+                            await checkLoops(1, x1)
                         } else {
-                            checkLoops(1, x1)
+                            await checkLoops(1, x1)
                         }
                     })
                 }
 
                 if (messages1.length > 0) {
                     Log("Starting group-chat load...", 1)
-                    checkLoops(1, -1)
+                    await checkLoops(1, -1)
                 } else if (messages2.length > 0) {
                     Log("Starting group-chat load...", 2)
-                    checkLoops(2, -1)
+                    await checkLoops(2, -1)
                 }
             })
         })
@@ -1469,7 +1533,7 @@ class ThunderWave extends ZeroFrame {
             page.firstprivatemessagewas.date_added = date_added
     }
 
-    sendPrivateMessage(message3, recipient2, show) {
+    async sendPrivateMessage(message3, recipient2, show) {
         var verified = this.verifyUser()
         if (!verified)
             return false
@@ -1482,7 +1546,7 @@ class ThunderWave extends ZeroFrame {
             recipient = this.site_info.cert_user_id
 
         var randI = Math.random().toString(36).substr(2, 5) + Math.random().toString(36).substr(2, 5) + Math.random().toString(36).substr(2, 5)
-        var bR = btoa(randI + recipient)
+        var bR = await sha256Base64(randI + recipient)
 
         var message3 = message3 || false
         var message2 = message3 || $('#private_message').val()
@@ -1607,13 +1671,13 @@ class ThunderWave extends ZeroFrame {
                                             page.cmd("aesEncrypt", [
                                                 res3,
                                                 bR,
-                                                bR
                                             ], (res4) => {
                                                 // Log("Res4: ", res4)
 
                                                 // Add the new message to data
                                                 var di2 = data2.private_messages.push({
                                                     "randI": randI,
+                                                    "iv": res4[1],
                                                     "message": res4[2] // res3
                                                 })
 
@@ -1730,21 +1794,21 @@ class ThunderWave extends ZeroFrame {
             page.cmd("fileQuery", [
                 "data/users/" + page.site_info.auth_address + "/data_private.json",
                 "private_messages"
-            ], (messages2) => {
+            ], async (messages2) => {
                 // Log(messages2)
 
                 var first = true
 
                 var messages = []
 
-                var checkLoops = function(l, x) {
+                var checkLoops = async function(l, x) {
                     if (eval("messages" + l + ".length > x + 1")) {
                         // Log("Continuing " + l + ".. ", eval("messages" + l + ".length"), x + 1)
-                        eval("loop" + l + "(x + 1)")
+                        await eval("loop" + l + "(x + 1)")
                     } else {
                         // Log("Stopped " + l + ".")
                         if (l === 1 && sender !== page.site_info.cert_user_id) {
-                            checkLoops(2, -1)
+                            await checkLoops(2, -1)
                         } else {
                             l = 2
                         }
@@ -1787,18 +1851,18 @@ class ThunderWave extends ZeroFrame {
                     }
                 }
 
-                var loop2 = function(x2) {
+                var loop2 = async function(x2) {
                     var y2 = messages2[x2]
 
                     var randI = y2.randI
-                    var bS = btoa(randI + sender)
+                    var bS = await sha256Base64(randI + sender)
                     page.cmd("aesDecrypt", [
-                        bS,
+                        y2.iv || bS,
                         y2.message,
                         bS
-                    ], (msg2) => {
+                    ], async (msg2) => {
                         if (msg2) {
-                            page.cmd("eciesDecrypt", msg2, (msg) => {
+                            page.cmd("eciesDecrypt", msg2, async (msg) => {
                                 if (msg)
                                     var msg = JSON.parseS(msg)
                                 if (msg !== null) {
@@ -1811,17 +1875,17 @@ class ThunderWave extends ZeroFrame {
                                     })
                                 }
 
-                                checkLoops(2, x2)
+                                await checkLoops(2, x2)
                             })
                         } else {
-                            checkLoops(2, x2)
+                            await checkLoops(2, x2)
                         }
                     })
                 }
 
                 var loop1 = function(x1) {
                     var y1 = messages1[x1]
-                    page.cmd("eciesDecrypt", y1.message, (msg) => {
+                    page.cmd("eciesDecrypt", y1.message, async (msg) => {
                         if (msg)
                             var msg = JSON.parseS(msg)
                         if (msg !== null) {
@@ -1834,13 +1898,13 @@ class ThunderWave extends ZeroFrame {
                             })
                         }
 
-                        checkLoops(1, x1)
+                        await checkLoops(1, x1)
                     })
                 }
 
                 if (messages1.length > 0) {
                     Log("Starting private-chat load...")
-                    checkLoops(1, -1)
+                    await checkLoops(1, -1)
                 }
             })
         })
