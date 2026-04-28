@@ -5215,7 +5215,7 @@ class ThunderWave extends ZeroFrame {
                     renderer: markedR
                 }
             )
-            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid|zeroid2)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
                 var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
@@ -5517,7 +5517,7 @@ class ThunderWave extends ZeroFrame {
         var message_parsed = marked(message_escaped, {
                 renderer: markedR
             })
-            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid|cryptoid)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid|zeroid2)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
                 var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \', 2); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
@@ -6329,7 +6329,7 @@ class ThunderWave extends ZeroFrame {
         var message_parsed = marked(message_escaped, {
                 renderer: markedR
             })
-            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid|cryptoid)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+            .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid|zeroid2)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
                 var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \', 1); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
                 var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                 return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
@@ -7063,7 +7063,7 @@ class ThunderWave extends ZeroFrame {
                             renderer: markedR
                         }
                     )
-                    .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+                    .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid|zeroid2)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
                         var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
                         var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                         return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
@@ -7080,7 +7080,7 @@ class ThunderWave extends ZeroFrame {
                 $('#QUOTEREPLACE_' + _tc).replaceWith($('<div class="quote">' +
                     '<blockquote class="quotechild" cite="tc_' + _tc + '">' +
                     '<by>' + quote.cert_user_id
-                    .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
+                    .replace(/((?:(?:[\w]+)@(?:zeroid|zeroverse|kaffie|cryptoid|kxoid|zeroid2)\.bit)|@(?:[\w]+))/gmi, function(match, p1) { // ((?:[\w]+)@(?:zeroid|zeroverse)\.bit)
                         var profile_link_part = (page.LS.opts.parse_profile_links.value ? '<a class="message-profile-link" onclick="add2MSGInput(\'' + p1 + ' \'); return false;" href="?u/' + encodeURI(p1) + '">' + p1 + '</a>' : '<span class="message-profile-link">' + p1 + '</span>')
                         var isthisuser = (p1.match(new RegExp(page.site_info.cert_user_id + "|@" + page.site_info.cert_user_id.split("@")[0], "gmi"))) ? true : false
                         return (isthisuser ? "<mark>" : "") + profile_link_part + (isthisuser ? "</mark>" : "")
@@ -7731,7 +7731,8 @@ class ThunderWave extends ZeroFrame {
                 "zeroverse.bit",
                 "kaffie.bit",
                 "cryptoid.bit",
-                "kxoid.bit"
+                "kxoid.bit",
+                "zeroid2",
             ]
         })
         return false
